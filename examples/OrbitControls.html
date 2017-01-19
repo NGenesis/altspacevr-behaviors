@@ -7,14 +7,14 @@
 		<script src="https://cdn.rawgit.com/mrdoob/three.js/r83/build/three.min.js"></script>
 		<script src="https://cdn.rawgit.com/AltspaceVR/AltspaceSDK/v0.28.1/dist/altspace.min.js"></script>
 		<script src="https://cdn.rawgit.com/mrdoob/three.js/r83/examples/js/controls/OrbitControls.js"></script>
-		<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.1/js/OrbitControls.js"></script>
+		<script src="../js/OrbitControls.js"></script>
 	</head>
 	<body>
 		<script>
 			var sim = altspace.utilities.Simulation();
 			if(!altspace.inClient) sim.camera.addBehavior(new altspace.utilities.behaviors.OrbitControls());
 
-			var cube = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial());
+			var cube = new THREE.Mesh(new THREE.BoxGeometry(100, 100, 100), new THREE.MeshBasicMaterial());
 			sim.scene.add(cube);
 		</script>
 	</body>
