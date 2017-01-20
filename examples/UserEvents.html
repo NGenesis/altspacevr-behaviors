@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang=en>
+	<head>
+		<meta charset=utf-8>
+		<title>UserEvents Behavior Example</title>
+		<script src="https://cdn.rawgit.com/mrdoob/three.js/r84/build/three.min.js"></script>
+		<script src="https://cdn.rawgit.com/AltspaceVR/AltspaceSDK/v0.28.1/dist/altspace.min.js"></script>
+		<script src="../js/UserEvents.js"></script>
+	</head>
+	<body>
+		<script>
+		var sim = altspace.utilities.Simulation();
+		var scene = sim.scene;
+
+		var avatarPrimaryColor;
+		var avatarHighlightColor;
+		var avatarColorGeometry = new THREE.BoxGeometry(100, 100, 100);
+		var avatarDetails;
+
+		scene.addEventListener('avatarchange', function(event) {
+			console.log(event.detail.userId);
+			console.log(event.detail.avatarId);
+			console.log(event.detail.avatarClass);
+			console.log(event.detail.colors);
+			console.log(event.detail.textures);
+
+			if(!avatarDetails) {
+				avatarDetails = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), Object.assign(new THREE.MeshBasicMaterial(), { visible: false }));
+
+				altspace.addNativeComponent(avatarDetails, 'n-billboard');
+				altspace.addNativeComponent(avatarDetails, 'n-text');
+				avatarDetails.position.y = -100;
+				scene.add(avatarDetails);
+			}
+
+			altspace.updateNativeComponent(avatarDetails, 'n-text', {
+				text: 'User ID: ' + event.detail.userId + '\nAvatar ID: ' + event.detail.avatarId + '\nAvatar Class: ' + event.detail.avatarClass + (event.detail.avatarClass === 'Rubenoid' ? ('\nHair ID: ' + event.detail.textures['hair'] + '\nSkin ID: ' + event.detail.textures['skin'] + '\nClothing ID: ' + event.detail.textures['clothing']) : ''),
+				fontSize: 150,
+				width: 500,
+				height: 1,
+				horizontalAlign: 'middle',
+				verticalAlign: 'middle'
+			});
+
+			if(avatarPrimaryColor) {
+				scene.remove(avatarPrimaryColor);
+				avatarPrimaryColor = null;
+			}
+
+			if(event.detail.colors['primary']) {
+				avatarPrimaryColor = new THREE.Mesh(avatarColorGeometry, Object.assign(new THREE.MeshBasicMaterial(), { color: event.detail.colors['primary'] }));
+				avatarPrimaryColor.position.x = -100;
+				scene.add(avatarPrimaryColor);
+			}
+
+			if(avatarHighlightColor) {
+				scene.remove(avatarHighlightColor);
+				avatarHighlightColor = null;
+			}
+
+			if(event.detail.colors['highlight']) {
+				avatarHighlightColor = new THREE.Mesh(avatarColorGeometry, Object.assign(new THREE.MeshBasicMaterial(), { color: event.detail.colors['highlight'] }));
+				avatarHighlightColor.position.x = 100;
+				scene.add(avatarHighlightColor);
+			}
+		});
+
+		scene.addBehavior(altspace.utilities.behaviors.UserEvents());
+		</script>
+	</body>
+</html>
