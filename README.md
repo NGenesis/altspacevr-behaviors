@@ -1,7 +1,7 @@
 # AltspaceVR Behaviors
 Behavior types for common functionality compatible with AltspaceVR SDK behavior design pattern.
 
-* altspace.utilties.behaviors.OrbitalControls
+* altspace.utilties.behaviors.OrbitControls
  * Provides a convenience wrapper for THREE.OrbitControls when working with [altspace.utilties.Simulation](https://altspacevr.github.io/AltspaceSDK/doc/module-altspace_utilities.Simulation.html).
 * altspace.utilties.behaviors.UserEvents
  * Subscribes to avatar and user preference update events for a given list of users.
