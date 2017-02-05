@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang=en>
+	<head>
+		<meta charset=utf-8>
+		<title>UserEvents Behavior Example</title>
+		<script src="https://cdn.rawgit.com/mrdoob/three.js/r84/build/three.min.js"></script>
+		<script src="https://cdn.rawgit.com/AltspaceVR/AltspaceSDK/v0.28.1/dist/altspace.min.js"></script>
+		<script src="../js/NativeComponent.js"></script>
+	</head>
+	<body>
+		<script>
+		var sim = altspace.utilities.Simulation();
+		var root = sim.scene.add(new THREE.Group());
+		root.scale.multiplyScalar(5);
+
+		// n-text / n-billboard
+		var ntext = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), Object.assign(new THREE.MeshBasicMaterial(), { visible: false }));
+		ntext.addBehavior(new altspace.utilities.behaviors.NativeComponent('n-text', {
+			text: 'Goodbye, cruel world!',
+			fontSize: 100,
+			width: 200,
+			height: 1,
+			horizontalAlign: 'middle',
+			verticalAlign: 'middle'
+		}));
+		ntext.addBehavior(new altspace.utilities.behaviors.NativeComponent('n-billboard'));
+		ntext.position.y += 20;
+
+		root.add(ntext);
+
+		// n-sphere-collider
+		var nspherecollider = new THREE.Mesh(new THREE.SphereGeometry(10, 20, 20), new THREE.MeshBasicMaterial({ color: 0x00ff00 }));
+		root.add(nspherecollider);
+		nspherecollider.addBehavior(new altspace.utilities.behaviors.NativeComponent('n-sphere-collider', {
+			isTrigger: false,
+			center: { x: 0, y: 0, z: 0 },
+			radius: 10,
+			type: 'environment'
+		}));
+
+		// n-box-collider
+		var nboxcollider = new THREE.Mesh(new THREE.BoxGeometry(10, 10, 10), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+		root.add(nboxcollider);
+		nboxcollider.addBehavior(new altspace.utilities.behaviors.NativeComponent('n-box-collider', {
+			isTrigger: false,
+			size: { x: 10, y: 10, z: 10 },
+			type: 'environment'
+		}));
+
+		// n-capsule-collider
+		var ncapsulecollider = new THREE.Mesh(new THREE.BoxGeometry(10, 10, 10), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+		root.add(ncapsulecollider);
+		ncapsulecollider.addBehavior(new altspace.utilities.behaviors.NativeComponent('n-capsule-collider', {
+			isTrigger: false,
+			center: { x: 0, y: 0, z: 0 },
+			radius: 10,
+			height: 10,
+			direction: 'y',
+			type: 'environment'
+		}));
+
+		// n-mesh-collider
+		var nmeshcollider = new THREE.Mesh(new THREE.BoxGeometry(10, 10, 10), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+		root.add(nmeshcollider);
+		nmeshcollider.addBehavior(new altspace.utilities.behaviors.NativeComponent('n-mesh-collider', {
+			isTrigger: false,
+			convex: true,
+			type: 'environment'
+		}));
+
+		// n-spawner
+		var nspawner = new THREE.Group();
+		nspawner.addBehavior(new altspace.utilities.behaviors.NativeComponent('n-spawner'), { res: 'interactables/basketball' });
+		root.add(nspawner);
+
+		// n-object
+		var nobject = new THREE.Group();
+		nobject.addBehavior(new altspace.utilities.behaviors.NativeComponent('n-object'), { res: 'architecture/wall-4w-4h' });
+		root.add(nobject);
+
+		// n-container
+		var ncontainer = new THREE.Group();
+		ncontainer.addBehavior(new altspace.utilities.behaviors.NativeComponent('n-container'), { capacity: 4 });
+		root.add(ncontainer);
+
+		// n-sound
+		var nsound = new THREE.Group();
+		nsound.addBehavior(new altspace.utilities.behaviors.NativeComponent('n-sound'), {
+			on: '',
+			res: '',
+			src: '',
+			loop: false,
+			volume: 1,
+			autoplay: false,
+			oneshot: false,
+			spatialBlend: 1,
+			pitch: 1,
+			minDistance: 1,
+			maxDistance: 12,
+		});
+		root.add(nsound);
+
+		// n-browser
+		var nbrowser = new THREE.Group();
+		nbrowser.addBehavior(new altspace.utilities.behaviors.NativeComponent('n-browser'), {
+			url: 'https://www.google.com',
+			controls: null,
+		});
+		root.add(nbrowser);
+
+		// n-cockpit-parent
+		var ncockpitparent = new THREE.Mesh(new THREE.PlaneGeometry(10, 10), new THREE.MeshBasicMaterial({ color: 0xFF0000, transparent: true, opacity: 0.3 }));
+		ncockpitparent.addBehavior(new altspace.utilities.behaviors.NativeComponent('n-cockpit-parent'));
+		root.add(ncockpitparent);
+
+		// n-skeleton-parent
+		var nskeletonparent = new THREE.Mesh(new THREE.BoxGeometry(10, 10, 10), new THREE.MeshBasicMaterial({ color: 0xFF0000, transparent: true, opacity: 0.3 }));
+		nskeletonparent.addBehavior(new altspace.utilities.behaviors.NativeComponent('n-skeleton-parent', {
+			part: 'head',
+			side: 'center',
+			index: 0,
+			/*userId: ''*/
+		}));
+		root.add(nskeletonparent);
+		</script>
+	</body>
+</html>
