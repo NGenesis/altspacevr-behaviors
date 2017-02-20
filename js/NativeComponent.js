@@ -34,7 +34,7 @@ altspace.utilities.behaviors.NativeComponent = function(_type, _data) {
 		altspace.callNativeComponent(this.component, this.type, functionName, functionArgs);
 	}
 
-	this.destroy = function() {
+	this.dispose = function() {
 		altspace.removeNativeComponent(this.component, this.type);
 		if(placeholder) object3d.remove(placeholder);
 	}
