@@ -1,20 +1,16 @@
-var OrbitControlsBehavior = (function() {
-	function OrbitControlsBehavior() {
-		this.type = 'OrbitControls';
+'use strict';
 
-		this.awake = function(o) {
-			this.controls = new THREE.OrbitControls(o);
-		};
+window.altspaceutil = window.altspaceutil || {};
+altspaceutil.behaviors = altspace.utilities.behaviors || {};
 
-		this.update = function(deltaTime) {
-			this.controls.update();
-		};
+altspaceutil.behaviors.OrbitControls = function() {
+	this.type = 'OrbitControls';
+
+	this.awake = function(o) {
+		if(!altspace.inClient) this.controls = new THREE.OrbitControls(o);
 	}
 
-	return OrbitControlsBehavior;
-}());
-
-altspace = altspace || {};
-altspace.utilities = altspace.utilities || {};
-altspace.utilities.behaviors = altspace.utilities.behaviors || {};
-altspace.utilities.behaviors.OrbitControls = OrbitControlsBehavior;
+	this.update = function(deltaTime) {
+		if(!altspace.inClient) this.controls.update();
+	}
+}

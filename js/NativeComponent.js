@@ -1,41 +1,187 @@
-altspace = altspace || {};
-altspace.utilities = altspace.utilities || {};
-altspace.utilities.behaviors = altspace.utilities.behaviors || {};
+'use strict';
 
-altspace.utilities.behaviors.NativeComponent = function(_type, _data) {
-	this.type = _type;
-	this.data = _data;
-	var object3d, placeholder;
+window.altspaceutil = window.altspaceutil || {};
+altspaceutil.behaviors = altspaceutil.behaviors || {};
+
+altspaceutil.behaviors.NativeComponentDefaults = {
+	'n-object': {
+		data: {
+			res: 'architecture/wall-4w-4h'
+		}
+	},
+
+	'n-spawner': {
+		data: {
+			res: 'interactables/basketball'
+		}
+	},
+
+	'n-text': {
+		data: {
+			text: '',
+			fontSize: 10,
+			width: 10,
+			height: 1,
+			horizontalAlign: 'middle',
+			verticalAlign: 'middle'
+		}
+	},
+
+	'n-collider': {
+		data: {
+			center: { 'x': 0, 'y': 0, 'z': 0 },
+			type: 'environment'
+		}
+	},
+
+	'n-sphere-collider': {
+		data: {
+			isTrigger: false,
+			center: { 'x': 0, 'y': 0, 'z': 0 },
+			radius: 0,
+			type: 'environment'
+		}
+	},
+
+	'n-box-collider': {
+		data: {
+			isTrigger: false,
+			center: { 'x': 0, 'y': 0, 'z': 0 },
+			size: { 'x': 0, 'y': 0, 'z': 0 },
+			type: 'environment'
+		}
+	},
+
+	'n-capsule-collider': {
+		data: {
+			isTrigger: false,
+			center: { 'x': 0, 'y': 0, 'z': 0 },
+			radius: 0,
+			height: 0,
+			direction: 'y',
+			type: 'environment'
+		}
+	},
+
+	'n-mesh-collider': {
+		data: {
+			isTrigger: false,
+			convex: true,
+			type: 'environment'
+		},
+		config: {
+			recursive: true
+		}
+	},
+
+	'n-container': {
+		data: {
+			capacity: 4
+		}
+	},
+
+	'n-sound': {
+		data: {
+			on: '',
+			res: '',
+			src: '',
+			loop: false,
+			volume: 1,
+			autoplay: false,
+			oneshot: false,
+			spatialBlend: 1,
+			pitch: 1,
+			minDistance: 1,
+			maxDistance: 12
+		}
+	},
+
+	'n-skeleton-parent': {
+		data: {
+			part: 'head',
+			side: 'center',
+			index: 0,
+			//userId: undefined// defaults to current user when omitted
+		}
+	},
+
+	'n-cockpit-parent': {
+		config: {
+			sendUpdates: false
+		}
+	},
+
+	'n-billboard': {
+		config: {
+			sendUpdates: false
+		}
+	}
+};
+
+altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
+	this.type = _type || 'NativeComponent';
+
+	var defaults = altspaceutil.behaviors.NativeComponentDefaults[this.type];
+	this.config = Object.assign({ sendUpdates: true, recursive: false, useCollider: false }, (defaults && defaults.config) ? defaults.config : {}, _config);
+	this.data = Object.assign((defaults && defaults.data) ? defaults.data : {}, _data);
 
 	this.awake = function(o) {
-		this.component = object3d = o;
+		this.component = this.object3d = o;
 
 		if(!(this.component instanceof THREE.Mesh)) {
 			// Create Placeholder Mesh
-			this.component = placeholder = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), Object.assign(new THREE.MeshBasicMaterial(), { visible: false }));
-			object3d.add(placeholder);
+			this.component = this.placeholder = new THREE.Mesh(new THREE.BoxBufferGeometry(0.001, 0.001, 0.001), Object.assign(new THREE.MeshBasicMaterial(), { visible: false }));
+			this.object3d.add(this.placeholder);
 		}
 
-		altspace.addNativeComponent(this.component, this.type);
-		altspace.updateNativeComponent(this.component, this.type, this.data);
+		if(!this.config.useCollider) {
+			this.component.userData.altspace = this.component.userData.altspace || {};
+			this.component.userData.altspace.collider = this.component.userData.altspace.collider || {};
+			this.component.userData.altspace.collider.enabled = false;
+		}
+
+		if(altspace.inClient) {
+			altspace.addNativeComponent(this.component, this.type);
+			if(this.config.sendUpdates) altspace.updateNativeComponent(this.component, this.type, this.data);
+		}
+
+		if(this.config.recursive) {
+			for(var child of this.object3d.children) {
+				child.addBehavior(Object.assign(new altspaceutil.behaviors.NativeComponent(this.type, this.data, this.config), { parent: this }));
+			}
+		}
 	}
 
 	this.update = function() {
-		if(placeholder) {
-			// Placeholder Inherits Parent Object Properties
-			if(object3d.userData.altspace !== undefined) placeholder.userData.altspace = object3d.userData.altspace;
-			placeholder.visible = object3d.visible;
+		if(this.placeholder) {
+			// Placeholder Inherits Object Properties
+			if(this.object3d.userData.altspace) this.placeholder.userData.altspace = this.object3d.userData.altspace;
+			this.placeholder.visible = this.object3d.visible;
 		}
 
-		altspace.updateNativeComponent(this.component, this.type, this.data);
+		if(altspace.inClient && this.config.sendUpdates) altspace.updateNativeComponent(this.component, this.type, this.data);
 	}
 
-	this.call = function(functionName, functionArgs) {
+	this.callComponent = function(functionName, functionArgs) {
 		altspace.callNativeComponent(this.component, this.type, functionName, functionArgs);
+
+		if(this.config.recursive) {
+			for(var child of this.object3d.children) {
+				var childComponent = child.getBehaviorByType(this.type);
+				if(childComponent && childComponent.parent === this) child.callComponent(functionName, functionArgs);
+			}
+		}
 	}
 
 	this.dispose = function() {
-		altspace.removeNativeComponent(this.component, this.type);
-		if(placeholder) object3d.remove(placeholder);
+		if(this.config.recursive) {
+			for(var child of this.object3d.children) {
+				var childComponent = child.getBehaviorByType(this.type);
+				if(childComponent && childComponent.parent === this) child.removeBehavior(childComponent);
+			}
+		}
+
+		if(altspace.inClient) altspace.removeNativeComponent(this.component, this.type);
+		if(this.placeholder) this.object3d.remove(this.placeholder);
 	}
 }

@@ -1,3 +1,8 @@
+'use strict';
+
+window.altspaceutil = window.altspaceutil || {};
+altspaceutil.behaviors = altspaceutil.behaviors || {};
+
 /**
  * An identifier that represents the user's avatar type preference.
  * @typedef {String} module:altspace/utilities/behaviors.UserEvents~AvatarId
@@ -18,8 +23,10 @@
  * @param {Boolean} [config.trace=false] Specifies whether debugging information should be displayed.
  * @memberof module:altspace/utilities/behaviors
  **/
-function UserEventsBehavior(config) {
+altspaceutil.behaviors.UserEvents = function(config) {
 	config = config || {};
+
+	this.type = 'UserEvents';
 
 	/**
 	* A precondition callback returning a boolean that determines if a user should have their data requested.
@@ -29,56 +36,52 @@ function UserEventsBehavior(config) {
 	* @param {THREE.Object3D} object The object that will emit the request.
 	* @memberof module:altspace/utilities/behaviors.UserEvents
 	*/
-	var onRequestData = config.onRequestData || null;
+	this.onRequestData = config.onRequestData || null;
 
-	var refreshTime = config.refreshTime || 5000;
-	var trace = config.trace || false;
-	var object3d;
-	var time = 0;
-	var loading = false;
-	var dataRequest;
+	this.refreshTime = config.refreshTime || 5000;
+	this.trace = config.trace || false;
+	this.time = 0;
+	this.loading = false;
 
-	var username;
-	var avatarId;
-	var displayName;
+	this.users = {};
+	this.userIds = config.userIds || [];
 
-	var users = {};
-	var userIds = config.userIds || [];
+	this.awake = function(o) {
+		this.object3d = o;
+		this.userIds = this.userIds.constructor === Array ? this.userIds : [this.userIds];
 
-	function awake(o) {
-		object3d = o;
-		userIds = userIds.constructor === Array ? userIds : [userIds];
+		this.dataRequest = new THREE.FileLoader();
+		this.dataRequest.setWithCredentials(true);
 
-		dataRequest = (THREE.FileLoader ? new THREE.FileLoader() : new THREE.XHRLoader(/* DEPRECATED: r83 */));
-		dataRequest.setWithCredentials(true);
-
-		if(userIds.length <= 0) {
+		if(this.userIds.length <= 0) {
+			var self = this;
 			altspace.getUser().then(function(user) {
-				userIds.push(user.userId);
-				requestUserData();
+				self.userIds.push(user.userId);
+				self.requestUserData();
 			});
 		}
 		else {
-			requestUserData();
+			this.requestUserData();
 		}
 	}
 
-	function update(deltaTime) {
-		if(!loading && userIds.length > 0) {
-			time -= deltaTime;
-			if(time <= 0) requestUserData();
+	this.update = function(deltaTime) {
+		if(!this.loading && this.userIds.length > 0) {
+			this.time -= deltaTime;
+			if(this.time <= 0) this.requestUserData();
 		}
 	}
 
-	function onLoaded(obj) {
+	this.onLoaded = function(obj) {
 		var json = JSON.parse(obj);
+		var self = this;
 
 		for(var jsonuser of json.users) {
 			if(jsonuser && jsonuser.user_id) {
 				var userId = jsonuser.user_id;
 
-				var user = users[userId] || { userId: userId };
-				users[userId] = user;
+				var user = this.users[userId] || { userId: userId };
+				this.users[userId] = user;
 
 				var oldUsername = user.username;
 				user.username = jsonuser.username || null;
@@ -115,7 +118,7 @@ function UserEventsBehavior(config) {
 					case 'robothead-roundguy-01':
 					case 'robothead-propellerhead-01': {
 						avatarClass = 'Robothead';
-						user.avatarColors = { 'highlight': getAvatarColor(jsonavatar['robothead-highlight-color']) };
+						user.avatarColors = { 'highlight': this.getAvatarColor(jsonavatar['robothead-highlight-color']) };
 						user.avatarTextures = {};
 						if(!avatarAppearanceChanged) avatarAppearanceChanged = (!oldAvatarColors['highlight'] || !oldAvatarColors['highlight'].equals(user.avatarColors['highlight']));
 						break;
@@ -129,7 +132,7 @@ function UserEventsBehavior(config) {
 					case 'x-series-m01':
 					case 'x-series-m02': {
 						avatarClass = 'Pod';
-						user.avatarColors = { 'primary': getAvatarColor(jsonavatar['primary-color']), 'highlight': getAvatarColor(jsonavatar['highlight-color']) };
+						user.avatarColors = { 'primary': this.getAvatarColor(jsonavatar['primary-color']), 'highlight': this.getAvatarColor(jsonavatar['highlight-color']) };
 						user.avatarTextures = {};
 						if(!avatarAppearanceChanged) avatarAppearanceChanged = (!oldAvatarColors['primary'] || !oldAvatarColors['highlight'] || !oldAvatarColors['primary'].equals(user.avatarColors['primary']) || !oldAvatarColors['highlight'].equals(user.avatarColors['highlight']));
 						break;
@@ -139,7 +142,7 @@ function UserEventsBehavior(config) {
 						avatarClass = '';
 						user.avatarColors = {};
 						user.avatarTextures = {};
-						if(trace) console.log('Unknown avatar type: ' + user.avatarId);
+						if(this.trace) console.log('Unknown avatar type: ' + user.avatarId);
 						break;
 					}
 				}
@@ -155,7 +158,7 @@ function UserEventsBehavior(config) {
 					* @property {THREE.Object3D} target - The object which emitted the event.
 					* @memberof module:altspace/utilities/behaviors.UserEvents
 					*/
-					object3d.dispatchEvent({
+					this.object3d.dispatchEvent({
 						type: 'userchange',
 						detail: {
 							userId: user.userId,
@@ -163,7 +166,7 @@ function UserEventsBehavior(config) {
 							displayName: user.displayName
 						},
 						bubbles: true,
-						target: object3d
+						target: self.object3d
 					});
 				}
 
@@ -183,7 +186,7 @@ function UserEventsBehavior(config) {
 					* @property {THREE.Object3D} target - The object which emitted the event.
 					* @memberof module:altspace/utilities/behaviors.UserEvents
 					*/
-					object3d.dispatchEvent({
+					this.object3d.dispatchEvent({
 						type: 'avatarchange',
 						detail: {
 							userId: user.userId,
@@ -193,7 +196,7 @@ function UserEventsBehavior(config) {
 							textures: user.avatarTextures
 						},
 						bubbles: true,
-						target: object3d
+						target: self.object3d
 					});
 				}
 
@@ -208,7 +211,7 @@ function UserEventsBehavior(config) {
 					* @property {THREE.Object3D} target - The object which emitted the event.
 					* @memberof module:altspace/utilities/behaviors.UserEvents
 					*/
-					object3d.dispatchEvent({
+					this.object3d.dispatchEvent({
 						type: 'avatarstatus',
 						detail: {
 							userId: user.userId,
@@ -216,22 +219,22 @@ function UserEventsBehavior(config) {
 							online: (user.online ? true : false)
 						},
 						bubbles: true,
-						target: object3d
+						target: self.object3d
 					});
 				}
 			}
 		}
 
-		loading = false;
+		this.loading = false;
 	}
 
-	function onError(xhr) {
-		if(trace) {
+	this.onError = function(xhr) {
+		if(this.trace) {
 			var url = xhr.target.responseURL || '';
 			console.log('Error loading avatar data ' + url);
 		}
 
-		loading = false;
+		this.loading = false;
 	}
 
 	/**
@@ -241,9 +244,9 @@ function UserEventsBehavior(config) {
 	* @param {String} userId - User ID to receive events for.
 	* @memberof module:altspace/utilities/behaviors.UserEvents
 	*/
-	function subscribeUser(userId) {
-		var index = userIds.indexOf(userId);
-		if(index === -1) userIds.push(userId);
+	this.subscribeUser = function(userId) {
+		var index = this.userIds.indexOf(userId);
+		if(index === -1) this.userIds.push(userId);
 	}
 
 	/**
@@ -253,30 +256,30 @@ function UserEventsBehavior(config) {
 	* @param {String} userId - User ID to stop receiving events for.
 	* @memberof module:altspace/utilities/behaviors.UserEvents
 	*/
-	function unsubscribeUser(userId) {
-		var index = userIds.indexOf(userId);
-		if(index >= 0) userIds.splice(index, 1);
+	this.unsubscribeUser = function(userId) {
+		var index = this.userIds.indexOf(userId);
+		if(index >= 0) this.userIds.splice(index, 1);
 	}
 
-	function requestUserData() {
-		if(!dataRequest || loading || userIds.length <= 0) return;
+	this.requestUserData = function() {
+		if(!this.dataRequest || this.loading || this.userIds.length <= 0) return;
 
 		var requestUserIds = [];
-		for(var userId of userIds) {
-			if(!onRequestData || onRequestData(userId, object3d)) requestUserIds.push(userId);
+		for(var userId of this.userIds) {
+			if(!this.onRequestData || this.onRequestData(userId, this.object3d)) requestUserIds.push(userId);
 		}
 
 		if(requestUserIds.length > 0) {
 			// Authenticates Using Positron Session Exposed By AltspaceSDK
 			// https://account.altvr.com/api/v1/users/<userid1>,<userid2>,...
-			dataRequest.load('https://account.altvr.com/api/v1/users/' + requestUserIds.join(), onLoaded, undefined, onError);
+			this.dataRequest.load('https://account.altvr.com/api/v1/users/' + requestUserIds.join(), this.onLoaded.bind(this), undefined, this.onError.bind(this));
 
-			time = refreshTime;
-			loading = true;
+			this.time = this.refreshTime;
+			this.loading = true;
 		}
 	}
 
-	function getAvatarColor(color) {
+	this.getAvatarColor = function(color) {
 		function getColorFromRGB(r, g, b) {
 			return new THREE.Color(r / 255, g / 255, b / 255);
 		}
@@ -296,11 +299,4 @@ function UserEventsBehavior(config) {
 		if(typeof(color[0]) === 'string') return getColorFromName(color[0]);
 		return getColorFromRGB(color[0], color[1], color[2]);
 	}
-
-	return { awake: awake, update: update, subscribeUser: subscribeUser, unsubscribeUser: unsubscribeUser, type: 'UserEvents' };
 }
-
-altspace = altspace || {};
-altspace.utilities = altspace.utilities || {};
-altspace.utilities.behaviors = altspace.utilities.behaviors || {};
-altspace.utilities.behaviors.UserEvents = UserEventsBehavior;

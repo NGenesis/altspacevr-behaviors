@@ -4,18 +4,30 @@
 		<meta charset=utf-8>
 		<title>UserEvents Behavior Example</title>
 		<script src="https://cdn.rawgit.com/mrdoob/three.js/r84/build/three.min.js"></script>
-		<script src="https://cdn.rawgit.com/AltspaceVR/AltspaceSDK/v0.28.1/dist/altspace.min.js"></script>
+		<script src="https://cdn.rawgit.com/AltspaceVR/AltspaceSDK/v2.0.3/dist/altspace.min.js"></script>
+		<script src="../js/NativeComponent.js"></script>
 		<script src="../js/UserEvents.js"></script>
 	</head>
 	<body>
 		<script>
-		var sim = altspace.utilities.Simulation();
+		var sim = new altspace.utilities.Simulation();
 		var scene = sim.scene;
 
 		var avatarPrimaryColor;
 		var avatarHighlightColor;
 		var avatarColorGeometry = new THREE.BoxGeometry(100, 100, 100);
-		var avatarDetails;
+
+		var avatarDetails = new THREE.Group();
+		avatarDetails.addBehavior(new altspaceutil.behaviors.NativeComponent('n-billboard'));
+		avatarDetails.addBehavior(new altspaceutil.behaviors.NativeComponent('n-text', {
+			fontSize: 150,
+			width: 500,
+			height: 1,
+			horizontalAlign: 'middle',
+			verticalAlign: 'middle'
+		}));
+		avatarDetails.position.y = -100;
+		scene.add(avatarDetails);
 
 		scene.addEventListener('avatarchange', function(event) {
 			console.log(event.detail.userId);
@@ -24,23 +36,7 @@
 			console.log(event.detail.colors);
 			console.log(event.detail.textures);
 
-			if(!avatarDetails) {
-				avatarDetails = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), Object.assign(new THREE.MeshBasicMaterial(), { visible: false }));
-
-				altspace.addNativeComponent(avatarDetails, 'n-billboard');
-				altspace.addNativeComponent(avatarDetails, 'n-text');
-				avatarDetails.position.y = -100;
-				scene.add(avatarDetails);
-			}
-
-			altspace.updateNativeComponent(avatarDetails, 'n-text', {
-				text: 'User ID: ' + event.detail.userId + '\nAvatar ID: ' + event.detail.avatarId + '\nAvatar Class: ' + event.detail.avatarClass + (event.detail.avatarClass === 'Rubenoid' ? ('\nHair ID: ' + event.detail.textures['hair'] + '\nSkin ID: ' + event.detail.textures['skin'] + '\nClothing ID: ' + event.detail.textures['clothing']) : ''),
-				fontSize: 150,
-				width: 500,
-				height: 1,
-				horizontalAlign: 'middle',
-				verticalAlign: 'middle'
-			});
+			avatarDetails.getBehaviorByType('n-text').data.text = 'User ID: ' + event.detail.userId + '\nAvatar ID: ' + event.detail.avatarId + '\nAvatar Class: ' + event.detail.avatarClass + (event.detail.avatarClass === 'Rubenoid' ? ('\nHair ID: ' + event.detail.textures['hair'] + '\nSkin ID: ' + event.detail.textures['skin'] + '\nClothing ID: ' + event.detail.textures['clothing']) : '');
 
 			if(avatarPrimaryColor) {
 				scene.remove(avatarPrimaryColor);
@@ -65,7 +61,7 @@
 			}
 		});
 
-		scene.addBehavior(altspace.utilities.behaviors.UserEvents());
+		scene.addBehavior(new altspaceutil.behaviors.UserEvents());
 		</script>
 	</body>
 </html>

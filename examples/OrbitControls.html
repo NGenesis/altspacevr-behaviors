@@ -6,13 +6,13 @@
 		<title>OrbitControls Behavior Example</title>
 		<script src="https://cdn.rawgit.com/mrdoob/three.js/r84/build/three.min.js"></script>
 		<script src="https://cdn.rawgit.com/mrdoob/three.js/r84/examples/js/controls/OrbitControls.js"></script>
-		<script src="https://cdn.rawgit.com/AltspaceVR/AltspaceSDK/v0.28.1/dist/altspace.min.js"></script>
+		<script src="https://cdn.rawgit.com/AltspaceVR/AltspaceSDK/v2.0.3/dist/altspace.min.js"></script>
 		<script src="../js/OrbitControls.js"></script>
 	</head>
 	<body>
 		<script>
-			var sim = altspace.utilities.Simulation();
-			if(!altspace.inClient) sim.camera.addBehavior(new altspace.utilities.behaviors.OrbitControls());
+			var sim = new altspace.utilities.Simulation();
+			sim.camera.addBehavior(new altspaceutil.behaviors.OrbitControls());
 
 			var cube = new THREE.Mesh(new THREE.BoxGeometry(100, 100, 100), new THREE.MeshBasicMaterial());
 			sim.scene.add(cube);
