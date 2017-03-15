@@ -1,7 +1,7 @@
 'use strict';
 
 window.altspaceutil = window.altspaceutil || {};
-altspaceutil.behaviors = altspace.utilities.behaviors || {};
+altspaceutil.behaviors = altspaceutil.behaviors || {};
 
 altspaceutil.behaviors.OrbitControls = function() {
 	this.type = 'OrbitControls';
