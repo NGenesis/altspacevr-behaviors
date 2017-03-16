@@ -92,7 +92,7 @@
 				var nsound = new THREE.Group();
 				nsound.position.set(5, 0, 5);
 				nsound.addBehaviors(new altspaceutil.behaviors.NativeComponent('n-sound', {
-					src: resolveURL(/Mobile/i.test(navigator.userAgent) ? 'NativeComponent/test.mp3' : 'NativeComponent/test.ogg'),
+					src: resolveURL(/Mobile/i.test(navigator.userAgent) ? 'test.mp3' : 'test.ogg'),
 					autoplay: true,
 					loop: false,
 					volume: 0.5,
