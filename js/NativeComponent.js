@@ -122,8 +122,9 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 	this.type = _type || 'NativeComponent';
 
 	var defaults = altspaceutil.behaviors.NativeComponentDefaults[this.type];
-	this.config = Object.assign({ sendUpdates: true, recursive: false, useCollider: false }, (defaults && defaults.config) ? defaults.config : {}, _config);
-	this.data = Object.assign((defaults && defaults.data) ? defaults.data : {}, _data);
+	this.config = Object.assign({ sendUpdates: true, recursive: false, useCollider: false, updateOnStaleData: true }, (defaults && defaults.config) ? JSON.parse(JSON.stringify(defaults.config)) : {}, _config);
+	this.data = Object.assign((defaults && defaults.data) ? JSON.parse(JSON.stringify(defaults.data)) : {}, _data);
+	if(altspace.inClient && this.config.sendUpdates && this.config.updateOnStaleData) this.oldData = JSON.stringify(this.data);
 
 	this.awake = function(o) {
 		this.component = this.object3d = o;
@@ -159,7 +160,17 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 			this.placeholder.visible = this.object3d.visible;
 		}
 
-		if(altspace.inClient && this.config.sendUpdates) altspace.updateNativeComponent(this.component, this.type, this.data);
+		if(altspace.inClient && this.config.sendUpdates) {
+			if(this.config.updateOnStaleData) {
+				var newData = JSON.stringify(this.data);
+				if(this.oldData !== newData) {
+					this.oldData = newData;
+					altspace.updateNativeComponent(this.component, this.type, this.data);
+				}
+			} else {
+				altspace.updateNativeComponent(this.component, this.type, this.data);
+			}
+		}
 	}
 
 	this.callComponent = function(functionName, functionArgs) {
