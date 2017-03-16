@@ -18,88 +18,78 @@
 				var nspherecollider = new THREE.Mesh(new THREE.SphereBufferGeometry(1, 8, 8), new THREE.MeshBasicMaterial({ color: 0x00ff00 }));
 				nspherecollider.position.set(-10, 0, 0);
 				sim.scene.add(nspherecollider);
-				nspherecollider.addBehaviors(new altspaceutil.behaviors.NativeComponent('n-sphere-collider', {
-					isTrigger: false,
-					center: { x: 0, y: 0, z: 0 },
-					radius: 1,
-					type: 'environment'
-				}), new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-sphere-collider', height: 4, fontSize: 4, verticalAlign: 'top' }));
+				nspherecollider.addBehaviors(new altspaceutil.behaviors.NativeComponent('n-sphere-collider', { radius: 1 }), new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-sphere-collider', height: 4, fontSize: 4, verticalAlign: 'top' }));
 
 				// n-box-collider
 				var nboxcollider = new THREE.Mesh(new THREE.BoxBufferGeometry(2, 2, 2), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
 				nboxcollider.position.set(-5, 0, 0);
 				sim.scene.add(nboxcollider);
-				nboxcollider.addBehaviors(new altspaceutil.behaviors.NativeComponent('n-box-collider', {
-					isTrigger: false,
-					size: { x: 1, y: 1, z: 1 },
-					type: 'environment'
-				}), new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-box-collider', height: 4, fontSize: 4, verticalAlign: 'top' }));
+				nboxcollider.addBehaviors(
+					new altspaceutil.behaviors.NativeComponent('n-box-collider', { size: { x: 1, y: 1, z: 1 } }),
+					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-box-collider', height: 4, fontSize: 4, verticalAlign: 'top' })
+				);
 
 				// n-capsule-collider
 				var ncapsulecollider = new THREE.Mesh(new THREE.CylinderBufferGeometry(1, 1, 2, 10), new THREE.MeshBasicMaterial({ color: 0xaaaa00 }));
 				ncapsulecollider.position.set(0, 0, 0);
 				sim.scene.add(ncapsulecollider);
-				ncapsulecollider.addBehaviors(new altspaceutil.behaviors.NativeComponent('n-capsule-collider', {
-					isTrigger: false,
-					center: { x: 0, y: 0, z: 0 },
-					radius: 1,
-					height: 2,
-					direction: 'y',
-					type: 'environment'
-				}), new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-capsule-collider', height: 4, fontSize: 4, verticalAlign: 'top' }));
+				ncapsulecollider.addBehaviors(
+					new altspaceutil.behaviors.NativeComponent('n-capsule-collider', { radius: 1, height: 2, direction: 'y' }),
+					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-capsule-collider', height: 4, fontSize: 4, verticalAlign: 'top' })
+				);
 
 				// n-mesh-collider
 				var nmeshcollider = new THREE.Mesh(new THREE.TorusKnotBufferGeometry(2, 0.2, 64, 16), new THREE.MeshBasicMaterial({ color: 0x00aaaa }));
 				nmeshcollider.position.set(5, 0, 0);
 				sim.scene.add(nmeshcollider);
-				nmeshcollider.addBehaviors(new altspaceutil.behaviors.NativeComponent('n-mesh-collider', {
-					isTrigger: false,
-					convex: false,
-					type: 'environment'
-				}), new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-mesh-collider', height: 4, fontSize: 4, verticalAlign: 'top' }));
+				nmeshcollider.addBehaviors(
+					new altspaceutil.behaviors.NativeComponent('n-mesh-collider', { convex: false, type: 'environment' }),
+					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-mesh-collider', height: 4, fontSize: 4, verticalAlign: 'top' })
+				);
 
 				// n-spawner
 				var nspawner = new THREE.Group();
 				nspawner.position.set(-10, 0, 5);
-				nspawner.addBehaviors(new altspaceutil.behaviors.NativeComponent('n-spawner', { res: 'interactables/basketball' }), new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-spawner', height: 4, fontSize: 4, verticalAlign: 'top' }));
 				sim.scene.add(nspawner);
+				nspawner.addBehaviors(
+					new altspaceutil.behaviors.NativeComponent('n-spawner', { res: 'interactables/basketball' }),
+					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-spawner', height: 4, fontSize: 4, verticalAlign: 'top' })
+				);
 
 				// n-object
 				var nobject = new THREE.Group();
 				nobject.position.set(-5, 0, 5);
-				nobject.addBehaviors(new altspaceutil.behaviors.NativeComponent('n-object', { res: 'objects/target-archery' }), 
-					new altspaceutil.behaviors.NativeComponent('n-object', { res: 'effects/fireworks' }),
-					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-object', height: 4, fontSize: 4, verticalAlign: 'top' }));
 				sim.scene.add(nobject);
+				nobject.addBehaviors(
+					new altspaceutil.behaviors.NativeComponent('n-object', { res: 'objects/target-archery' }), 
+					new altspaceutil.behaviors.NativeComponent('n-object', { res: 'effects/fireworks' }),
+					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-object', height: 4, fontSize: 4, verticalAlign: 'top' })
+				);
 
 				// n-container
 				var ncontainer = new THREE.Group();
 				ncontainer.position.set(0, 0, 5);
-				ncontainer.addBehaviors(new altspaceutil.behaviors.NativeComponent('n-container', { capacity: 4 }), new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-container', height: 4, fontSize: 4, verticalAlign: 'top' }));
 				sim.scene.add(ncontainer);
-
-				function resolveURL(url) {
-					if(typeof url !== 'string' || url === '') return '';
-
-					// Absolute URL
-					if(/^https?:\/\//i.test(url)) return url;
-
-					var absoluteUrl = new URL(url, location.href.substring(0, location.href.lastIndexOf('/') + 1));
-					return absoluteUrl.toString();
-				}
+				ncontainer.addBehaviors(
+					new altspaceutil.behaviors.NativeComponent('n-container', { capacity: 4 }),
+					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-container', height: 4, fontSize: 4, verticalAlign: 'top' })
+				);
 
 				// n-sound
 				var nsound = new THREE.Group();
 				nsound.position.set(5, 0, 5);
-				nsound.addBehaviors(new altspaceutil.behaviors.NativeComponent('n-sound', {
-					src: resolveURL(/Mobile/i.test(navigator.userAgent) ? 'test.mp3' : 'test.ogg'),
-					autoplay: true,
-					loop: false,
-					volume: 0.5,
-					minDistance: 1,
-					maxDistance: 12,
-				}), new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-sound', height: 4, fontSize: 4, verticalAlign: 'top' }));
 				sim.scene.add(nsound);
+				nsound.addBehaviors(
+					new altspaceutil.behaviors.NativeComponent('n-sound', {
+						src: /Mobile/i.test(navigator.userAgent) ? 'test.mp3' : 'test.ogg', // MP3 Supported For Mobile Devices, OGG Supported For Everything Else
+						autoplay: true,
+						loop: false,
+						volume: 0.5,
+						minDistance: 1,
+						maxDistance: 12,
+					}),
+					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-sound', height: 4, fontSize: 4, verticalAlign: 'top' })
+				);
 
 				// n-sound Function Calls
 				setInterval(function() {
@@ -112,33 +102,38 @@
 				// n-cockpit-parent
 				var ncockpitparent = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), new THREE.MeshBasicMaterial({ color: 0xFF0000, transparent: true, opacity: 0.3, side: THREE.DoubleSide }));
 				ncockpitparent.position.set(-2.5, 0, -4);
-				ncockpitparent.addBehaviors(new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-cockpit-parent', height: 2, fontSize: 2, verticalAlign: 'top' }), new altspaceutil.behaviors.NativeComponent('n-cockpit-parent'));
 				sim.scene.add(ncockpitparent);
+				ncockpitparent.addBehaviors(
+					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-cockpit-parent', height: 2, fontSize: 2, verticalAlign: 'top' }),
+					new altspaceutil.behaviors.NativeComponent('n-cockpit-parent')
+				);
 
 				// n-skeleton-parent
 				var nskeletonparent = new THREE.Mesh(new THREE.BoxBufferGeometry(0.2, 0.2, 0.2), new THREE.MeshBasicMaterial({ color: 0xFF0000, transparent: true, opacity: 0.3 }));
 				nskeletonparent.position.set(0, 0.3, 0);
-				nskeletonparent.addBehaviors(new altspaceutil.behaviors.NativeComponent('n-skeleton-parent', {
-					part: 'head',
-					side: 'center',
-					index: 0,
-					/*userId: ''*/
-				}), new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-skeleton-parent', height: 1, fontSize: 2, verticalAlign: 'top' }));
 				sim.scene.add(nskeletonparent);
+				nskeletonparent.addBehaviors(
+					new altspaceutil.behaviors.NativeComponent('n-skeleton-parent', {
+						part: 'head',
+						side: 'center',
+						index: 0,
+						/*userId: ''*/
+					}),
+					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-skeleton-parent', height: 1, fontSize: 2, verticalAlign: 'top' })
+				);
 
 				// n-text / n-billboard
 				var ntext = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), Object.assign(new THREE.MeshBasicMaterial(), { visible: false }));
 				ntext.position.set(5, 2, 10);
-				ntext.addBehaviors(new altspaceutil.behaviors.NativeComponent('n-text', {
-					text: 'n-text / n-billboard',
-					fontSize: 3,
-					width: 100,
-					height: 1,
-					horizontalAlign: 'middle',
-					verticalAlign: 'middle'
-				}), new altspaceutil.behaviors.NativeComponent('n-billboard'));
-
 				sim.scene.add(ntext);
+				ntext.addBehaviors(
+					new altspaceutil.behaviors.NativeComponent('n-text', {
+						text: 'n-text / n-billboard',
+						fontSize: 3,
+						width: 100
+					}),
+					new altspaceutil.behaviors.NativeComponent('n-billboard')
+				);
 
 				(function updateText() {
 					requestAnimationFrame(updateText);

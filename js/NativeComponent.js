@@ -93,6 +93,18 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			pitch: 1,
 			minDistance: 1,
 			maxDistance: 12
+		},
+		initComponent: function() {
+			var src = this.data.src;
+			if(src && !src.startsWith('http')) {
+				if(src.startsWith('/')) {
+					this.data.src = location.origin + src;
+				} else {
+					var currPath = location.pathname;
+					if(!currPath.endsWith('/')) currPath = location.pathname.split('/').slice(0, -1).join('/') + '/';
+					this.data.src = location.origin + currPath + src;
+				}
+			}
 		}
 	},
 
@@ -124,6 +136,7 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 	var defaults = altspaceutil.behaviors.NativeComponentDefaults[this.type];
 	this.config = Object.assign({ sendUpdates: true, recursive: false, useCollider: false, updateOnStaleData: true }, (defaults && defaults.config) ? JSON.parse(JSON.stringify(defaults.config)) : {}, _config);
 	this.data = Object.assign((defaults && defaults.data) ? JSON.parse(JSON.stringify(defaults.data)) : {}, _data);
+	if(defaults && defaults.initComponent) defaults.initComponent.bind(this)();
 	if(altspace.inClient && this.config.sendUpdates && this.config.updateOnStaleData) this.oldData = JSON.stringify(this.data);
 
 	this.awake = function(o) {
