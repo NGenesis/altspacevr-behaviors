@@ -77,6 +77,84 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 	'n-container': {
 		data: {
 			capacity: 4
+		},
+		initComponent: function() {
+			var self = this;
+			self.count = 0;
+
+			if(altspace.inClient && altspace._internal) {
+				// Handle Container Count Changes
+				altspace._internal.onClientEvent('NativeContainerCountChanged', function(meshId, count, oldCount) {
+					var object3d = altspace._internal.getObject3DById(meshId);
+					if(object3d && object3d === self.component) {
+						/**
+						* The number of objects in the n-container.
+						* @instance
+						* @member {Number} count
+						* @readonly
+						* @memberof module:altspace/utilities/behaviors.NativeComponent
+						*/
+						self.count = count;
+
+						/**
+						* Fires an event every time an object enters or leaves the bounds of the n-container.
+						*
+						* @event container-count-changed
+						* @property {Number} count The new object count
+						* @property {Number} oldCount The old object count
+						* @property {THREE.Object3D} target - The object which emitted the event.
+						* @memberof module:altspace/utilities/behaviors.NativeComponent
+						*/
+						object3d.dispatchEvent({
+							type: 'container-count-changed',
+							detail: {
+								count: count,
+								oldCount: oldCount
+							},
+							bubbles: true,
+							target: object3d
+						});
+					}
+				});
+
+				// Handle Container State Changes
+				altspace._internal.onClientEvent('NativeContainerStateChanged', function(meshId, stateName, didGain) {
+					var object3d = altspace._internal.getObject3DById(meshId);
+					if(object3d && object3d === self.component) {
+						var oldState = self.state;
+
+						self.state = didGain ? stateName : undefined;
+						object3d.dispatchEvent({
+							type: didGain ? 'stateadded' : 'stateremoved',
+							detail: { state: stateName },
+							bubbles: true,
+							target: object3d
+						});
+
+						/**
+						* Fires an event when the n-container reaches zero objects contained.
+						*
+						* @event container-empty
+						* @property {THREE.Object3D} target - The object which emitted the event.
+						* @memberof module:altspace/utilities/behaviors.NativeComponent
+						*/
+						/**
+						* Fires an event when the n-container reaches its capacity
+						*
+						* @event container-full
+						* @property {THREE.Object3D} target - The object which emitted the event.
+						* @memberof module:altspace/utilities/behaviors.NativeComponent
+						*/
+						if(self.state !== oldState && self.state) {
+							object3d.dispatchEvent({
+								type: stateName,
+								bubbles: true,
+								target: object3d
+							});
+						}
+					}
+				});
+			}
 		}
 	},
 
@@ -104,6 +182,56 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 					if(!currPath.endsWith('/')) currPath = location.pathname.split('/').slice(0, -1).join('/') + '/';
 					this.data.src = location.origin + currPath + src;
 				}
+			}
+
+			if(altspace.inClient && altspace._internal) {
+				var self = this;
+
+				// Handle Container Count Changes
+				altspace._internal.onClientEvent('NativeSoundLoadedEvent', function(meshId, count, oldCount) {
+					var object3d = altspace._internal.getObject3DById(meshId);
+					if(object3d && object3d === self.component) {
+						/**
+						* Fires an event once the n-sound has finished loading.
+						*
+						* @event n-sound-loaded
+						* @property {THREE.Object3D} target - The object which emitted the event.
+						* @memberof module:altspace/utilities/behaviors.NativeComponent
+						*/
+						object3d.dispatchEvent({
+							type: 'n-sound-loaded',
+							bubbles: true,
+							target: object3d
+						});
+					}
+				});
+			}
+		},
+		callComponent: function(functionName, functionArgs) {
+			if(functionName === 'play') {
+				this.component.dispatchEvent({
+					type: 'sound-played',
+					bubbles: true,
+					target: this.component
+				});
+			} else if(functionName === 'pause') {
+				this.component.dispatchEvent({
+					type: 'sound-paused',
+					bubbles: true,
+					target: this.component
+				});
+			}
+		},
+		update: function() {
+			if(this.playHandlerType) {
+				this.component.removeEventListener(this.playHandlerType, this.playHandler);
+				this.playHandlerType = null;
+			}
+
+			if(this.data.on && this.data.on !== '') {
+				if(this.playHandler === undefined) this.playHandler = this.callComponent.bind(this, 'play');
+				this.playHandlerType = this.data.on;
+				this.component.addEventListener(this.playHandlerType, this.playHandler);
 			}
 		}
 	},
@@ -133,10 +261,10 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 	this.type = _type || 'NativeComponent';
 
-	var defaults = altspaceutil.behaviors.NativeComponentDefaults[this.type];
-	this.config = Object.assign({ sendUpdates: true, recursive: false, useCollider: false, updateOnStaleData: true }, (defaults && defaults.config) ? JSON.parse(JSON.stringify(defaults.config)) : {}, _config);
-	this.data = Object.assign((defaults && defaults.data) ? JSON.parse(JSON.stringify(defaults.data)) : {}, _data);
-	if(defaults && defaults.initComponent) defaults.initComponent.bind(this)();
+	this.defaults = altspaceutil.behaviors.NativeComponentDefaults[this.type];
+	this.config = Object.assign({ sendUpdates: true, recursive: false, useCollider: false, updateOnStaleData: true }, (this.defaults && this.defaults.config) ? JSON.parse(JSON.stringify(this.defaults.config)) : {}, _config);
+	this.data = Object.assign((this.defaults && this.defaults.data) ? JSON.parse(JSON.stringify(this.defaults.data)) : {}, _data);
+	if(this.defaults && this.defaults.initComponent) this.defaults.initComponent.bind(this)();
 	if(altspace.inClient && this.config.sendUpdates && this.config.updateOnStaleData) this.oldData = JSON.stringify(this.data);
 
 	this.awake = function(o) {
@@ -177,17 +305,20 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 			if(this.config.updateOnStaleData) {
 				var newData = JSON.stringify(this.data);
 				if(this.oldData !== newData) {
-					this.oldData = newData;
 					altspace.updateNativeComponent(this.component, this.type, this.data);
+					if(this.defaults && this.defaults.update) this.defaults.update.bind(this)();
+					this.oldData = newData;
 				}
 			} else {
 				altspace.updateNativeComponent(this.component, this.type, this.data);
+				if(this.defaults && this.defaults.update) this.defaults.update.bind(this)();
 			}
 		}
 	}
 
 	this.callComponent = function(functionName, functionArgs) {
 		altspace.callNativeComponent(this.component, this.type, functionName, functionArgs);
+		if(this.defaults && this.defaults.callComponent) this.defaults.callComponent.bind(this)(functionName, functionArgs);
 
 		if(this.config.recursive) {
 			for(var child of this.object3d.children) {

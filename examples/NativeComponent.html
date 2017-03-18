@@ -67,22 +67,32 @@
 				);
 
 				// n-container
-				var ncontainer = new THREE.Group();
+				var ncontainer = new THREE.Mesh(new THREE.BoxBufferGeometry(2, 2, 2), new THREE.MeshBasicMaterial({ color: 0xffbbee, transparent: true, opacity: 0.3 }));
 				ncontainer.position.set(0, 0, 5);
 				sim.scene.add(ncontainer);
+				ncontainer.addEventListener('container-count-changed', function(event) {
+					event.target.getBehaviorByType('n-text').data.text = 'n-container\nCount: ' + event.target.getBehaviorByType('n-container').count;
+				});
+				ncontainer.addEventListener('container-empty', function(event) {
+					event.target.getBehaviorByType('n-text').data.text = 'n-container\nCount: ' + event.target.getBehaviorByType('n-container').count + ', State: Empty';
+				});
+				ncontainer.addEventListener('container-full', function(event) {
+					event.target.getBehaviorByType('n-text').data.text = 'n-container\nCount: ' + event.target.getBehaviorByType('n-container').count + ', State: Full';
+				});
 				ncontainer.addBehaviors(
-					new altspaceutil.behaviors.NativeComponent('n-container', { capacity: 4 }),
+					new altspaceutil.behaviors.NativeComponent('n-box-collider', { isTrigger: true, size: { x: 2, y: 2, z: 2 } }),
+					new altspaceutil.behaviors.NativeComponent('n-container', { capacity: 2 }),
 					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-container', height: 4, fontSize: 4, verticalAlign: 'top' })
 				);
 
 				// n-sound
-				var nsound = new THREE.Group();
+				var nsound = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), Object.assign(new THREE.MeshBasicMaterial(), { visible: false }));
 				nsound.position.set(5, 0, 5);
 				sim.scene.add(nsound);
 				nsound.addBehaviors(
 					new altspaceutil.behaviors.NativeComponent('n-sound', {
 						src: /Mobile/i.test(navigator.userAgent) ? 'test.mp3' : 'test.ogg', // MP3 Supported For Mobile Devices, OGG Supported For Everything Else
-						autoplay: true,
+						autoplay: false,
 						loop: false,
 						volume: 0.5,
 						minDistance: 1,
@@ -90,14 +100,27 @@
 					}),
 					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-sound', height: 4, fontSize: 4, verticalAlign: 'top' })
 				);
-
-				// n-sound Function Calls
-				setInterval(function() {
+				nsound.addEventListener('n-sound-loaded', function(event) {
 					var nsoundcomponent = nsound.getBehaviorByType('n-sound');
-					nsoundcomponent.callComponent('pause');
-					nsoundcomponent.callComponent('seek', { time: 0 });
-					nsoundcomponent.callComponent('play');
-				}, 5000);
+					setTimeout(function() {
+						nsoundcomponent.callComponent('play');
+						nsoundcomponent.callComponent('seek', { time: 0 });
+					},1000);
+					nsound.getBehaviorByType('n-text').data.text = 'n-sound\nStatus: ' + 'Loaded';
+				});
+				nsound.addEventListener('sound-paused', function(event) {
+					var nsoundcomponent = nsound.getBehaviorByType('n-sound');
+					setTimeout(function() {
+						nsoundcomponent.callComponent('play');
+						nsoundcomponent.callComponent('seek', { time: 0 });
+					},3000);
+					nsound.getBehaviorByType('n-text').data.text = 'n-sound\nStatus: Paused';
+				});
+				nsound.addEventListener('sound-played', function(event) {
+					var nsoundcomponent = nsound.getBehaviorByType('n-sound');
+					setTimeout(function() { nsoundcomponent.callComponent('pause'); }, 3000);
+					nsound.getBehaviorByType('n-text').data.text = 'n-sound\nStatus: Playing';
+				});
 
 				// n-cockpit-parent
 				var ncockpitparent = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), new THREE.MeshBasicMaterial({ color: 0xFF0000, transparent: true, opacity: 0.3, side: THREE.DoubleSide }));
@@ -115,9 +138,7 @@
 				nskeletonparent.addBehaviors(
 					new altspaceutil.behaviors.NativeComponent('n-skeleton-parent', {
 						part: 'head',
-						side: 'center',
-						index: 0,
-						/*userId: ''*/
+						side: 'center'
 					}),
 					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-skeleton-parent', height: 1, fontSize: 2, verticalAlign: 'top' })
 				);
