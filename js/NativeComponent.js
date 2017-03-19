@@ -70,7 +70,7 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			type: 'environment'
 		},
 		config: {
-			recursive: true
+			recursiveMesh: true
 		}
 	},
 
@@ -262,7 +262,7 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 	this.type = _type || 'NativeComponent';
 
 	this.defaults = altspaceutil.behaviors.NativeComponentDefaults[this.type];
-	this.config = Object.assign({ sendUpdates: true, recursive: false, useCollider: false, updateOnStaleData: true }, (this.defaults && this.defaults.config) ? JSON.parse(JSON.stringify(this.defaults.config)) : {}, _config);
+	this.config = Object.assign({ sendUpdates: true, recursiveMesh: false, recursive: false, useCollider: false, updateOnStaleData: true }, (this.defaults && this.defaults.config) ? JSON.parse(JSON.stringify(this.defaults.config)) : {}, _config);
 	this.data = Object.assign((this.defaults && this.defaults.data) ? JSON.parse(JSON.stringify(this.defaults.data)) : {}, _data);
 	if(this.defaults && this.defaults.initComponent) this.defaults.initComponent.bind(this)();
 	if(altspace.inClient && this.config.sendUpdates && this.config.updateOnStaleData) this.oldData = JSON.stringify(this.data);
@@ -287,10 +287,13 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 			if(this.config.sendUpdates) altspace.updateNativeComponent(this.component, this.type, this.data);
 		}
 
-		if(this.config.recursive) {
-			for(var child of this.object3d.children) {
-				child.addBehavior(Object.assign(new altspaceutil.behaviors.NativeComponent(this.type, this.data, this.config), { parent: this }));
-			}
+		// Add Component To Descendants
+		if((this.config.recursive || this.config.recursiveMesh) && !this.parent) {
+			this.object3d.traverse((function(child) {
+				if(child !== this.object3d && child !== this.placeholder && (this.config.recursive || (this.config.recursiveMesh && child instanceof THREE.Mesh))) {
+					child.addBehavior(Object.assign(new altspaceutil.behaviors.NativeComponent(this.type, this.data, this.config), { parent: this }));
+				}
+			}).bind(this));
 		}
 	}
 
@@ -320,20 +323,24 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 		altspace.callNativeComponent(this.component, this.type, functionName, functionArgs);
 		if(this.defaults && this.defaults.callComponent) this.defaults.callComponent.bind(this)(functionName, functionArgs);
 
-		if(this.config.recursive) {
-			for(var child of this.object3d.children) {
-				var childComponent = child.getBehaviorByType(this.type);
-				if(childComponent && childComponent.parent === this) child.callComponent(functionName, functionArgs);
-			}
+		if(this.config.recursive || this.config.recursiveMesh && !this.parent) {
+			this.object3d.traverse((function(child) {
+				if(child !== this.object3d && child !== this.placeholder && (this.config.recursive || (this.config.recursiveMesh && child instanceof THREE.Mesh))) {
+					var childComponent = child.getBehaviorByType(this.type);
+					if(childComponent && childComponent.parent === this) child.callComponent(functionName, functionArgs);
+				}
+			}).bind(this));
 		}
 	}
 
 	this.dispose = function() {
-		if(this.config.recursive) {
-			for(var child of this.object3d.children) {
-				var childComponent = child.getBehaviorByType(this.type);
-				if(childComponent && childComponent.parent === this) child.removeBehavior(childComponent);
-			}
+		if(this.config.recursive || this.config.recursiveMesh && !this.parent) {
+			this.object3d.traverse((function(child) {
+				if(child !== this.object3d && child !== this.placeholder && (this.config.recursive || (this.config.recursiveMesh && child instanceof THREE.Mesh))) {
+					var childComponent = child.getBehaviorByType(this.type);
+					if(childComponent && childComponent.parent === this) child.removeBehavior(childComponent);
+				}
+			}).bind(this));
 		}
 
 		if(altspace.inClient) altspace.removeNativeComponent(this.component, this.type);
