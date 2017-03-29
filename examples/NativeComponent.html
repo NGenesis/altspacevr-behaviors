@@ -5,7 +5,7 @@
 		<meta name="author" content="Genesis">
 		<title>NativeComponent Behavior Example</title>
 		<script src="https://cdn.rawgit.com/mrdoob/three.js/r84/build/three.min.js"></script>
-		<script src="https://cdn.rawgit.com/AltspaceVR/AltspaceSDK/v2.0.3/dist/altspace.min.js"></script>
+		<script src="https://cdn.rawgit.com/AltspaceVR/AltspaceSDK/v2.1.0/dist/altspace.min.js"></script>
 		<script src="../js/NativeComponent.js"></script>
 	</head>
 	<body>
@@ -14,6 +14,26 @@
 
 		altspace.getEnclosure().then(function(enclosure) {
 			enclosure.requestFullspace().then(function() {
+				// n-layout-browser (3D Enclosure)
+				var nlayoutbrowser = new THREE.Mesh(new THREE.BoxBufferGeometry(5, 5, 5), Object.assign(new THREE.MeshBasicMaterial(), { visible: false }));
+				nlayoutbrowser.position.set(15, 0, -15);
+				nlayoutbrowser.scale.set(5, 5, 5);
+				sim.scene.add(nlayoutbrowser);
+				nlayoutbrowser.addBehaviors(
+					new altspaceutil.behaviors.NativeComponent('n-layout-browser', { url: 'UserEvents.html', isEnclosure: true }),
+					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-layout-browser\n3D Enclosure', height: 6, fontSize: 4, verticalAlign: 'top' })
+				);
+
+				// n-layout-browser (2D Enclosure)
+				var nlayoutbrowser = new THREE.Mesh(new THREE.BoxBufferGeometry(5, 5, 5), Object.assign(new THREE.MeshBasicMaterial({ color: 0xccdd33, transparent: true, opacity: 0.2 }), { visible: false }));
+				nlayoutbrowser.position.set(-15, 0, -15);
+				nlayoutbrowser.scale.set(5, 5, 5);
+				sim.scene.add(nlayoutbrowser);
+				nlayoutbrowser.addBehaviors(
+					new altspaceutil.behaviors.NativeComponent('n-layout-browser', { url: 'https://google.com' }),
+					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-layout-browser\n2D Enclosure', height: 6, fontSize: 4, verticalAlign: 'top' })
+				);
+
 				// n-sphere-collider
 				var nspherecollider = new THREE.Mesh(new THREE.SphereBufferGeometry(1, 8, 8), new THREE.MeshBasicMaterial({ color: 0x00ff00 }));
 				nspherecollider.position.set(-10, 0, 0);
@@ -61,7 +81,7 @@
 				nobject.position.set(-5, 0, 5);
 				sim.scene.add(nobject);
 				nobject.addBehaviors(
-					new altspaceutil.behaviors.NativeComponent('n-object', { res: 'objects/target-archery' }), 
+					new altspaceutil.behaviors.NativeComponent('n-object', { res: 'objects/target-archery' }),
 					new altspaceutil.behaviors.NativeComponent('n-object', { res: 'effects/fireworks' }),
 					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-object', height: 4, fontSize: 4, verticalAlign: 'top' })
 				);
@@ -78,6 +98,12 @@
 				});
 				ncontainer.addEventListener('container-full', function(event) {
 					event.target.getBehaviorByType('n-text').data.text = 'n-container\nCount: ' + event.target.getBehaviorByType('n-container').count + ', State: Full';
+				});
+				ncontainer.addEventListener('triggerenter', function(event) {
+					event.target.material.color.set(0xffeeff);
+				});
+				ncontainer.addEventListener('triggerexit', function(event) {
+					event.target.material.color.set(0xffbbee);
 				});
 				ncontainer.addBehaviors(
 					new altspaceutil.behaviors.NativeComponent('n-box-collider', { isTrigger: true, size: { x: 2, y: 2, z: 2 } }),
@@ -136,23 +162,34 @@
 				nskeletonparent.position.set(0, 0.3, 0);
 				sim.scene.add(nskeletonparent);
 				nskeletonparent.addBehaviors(
-					new altspaceutil.behaviors.NativeComponent('n-skeleton-parent', {
-						part: 'head',
-						side: 'center'
-					}),
+					new altspaceutil.behaviors.NativeComponent('n-skeleton-parent', { part: 'head', side: 'center' }),
 					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-skeleton-parent', height: 1, fontSize: 2, verticalAlign: 'top' })
+				);
+
+				// n-portal (Space)
+				var nportal = new THREE.Group();
+				nportal.position.set(5, 0, 10);
+				sim.scene.add(nportal);
+				nportal.addBehaviors(
+					new altspaceutil.behaviors.NativeComponent('n-portal', { targetSpace: 'campfire-lobby' }),
+					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-portal\nThe Campfire', height: 6, fontSize: 3, verticalAlign: 'top' })
+				);
+
+				// n-portal (Position)
+				var nportal = new THREE.Group();
+				nportal.position.set(0, 0, 10);
+				sim.scene.add(nportal);
+				nportal.addBehaviors(
+					new altspaceutil.behaviors.NativeComponent('n-portal', {}, { targetEntity: nspherecollider }),
+					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-portal\nCurrent Space', height: 6, fontSize: 3, verticalAlign: 'top' })
 				);
 
 				// n-text / n-billboard
 				var ntext = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), Object.assign(new THREE.MeshBasicMaterial(), { visible: false }));
-				ntext.position.set(5, 2, 10);
+				ntext.position.set(-15, 2, 10);
 				sim.scene.add(ntext);
 				ntext.addBehaviors(
-					new altspaceutil.behaviors.NativeComponent('n-text', {
-						text: 'n-text / n-billboard',
-						fontSize: 3,
-						width: 100
-					}),
+					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-text / n-billboard', fontSize: 3, width: 100 }),
 					new altspaceutil.behaviors.NativeComponent('n-billboard')
 				);
 

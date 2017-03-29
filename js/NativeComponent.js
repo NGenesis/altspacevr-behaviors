@@ -223,6 +223,8 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			}
 		},
 		update: function() {
+			altspace.updateNativeComponent(this.component, this.type, this.data);
+
 			if(this.playHandlerType) {
 				this.component.removeEventListener(this.playHandlerType, this.playHandler);
 				this.playHandlerType = null;
@@ -241,7 +243,7 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			part: 'head',
 			side: 'center',
 			index: 0,
-			//userId: undefined// defaults to current user when omitted
+			userId: null // defaults to current user when omitted
 		}
 	},
 
@@ -255,6 +257,48 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 		config: {
 			sendUpdates: false
 		}
+	},
+
+	'n-layout-browser': {
+		data: {
+			url: 'about:blank',
+			isEnclosure: false
+		},
+		initComponent: function() {
+			this.data.is3d = this.data.isEnclosure; // Deprecated
+
+			var url = this.data.url;
+			if(url && !url.startsWith('http')) {
+				if(url.startsWith('/')) {
+					this.data.url = location.origin + url;
+				} else {
+					var currPath = location.pathname;
+					if(!currPath.endsWith('/')) currPath = location.pathname.split('/').slice(0, -1).join('/') + '/';
+					this.data.url = location.origin + currPath + url;
+				}
+			}
+
+			this.scene.userData.altspace = this.scene.userData.altspace || {};
+			this.scene.userData.altspace.initialized = true;
+		}
+	},
+
+	'n-portal': {
+		data: {
+			targetSpace: null, // defaults to current space when omited
+			targetPosition: { x: 0, y: 0, z: 0 },
+			targetQuaternion: { x: 0, y: 0, z: 0, w: 1 }
+		},
+		update: function() {
+			if(this.config.targetEntity) {
+				this.scene.updateMatrixWorld(true);
+				this.data.targetPosition = this.config.targetEntity.getWorldPosition();
+				var quaternion = this.config.targetEntity.getWorldQuaternion();
+				this.data.targetQuaternion = { x: quaternion.x, y: quaternion.y, z: quaternion.z, w: quaternion.w };
+			}
+
+			altspace.updateNativeComponent(this.component, this.type, this.data);
+		}
 	}
 };
 
@@ -264,11 +308,12 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 	this.defaults = altspaceutil.behaviors.NativeComponentDefaults[this.type];
 	this.config = Object.assign({ sendUpdates: true, recursiveMesh: false, recursive: false, useCollider: false, updateOnStaleData: true }, (this.defaults && this.defaults.config) ? JSON.parse(JSON.stringify(this.defaults.config)) : {}, _config);
 	this.data = Object.assign((this.defaults && this.defaults.data) ? JSON.parse(JSON.stringify(this.defaults.data)) : {}, _data);
-	if(this.defaults && this.defaults.initComponent) this.defaults.initComponent.bind(this)();
-	if(altspace.inClient && this.config.sendUpdates && this.config.updateOnStaleData) this.oldData = JSON.stringify(this.data);
 
-	this.awake = function(o) {
+	this.awake = function(o, s) {
+		this.scene = s;
 		this.component = this.object3d = o;
+
+		if(this.defaults && this.defaults.initComponent) this.defaults.initComponent.bind(this)();
 
 		if(!(this.component instanceof THREE.Mesh)) {
 			// Create Placeholder Mesh
@@ -282,10 +327,8 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 			this.component.userData.altspace.collider.enabled = false;
 		}
 
-		if(altspace.inClient) {
-			altspace.addNativeComponent(this.component, this.type);
-			if(this.config.sendUpdates) altspace.updateNativeComponent(this.component, this.type, this.data);
-		}
+		if(altspace.inClient) altspace.addNativeComponent(this.component, this.type);
+		this.update();
 
 		// Add Component To Descendants
 		if((this.config.recursive || this.config.recursiveMesh) && !this.parent) {
@@ -308,13 +351,19 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 			if(this.config.updateOnStaleData) {
 				var newData = JSON.stringify(this.data);
 				if(this.oldData !== newData) {
-					altspace.updateNativeComponent(this.component, this.type, this.data);
-					if(this.defaults && this.defaults.update) this.defaults.update.bind(this)();
+					if(this.defaults && this.defaults.update) {
+						this.defaults.update.bind(this)();
+					} else {
+						altspace.updateNativeComponent(this.component, this.type, this.data);
+					}
 					this.oldData = newData;
 				}
 			} else {
-				altspace.updateNativeComponent(this.component, this.type, this.data);
-				if(this.defaults && this.defaults.update) this.defaults.update.bind(this)();
+				if(this.defaults && this.defaults.update) {
+					this.defaults.update.bind(this)();
+				} else {
+					altspace.updateNativeComponent(this.component, this.type, this.data);
+				}
 			}
 		}
 	}
