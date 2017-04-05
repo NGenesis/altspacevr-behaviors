@@ -154,6 +154,18 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 						}
 					}
 				});
+
+				// Forward Events From Placeholder To Behavior Owner
+				if(this.placeholder) {
+					var forwardPlaceholderEvent = (function(event) {
+						this.object3d.dispatchEvent(event);
+					}).bind(this);
+					this.placeholder.addEventListener('container-count-changed', forwardPlaceholderEvent);
+					this.placeholder.addEventListener('container-empty', forwardPlaceholderEvent);
+					this.placeholder.addEventListener('container-full', forwardPlaceholderEvent);
+					this.placeholder.addEventListener('triggerenter', forwardPlaceholderEvent);
+					this.placeholder.addEventListener('triggerexit', forwardPlaceholderEvent);
+				}
 			}
 		}
 	},
@@ -187,7 +199,7 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			if(altspace.inClient && altspace._internal) {
 				var self = this;
 
-				// Handle Container Count Changes
+				// Handle Sound Loaded
 				altspace._internal.onClientEvent('NativeSoundLoadedEvent', function(meshId, count, oldCount) {
 					var object3d = altspace._internal.getObject3DById(meshId);
 					if(object3d && object3d === self.component) {
@@ -205,6 +217,16 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 						});
 					}
 				});
+			}
+
+			// Forward Events From Placeholder To Behavior Owner
+			if(this.placeholder) {
+				var forwardPlaceholderEvent = (function(event) {
+					this.object3d.dispatchEvent(event);
+				}).bind(this);
+				this.placeholder.addEventListener('n-sound-loaded', forwardPlaceholderEvent);
+				this.placeholder.addEventListener('sound-paused', forwardPlaceholderEvent);
+				this.placeholder.addEventListener('sound-played', forwardPlaceholderEvent);
 			}
 		},
 		callComponent: function(functionName, functionArgs) {
@@ -265,8 +287,6 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			isEnclosure: false
 		},
 		initComponent: function() {
-			this.data.is3d = this.data.isEnclosure; // Deprecated
-
 			var url = this.data.url;
 			if(url && !url.startsWith('http')) {
 				if(url.startsWith('/')) {
@@ -306,20 +326,28 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 	this.type = _type || 'NativeComponent';
 
 	this.defaults = altspaceutil.behaviors.NativeComponentDefaults[this.type];
-	this.config = Object.assign({ sendUpdates: true, recursiveMesh: false, recursive: false, useCollider: false, updateOnStaleData: true }, (this.defaults && this.defaults.config) ? JSON.parse(JSON.stringify(this.defaults.config)) : {}, _config);
+	this.config = Object.assign({ sendUpdates: true, recursiveMesh: false, recursive: false, useCollider: false, updateOnStaleData: true, sharedComponent: true }, (this.defaults && this.defaults.config) ? JSON.parse(JSON.stringify(this.defaults.config)) : {}, _config);
 	this.data = Object.assign((this.defaults && this.defaults.data) ? JSON.parse(JSON.stringify(this.defaults.data)) : {}, _data);
 
 	this.awake = function(o, s) {
 		this.scene = s;
 		this.component = this.object3d = o;
 
-		if(this.defaults && this.defaults.initComponent) this.defaults.initComponent.bind(this)();
-
 		if(!(this.component instanceof THREE.Mesh)) {
 			// Create Placeholder Mesh
-			this.component = this.placeholder = new THREE.Mesh(new THREE.BoxBufferGeometry(0.001, 0.001, 0.001), Object.assign(new THREE.MeshBasicMaterial(), { visible: false }));
+			if(this.config.sharedComponent) {
+				this.sharedData = this.object3d.userData._sharedNativeComponent = this.object3d.userData._sharedNativeComponent || {};
+				this.sharedData.placeholder = this.sharedData.placeholder || new THREE.Mesh(new THREE.BoxBufferGeometry(0.001, 0.001, 0.001), Object.assign(new THREE.MeshBasicMaterial(), { visible: false }));
+				this.sharedData.behaviors = this.sharedData.behaviors || [];
+				this.sharedData.behaviors.push(this);
+				if(!this.sharedData.placeholder.parent) this.object3d.add(this.sharedData.placeholder);
+			}
+
+			this.component = this.placeholder = this.sharedData.placeholder || new THREE.Mesh(new THREE.BoxBufferGeometry(0.001, 0.001, 0.001), Object.assign(new THREE.MeshBasicMaterial(), { visible: false }));
 			this.object3d.add(this.placeholder);
 		}
+
+		if(this.defaults && this.defaults.initComponent) this.defaults.initComponent.bind(this)();
 
 		if(!this.config.useCollider) {
 			this.component.userData.altspace = this.component.userData.altspace || {};
@@ -393,6 +421,20 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 		}
 
 		if(altspace.inClient) altspace.removeNativeComponent(this.component, this.type);
-		if(this.placeholder) this.object3d.remove(this.placeholder);
+
+		if(this.config.sharedComponent && this.sharedData) {
+			// Decrease Reference Count
+			var index = this.sharedData.behaviors.indexOf(this);
+			if(index >= 0) this.sharedData.behaviors.splice(index, 1);
+
+			// Remove Shared Component Once All References Are Removed
+			if(this.sharedData.behaviors.length <= 0) {
+				if(this.sharedData.placeholder.parent) this.sharedData.placeholder.parent.remove(this.sharedData.placeholder);
+				delete this.object3d.userData._sharedNativeComponent;
+			}
+		} else if(this.placeholder) {
+			// Remove Standalone Placeholder
+			this.object3d.remove(this.placeholder);
+		}
 	}
 }
