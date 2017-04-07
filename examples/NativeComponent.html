@@ -68,7 +68,7 @@
 				);
 
 				// n-spawner
-				var nspawner = new THREE.Group();
+				var nspawner = new THREE.Object3D();
 				nspawner.position.set(-10, 0, 5);
 				sim.scene.add(nspawner);
 				nspawner.addBehaviors(
@@ -77,7 +77,7 @@
 				);
 
 				// n-object
-				var nobject = new THREE.Group();
+				var nobject = new THREE.Object3D();
 				nobject.position.set(-5, 0, 5);
 				sim.scene.add(nobject);
 				nobject.addBehaviors(
@@ -112,7 +112,7 @@
 				);
 
 				// n-sound
-				var nsound = new THREE.Group();
+				var nsound = new THREE.Object3D();
 				nsound.position.set(5, 0, 5);
 				sim.scene.add(nsound);
 				nsound.addBehaviors(
@@ -132,16 +132,16 @@
 
 					var nsoundcomponent = nsound.getBehaviorByType('n-sound');
 
-					var nsoundmutebutton = new THREE.Mesh(new THREE.BoxBufferGeometry(0.4, 0.4, 0.4), new THREE.MeshBasicMaterial({ color: 0x0000FF }));
+					var nsoundmutebutton = new THREE.Mesh(new THREE.BoxBufferGeometry(0.4, 0.4, 0.4), new THREE.MeshBasicMaterial({ color: 0x0000ff }));
 					nsoundmutebutton.position.set(-0.45, 0.5, 0);
 					nsoundmutebutton.addBehavior(new altspaceutil.behaviors.NativeComponent('n-text', { text: 'Mute', height: 0.7, fontSize: 1, verticalAlign: 'top' }, { useCollider: true }));
 					nsoundmutebutton.addEventListener('cursorup', function(event) {
 						nsoundcomponent.data.volume = nsoundcomponent.data.volume > 0 ? 0 : 0.5;
-						nsoundmutebutton.material.color.set(nsoundcomponent.data.volume > 0 ? 0x0000FF : 0xFF0000);
+						nsoundmutebutton.material.color.set(nsoundcomponent.data.volume > 0 ? 0x0000ff : 0xff0000);
 					});
 					nsound.add(nsoundmutebutton);
 
-					var nsoundplaybutton = new THREE.Mesh(new THREE.BoxBufferGeometry(0.4, 0.4, 0.4), new THREE.MeshBasicMaterial({ color: 0x0000FF }));
+					var nsoundplaybutton = new THREE.Mesh(new THREE.BoxBufferGeometry(0.4, 0.4, 0.4), new THREE.MeshBasicMaterial({ color: 0x0000ff }));
 					nsoundplaybutton.position.set(0, 0.5, 0);
 					nsoundplaybutton.addBehavior(new altspaceutil.behaviors.NativeComponent('n-text', { text: 'Play', height: 0.7, fontSize: 1, verticalAlign: 'top' }, { useCollider: true }));
 					nsoundplaybutton.addEventListener('cursorup', function(event) {
@@ -149,7 +149,7 @@
 					});
 					nsound.add(nsoundplaybutton);
 
-					var nsoundstopbutton = new THREE.Mesh(new THREE.BoxBufferGeometry(0.4, 0.4, 0.4), new THREE.MeshBasicMaterial({ color: 0x0000FF }));
+					var nsoundstopbutton = new THREE.Mesh(new THREE.BoxBufferGeometry(0.4, 0.4, 0.4), new THREE.MeshBasicMaterial({ color: 0x0000ff }));
 					nsoundstopbutton.position.set(0.45, 0.5, 0);
 					nsoundstopbutton.addBehavior(new altspaceutil.behaviors.NativeComponent('n-text', { text: 'Stop', height: 0.7, fontSize: 1, verticalAlign: 'top' }, { useCollider: true }));
 					nsoundstopbutton.addEventListener('cursorup', function(event) {
@@ -168,7 +168,7 @@
 				});
 
 				// n-cockpit-parent
-				var ncockpitparent = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), new THREE.MeshBasicMaterial({ color: 0xFF0000, transparent: true, opacity: 0.3, side: THREE.DoubleSide }));
+				var ncockpitparent = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.3, side: THREE.DoubleSide }));
 				ncockpitparent.position.set(-2.5, 0, -4);
 				sim.scene.add(ncockpitparent);
 				ncockpitparent.addBehaviors(
@@ -177,7 +177,7 @@
 				);
 
 				// n-skeleton-parent
-				var nskeletonparent = new THREE.Mesh(new THREE.BoxBufferGeometry(0.2, 0.2, 0.2), new THREE.MeshBasicMaterial({ color: 0xFF0000, transparent: true, opacity: 0.3 }));
+				var nskeletonparent = new THREE.Mesh(new THREE.BoxBufferGeometry(0.2, 0.2, 0.2), new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.3 }));
 				nskeletonparent.position.set(0, 0.3, 0);
 				sim.scene.add(nskeletonparent);
 				nskeletonparent.addBehaviors(
@@ -186,7 +186,7 @@
 				);
 
 				// n-portal (Space)
-				var nportal = new THREE.Group();
+				var nportal = new THREE.Object3D();
 				nportal.position.set(5, 0, 10);
 				sim.scene.add(nportal);
 				nportal.addBehaviors(
@@ -195,7 +195,7 @@
 				);
 
 				// n-portal (Position)
-				var nportal = new THREE.Group();
+				var nportal = new THREE.Object3D();
 				nportal.position.set(0, 0, 10);
 				sim.scene.add(nportal);
 				nportal.addBehaviors(
@@ -204,13 +204,15 @@
 				);
 
 				// n-text / n-billboard
-				var ntext = new THREE.Group();
+				var ntext = new THREE.Object3D();
 				ntext.position.set(-15, 2, 10);
 				sim.scene.add(ntext);
 				ntext.addBehaviors(
 					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-text / n-billboard', fontSize: 3, width: 100 }),
 					new altspaceutil.behaviors.NativeComponent('n-billboard'),
 					new (function NativeTextUpdate() {
+						this.type = 'NativeTextUpdate';
+
 						this.awake = function(o) {
 							// Retrieve Component From Object
 							this.nTextComponent = o.getBehaviorByType('n-text');

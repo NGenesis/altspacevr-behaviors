@@ -334,6 +334,16 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 		this.component = this.object3d = o;
 
 		if(!(this.component instanceof THREE.Mesh)) {
+			// Cannot Have Multiple Components Of The Same Type Per Mesh, Create New Placeholder For Subsequent Components
+			if(this.config.sharedComponent && this.object3d.userData._sharedNativeComponent) {
+				for(var behavior of this.object3d.userData._sharedNativeComponent.behaviors) {
+					if(behavior !== this && behavior.type === this.type) {
+						this.config.sharedComponent = false;
+						break;
+					}
+				}
+			}
+
 			// Create Placeholder Mesh
 			if(this.config.sharedComponent) {
 				this.sharedData = this.object3d.userData._sharedNativeComponent = this.object3d.userData._sharedNativeComponent || {};
@@ -343,7 +353,7 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 				if(!this.sharedData.placeholder.parent) this.object3d.add(this.sharedData.placeholder);
 			}
 
-			this.component = this.placeholder = this.sharedData.placeholder || new THREE.Mesh(new THREE.BoxBufferGeometry(0.001, 0.001, 0.001), Object.assign(new THREE.MeshBasicMaterial(), { visible: false }));
+			this.component = this.placeholder = (this.sharedData && this.sharedData.placeholder) ? this.sharedData.placeholder : new THREE.Mesh(new THREE.BoxBufferGeometry(0.001, 0.001, 0.001), Object.assign(new THREE.MeshBasicMaterial(), { visible: false }));
 			this.object3d.add(this.placeholder);
 		}
 
