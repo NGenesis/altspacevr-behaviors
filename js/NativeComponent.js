@@ -3,6 +3,37 @@
 window.altspaceutil = window.altspaceutil || {};
 altspaceutil.behaviors = altspaceutil.behaviors || {};
 
+// Native Event Helpers
+altspaceutil.addNativeEventListener = function(name, callback) {
+	return (altspace.inClient && altspace._internal && altspace._internal.couiEngine) ? altspace._internal.couiEngine.on(name, callback) : null;
+}
+
+altspaceutil.removeNativeEventListener = function(name, callback) {
+	if(altspace.inClient && altspace._internal && altspace._internal.couiEngine) altspace._internal.couiEngine.off(name, callback);
+}
+
+altspaceutil.getObject3DById = function(meshId) {
+	return (altspace.inClient && altspace._internal) ? altspace._internal.getObject3DById(meshId) : null;
+}
+
+altspaceutil.getThreeJSScene = function(meshId) {
+	return (altspace.inClient && altspace._internal) ? altspace._internal.getThreeJSScene() : null;
+}
+
+altspaceutil.getAbsoluteURL = function(url) {
+	if(url && !url.startsWith('http')) {
+		if(url.startsWith('/')) {
+			url = location.origin + url;
+		} else {
+			var currPath = location.pathname;
+			if(!currPath.endsWith('/')) currPath = location.pathname.split('/').slice(0, -1).join('/') + '/';
+			url = location.origin + currPath + url;
+		}
+	}
+
+	return url;
+}
+
 altspaceutil.behaviors.NativeComponentDefaults = {
 	'n-object': {
 		data: {
@@ -27,20 +58,14 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 		}
 	},
 
-	'n-collider': {
-		data: {
-			center: { 'x': 0, 'y': 0, 'z': 0 },
-			type: 'environment'
-		}
-	},
-
 	'n-sphere-collider': {
 		data: {
 			isTrigger: false,
 			center: { 'x': 0, 'y': 0, 'z': 0 },
 			radius: 0,
 			type: 'environment'
-		}
+		},
+		initComponent: initCollisionEventHandler
 	},
 
 	'n-box-collider': {
@@ -49,7 +74,8 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			center: { 'x': 0, 'y': 0, 'z': 0 },
 			size: { 'x': 0, 'y': 0, 'z': 0 },
 			type: 'environment'
-		}
+		},
+		initComponent: initCollisionEventHandler
 	},
 
 	'n-capsule-collider': {
@@ -60,7 +86,8 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			height: 0,
 			direction: 'y',
 			type: 'environment'
-		}
+		},
+		initComponent: initCollisionEventHandler
 	},
 
 	'n-mesh-collider': {
@@ -70,8 +97,10 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			type: 'environment'
 		},
 		config: {
-			recursiveMesh: true
-		}
+			recursiveMesh: true,
+			inheritParentData: true
+		},
+		initComponent: initCollisionEventHandler
 	},
 
 	'n-container': {
@@ -79,14 +108,13 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			capacity: 4
 		},
 		initComponent: function() {
-			var self = this;
-			self.count = 0;
+			this.count = 0;
 
-			if(altspace.inClient && altspace._internal) {
+			if(altspace.inClient) {
 				// Handle Container Count Changes
-				altspace._internal.onClientEvent('NativeContainerCountChanged', function(meshId, count, oldCount) {
-					var object3d = altspace._internal.getObject3DById(meshId);
-					if(object3d && object3d === self.component) {
+				this.nativeEvents['NativeContainerCountChanged'] = altspaceutil.addNativeEventListener('NativeContainerCountChanged', (function(meshId, count, oldCount) {
+					var object3d = altspaceutil.getObject3DById(meshId);
+					if(object3d && object3d === this.component) {
 						/**
 						* The number of objects in the n-container.
 						* @instance
@@ -94,7 +122,7 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 						* @readonly
 						* @memberof module:altspace/utilities/behaviors.NativeComponent
 						*/
-						self.count = count;
+						this.count = count;
 
 						/**
 						* Fires an event every time an object enters or leaves the bounds of the n-container.
@@ -115,15 +143,15 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 							target: object3d
 						});
 					}
-				});
+				}).bind(this));
 
 				// Handle Container State Changes
-				altspace._internal.onClientEvent('NativeContainerStateChanged', function(meshId, stateName, didGain) {
-					var object3d = altspace._internal.getObject3DById(meshId);
-					if(object3d && object3d === self.component) {
-						var oldState = self.state;
+				this.nativeEvents['NativeContainerStateChanged'] = altspaceutil.addNativeEventListener('NativeContainerStateChanged', (function(meshId, stateName, didGain) {
+					var object3d = altspaceutil.getObject3DById(meshId);
+					if(object3d && object3d === this.component) {
+						var oldState = this.state;
 
-						self.state = didGain ? stateName : undefined;
+						this.state = didGain ? stateName : undefined;
 						object3d.dispatchEvent({
 							type: didGain ? 'stateadded' : 'stateremoved',
 							detail: { state: stateName },
@@ -145,7 +173,7 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 						* @property {THREE.Object3D} target - The object which emitted the event.
 						* @memberof module:altspace/utilities/behaviors.NativeComponent
 						*/
-						if(self.state !== oldState && self.state) {
+						if(this.state !== oldState && this.state) {
 							object3d.dispatchEvent({
 								type: stateName,
 								bubbles: true,
@@ -153,19 +181,19 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 							});
 						}
 					}
-				});
+				}).bind(this));
+			}
 
-				// Forward Events From Placeholder To Behavior Owner
-				if(this.placeholder) {
-					var forwardPlaceholderEvent = (function(event) {
-						this.object3d.dispatchEvent(event);
-					}).bind(this);
-					this.placeholder.addEventListener('container-count-changed', forwardPlaceholderEvent);
-					this.placeholder.addEventListener('container-empty', forwardPlaceholderEvent);
-					this.placeholder.addEventListener('container-full', forwardPlaceholderEvent);
-					this.placeholder.addEventListener('triggerenter', forwardPlaceholderEvent);
-					this.placeholder.addEventListener('triggerexit', forwardPlaceholderEvent);
-				}
+			// Forward Events From Placeholder To Behavior Owner
+			if(this.placeholder) {
+				var forwardPlaceholderEvent = (function(event) {
+					this.object3d.dispatchEvent(event);
+				}).bind(this);
+				this.placeholder.addEventListener('container-count-changed', forwardPlaceholderEvent);
+				this.placeholder.addEventListener('container-empty', forwardPlaceholderEvent);
+				this.placeholder.addEventListener('container-full', forwardPlaceholderEvent);
+				this.placeholder.addEventListener('triggerenter', forwardPlaceholderEvent);
+				this.placeholder.addEventListener('triggerexit', forwardPlaceholderEvent);
 			}
 		}
 	},
@@ -185,24 +213,13 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			maxDistance: 12
 		},
 		initComponent: function() {
-			var src = this.data.src;
-			if(src && !src.startsWith('http')) {
-				if(src.startsWith('/')) {
-					this.data.src = location.origin + src;
-				} else {
-					var currPath = location.pathname;
-					if(!currPath.endsWith('/')) currPath = location.pathname.split('/').slice(0, -1).join('/') + '/';
-					this.data.src = location.origin + currPath + src;
-				}
-			}
+			this.data.src = altspaceutil.getAbsoluteURL(this.data.src);
 
-			if(altspace.inClient && altspace._internal) {
-				var self = this;
-
+			if(altspace.inClient) {
 				// Handle Sound Loaded
-				altspace._internal.onClientEvent('NativeSoundLoadedEvent', function(meshId, count, oldCount) {
-					var object3d = altspace._internal.getObject3DById(meshId);
-					if(object3d && object3d === self.component) {
+				this.nativeEvents['NativeSoundLoadedEvent'] = altspaceutil.addNativeEventListener('NativeSoundLoadedEvent', (function(meshId, count, oldCount) {
+					var object3d = altspaceutil.getObject3DById(meshId);
+					if(object3d && object3d === this.component) {
 						/**
 						* Fires an event once the n-sound has finished loading.
 						*
@@ -216,7 +233,7 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 							target: object3d
 						});
 					}
-				});
+				}).bind(this));
 			}
 
 			// Forward Events From Placeholder To Behavior Owner
@@ -266,6 +283,10 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			side: 'center',
 			index: 0,
 			userId: null // defaults to current user when omitted
+		},
+		config: {
+			recursiveMesh: true,
+			inheritParentData: true
 		}
 	},
 
@@ -287,17 +308,7 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			isEnclosure: false
 		},
 		initComponent: function() {
-			var url = this.data.url;
-			if(url && !url.startsWith('http')) {
-				if(url.startsWith('/')) {
-					this.data.url = location.origin + url;
-				} else {
-					var currPath = location.pathname;
-					if(!currPath.endsWith('/')) currPath = location.pathname.split('/').slice(0, -1).join('/') + '/';
-					this.data.url = location.origin + currPath + url;
-				}
-			}
-
+			this.data.url = altspaceutil.getAbsoluteURL(this.data.url);
 			this.scene.userData.altspace = this.scene.userData.altspace || {};
 			this.scene.userData.altspace.initialized = true;
 		}
@@ -319,14 +330,131 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 
 			altspace.updateNativeComponent(this.component, this.type, this.data);
 		}
+	},
+
+	'n-gltf': {
+		data: {
+			url: ''
+		},
+		initComponent: function() {
+			this.data.url = altspaceutil.getAbsoluteURL(this.data.url);
+		}
+	},
+
+	'n-rigidbody': {
+		data: {
+			mass: 1,
+			drag: 0,
+			angularDrag: 0.05,
+			useGravity: true,
+			isKinematic: false,
+			positionConstraints: [false, false, false],
+			rotationConstraints: [false, false, false],
+		},
+		initComponent: function() {
+			if(altspace.inClient) {
+				// Handle Transform Update Events
+				/*var tempInverseMatrix, pooledWorldPosition, pooledWorldQuaternion;
+				this.nativeEvents['NativeTransformUpdateEvent'] = altspaceutil.addNativeEventListener('NativeTransformUpdateEvent', (function(meshId, positionX, positionY, positionZ, rotationX, rotationY, rotationZ, rotationW) {
+					var object3d = altspaceutil.getObject3DById(meshId);
+					if(object3d && object3d === this.component) {
+						tempInverseMatrix = tempInverseMatrix || new THREE.Matrix4();
+						tempInverseMatrix.getInverse(altspaceutil.getThreeJSScene().matrix);
+
+						pooledWorldPosition = pooledWorldPosition || new THREE.Vector3();
+						pooledWorldPosition.set(positionX, positionY, positionZ);
+						pooledWorldPosition.applyMatrix4(tempInverseMatrix);
+
+						pooledWorldQuaternion = pooledWorldQuaternion || new THREE.Quaternion();
+						pooledWorldQuaternion.set(rotationX, rotationY, rotationZ, rotationW);
+						//TODO: This function doesn't exist. Not taking scene rotation into account at the moment because of this.
+						//Possibly compose the position and rotation into a single Matrix4 and apply the inverse scene matrix and then decompose the matrix.
+						//pooledWorldQuaternion.applyMatrix4(tempInverseMatrix);
+
+						object3d.dispatchEvent({
+							type: 'native-transform-update',
+							worldPosition: pooledWorldPosition,
+							worldQuaternion: pooledWorldQuaternion,
+							bubbles: true,
+							target: object3d
+						});
+					}
+				}).bind(this));*/
+
+				// Forward Events From Placeholder To Behavior Owner
+				if(this.placeholder) {
+					var forwardPlaceholderEvent = (function(event) {
+						this.object3d.dispatchEvent(event);
+					}).bind(this);
+					this.placeholder.addEventListener('native-transform-update', forwardPlaceholderEvent);
+				}
+			}
+		}
 	}
 };
+
+function initCollisionEventHandler() {
+	if(altspace.inClient && this.placeholder) {
+		this.nativeEvents['NativeCollisionEvent'] = altspaceutil.addNativeEventListener('NativeCollisionEvent', (function(type, thisMeshId, otherMeshId, relativeVelocityX, relativeVelocityY, relativeVelocityZ, normalX, normalY, normalZ, pointX, pointY, pointZ) {
+			var thisObject3D = altspaceutil.getObject3DById(thisMeshId), otherObject3D = altspaceutil.getObject3DById(otherMeshId);
+			if(thisObject3D === this.placeholder || otherObject3D === this.placeholder) {
+				var event = {
+					type: type,
+					bubbles: true,
+					target: (thisObject3D === this.placeholder) ? this.object3d : thisObject3D,
+					other: (otherObject3D === this.placeholder) ? this.object3d : otherObject3D,
+					relativeVelocity: {
+						x: relativeVelocityX,
+						y: relativeVelocityY,
+						z: relativeVelocityZ
+					}
+				};
+
+				//TODO BUG: the position needs to be transformed by the scene
+				//Some collision events (such as exit) seem to sometimes have no contact points
+				if (normalX) {
+					event.point = {
+						position: {
+							x: pointX,
+							y: pointY,
+							z: pointZ
+						},
+						normal: {
+							x: normalX,
+							y: normalY,
+							z: normalZ
+						}
+					}
+				}
+
+				this.object3d.dispatchEvent(event);
+				console.log(event);
+			}
+		}).bind(this));
+
+		this.nativeEvents['NativeTriggerEvent'] = altspaceutil.addNativeEventListener('NativeTriggerEvent', (function(type, thisMeshId, otherMeshId) {
+			var thisObject3D = altspaceutil.getObject3DById(thisMeshId), otherObject3D = altspaceutil.getObject3DById(otherMeshId);
+			if(thisObject3D === this.placeholder || otherObject3D === this.placeholder) {
+				var event = {
+					type: type,
+					bubbles: true,
+					target: (thisObject3D === this.placeholder) ? this.object3d : thisObject3D,
+					other: (otherObject3D === this.placeholder) ? this.object3d : otherObject3D,
+				};
+
+				this.object3d.dispatchEvent(event);
+				console.log(event);
+			}
+		}).bind(this));
+	}
+}
 
 altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 	this.type = _type || 'NativeComponent';
 
+	this.nativeEvents = {};
 	this.defaults = altspaceutil.behaviors.NativeComponentDefaults[this.type];
-	this.config = Object.assign({ sendUpdates: true, recursiveMesh: false, recursive: false, useCollider: false, updateOnStaleData: true, sharedComponent: true }, (this.defaults && this.defaults.config) ? JSON.parse(JSON.stringify(this.defaults.config)) : {}, _config);
+	this.config = Object.assign({ sendUpdates: true, recursiveMesh: false, recursive: false, useCollider: false, updateOnStaleData: true, sharedComponent: true, inheritParentData: false }, (this.defaults && this.defaults.config) ? JSON.parse(JSON.stringify(this.defaults.config)) : {}, _config);
 	this.data = Object.assign((this.defaults && this.defaults.data) ? JSON.parse(JSON.stringify(this.defaults.data)) : {}, _data);
 
 	this.awake = function(o, s) {
@@ -365,11 +493,27 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 			this.component.userData.altspace.collider.enabled = false;
 		}
 
+		// Link Children To Nearest Parent When Component Data Is Inherited
+		var linkedParent = false;
+		if(this.config.inheritParentData && !this.parent) {
+			var parent = this.object3d.parent;
+			while(parent) {
+				var behavior = parent.getBehaviorByType(this.type);
+				if(behavior) {
+					this.parent = behavior.parent || behavior;
+					linkedParent = true;
+					break;
+				}
+
+				parent = parent.parent;
+			}
+		}
+
 		if(altspace.inClient) altspace.addNativeComponent(this.component, this.type);
 		this.update();
 
 		// Add Component To Descendants
-		if((this.config.recursive || this.config.recursiveMesh) && !this.parent) {
+		if((this.config.recursive || this.config.recursiveMesh) && (!this.parent || linkedParent)) {
 			this.object3d.traverse((function(child) {
 				if(child !== this.object3d && child !== this.placeholder && (this.config.recursive || (this.config.recursiveMesh && child instanceof THREE.Mesh))) {
 					child.addBehavior(Object.assign(new altspaceutil.behaviors.NativeComponent(this.type, this.data, this.config), { parent: this }));
@@ -383,6 +527,18 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 			// Placeholder Inherits Object Properties
 			if(this.object3d.userData.altspace) this.placeholder.userData.altspace = this.object3d.userData.altspace;
 			this.placeholder.visible = this.object3d.visible;
+		}
+
+		// Children Inherit Parent's Data
+		if(this.parent && this.config.inheritParentData) this.data = Object.assign({}, this.parent.data);
+
+		// Recursively Applied Components Are Automatically Added To Children
+		if(!this.parent && (this.config.recursive || this.config.recursiveMesh)) {
+			this.object3d.traverse((function(child) {
+				if(child !== this.object3d && child !== this.placeholder && (this.config.recursive || (this.config.recursiveMesh && child instanceof THREE.Mesh))) {
+					if(!child.getBehaviorByType(this.type)) child.addBehavior(Object.assign(new altspaceutil.behaviors.NativeComponent(this.type, this.data, this.config), { parent: this }));
+				}
+			}).bind(this));
 		}
 
 		if(altspace.inClient && this.config.sendUpdates) {
@@ -407,7 +563,7 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 	}
 
 	this.callComponent = function(functionName, functionArgs) {
-		altspace.callNativeComponent(this.component, this.type, functionName, functionArgs);
+		if(altspace.inClient) altspace.callNativeComponent(this.component, this.type, functionName, functionArgs);
 		if(this.defaults && this.defaults.callComponent) this.defaults.callComponent.bind(this)(functionName, functionArgs);
 
 		if(this.config.recursive || this.config.recursiveMesh && !this.parent) {
@@ -430,6 +586,10 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 			}).bind(this));
 		}
 
+		for(var nativeEvent in this.nativeEvents) {
+			if(this.nativeEvents.hasOwnProperty(nativeEvent)) this.nativeEvents[nativeEvent].clear();
+		}
+
 		if(altspace.inClient) altspace.removeNativeComponent(this.component, this.type);
 
 		if(this.config.sharedComponent && this.sharedData) {
@@ -446,5 +606,64 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 			// Remove Standalone Placeholder
 			this.object3d.remove(this.placeholder);
 		}
+	}
+}
+
+/**
+ * The NativeComponentSync behavior syncs an object's native component data.  
+ * **Note:** NativeComponentSync must be used in conjunction with 
+ * [SceneSync]{@link module:altspace/utilities/behaviors.SceneSync}, 
+ * [Object3DSync]{@link module:altspace/utilities/behaviors.Object3DSync} and 
+ * a [NativeComponent]{@link module:altspaceutil/behaviors.NativeComponent} of
+ * the same type specified for NativeComponentSync.
+ *
+ * @class NativeComponentSync
+ * @memberof module:altspaceutil/behaviors
+ **/
+altspaceutil.behaviors.NativeComponentSync = function(_type, _config) {
+	this.componentType = _type || 'NativeComponent';
+	this.type = _type ? ('sync-' + _type) : 'NativeComponentSync';
+	this.config = _config || {};
+
+	this.awake = function(o) {
+		this.object3d = o;
+		this.component = this.object3d.getBehaviorByType(this.componentType);
+		this.sync = this.config.syncRef || this.object3d.getBehaviorByType('Object3DSync');
+		this.dataRef = this.sync.dataRef.child(this.componentType).child('data');
+
+		this.dataRef.on('value', (function(snapshot) {
+			if(this.sync.isMine) return;
+
+			var data = snapshot.val();
+			if(!data) return;
+
+			if(!this.component) {
+				this.component = this.object3d.getBehaviorByType(this.componentType);
+
+				if(!this.component) {
+					this.component = new altspaceutil.behaviors.NativeComponent(this.componentType, data);
+					this.object3d.addBehavior(this.component);
+					return;
+				}
+			}
+
+			this.component.data = data;
+		}).bind(this));
+
+		this.intervalId = setInterval(this.update.bind(this), this.sync.autoSendRateMS);
+	}
+
+	this.update = function() {
+		if(!this.sync.isMine || !this.component) return;
+
+		var newData = JSON.stringify(this.component.data);
+		if(this.oldData !== newData) {
+			this.dataRef.set(this.component.data);
+			this.oldData = newData;
+		}
+	}
+
+	this.dispose = function() {
+		if(this.intervalId) clearInterval(this.intervalId);
 	}
 }

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang=en>
+	<head>
+		<meta charset=utf-8>
+		<meta name="author" content="Genesis">
+		<title>NativeComponentSync Behavior Example</title>
+		<script src="https://cdn.rawgit.com/mrdoob/three.js/r85/build/three.min.js"></script>
+		<script src="https://cdn.rawgit.com/AltspaceVR/AltspaceSDK/v2.4.4/dist/altspace.min.js"></script>
+		<script src="../js/NativeComponent.min.js"></script>
+	</head>
+	<body>
+		<script>
+			var sim = new altspace.utilities.Simulation();
+			var handObject, userId;
+
+			altspace.getEnclosure().then(function(enclosure) {
+				enclosure.requestFullspace().then(function() {
+					altspace.getUser().then(function(user) {
+						altspace.utilities.sync.connect({ appId: 'NativeComponentSync', authorId: 'Genesis' }).then(function(connection) {
+							userId = user.userId;
+							sim.scene.addBehavior(new altspace.utilities.behaviors.SceneSync(connection.instance, { instantiators: { 'createHandObject': createHandObject }, ready: onSyncReady }));
+						});
+					});
+				});
+			});
+
+			function onSyncReady() {
+				// Add a button to toggle box between left and right hand
+				var togglebutton = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.3, side: THREE.DoubleSide }));
+				togglebutton.position.set(-1.5, 0, -2.5);
+
+				togglebutton.addEventListener('cursordown', function(event) {
+					if(handObject) {
+						var component = handObject.getBehaviorByType('n-skeleton-parent');
+						if(component) component.data.side = component.data.side === 'right' ? 'left' : 'right';
+
+						var component = handObject.getBehaviorByType('n-text');
+						if(component) component.data.text = component.data.text === 'right' ? 'left' : 'right';
+					}
+				});
+
+				togglebutton.addBehaviors(
+					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'Toggle Left/Right Hand', height: 2, fontSize: 2, verticalAlign: 'top' }, { useCollider: true }),
+					new altspaceutil.behaviors.NativeComponent('n-cockpit-parent', {}, { useCollider: true })
+				);
+
+				sim.scene.add(togglebutton);
+
+				// Create a synced object that is attached to your avatar's hand
+				handObject = sim.scene.getBehaviorByType('SceneSync').instantiate('createHandObject', { ownerUserId: userId, part: 'hand', side: 'left' }, true);
+			}
+
+			function createHandObject(initData) {
+				var obj = new THREE.Mesh(new THREE.BoxBufferGeometry(0.2, 0.2, 0.2), new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.3 }));
+				sim.scene.add(obj);
+
+				obj.addBehaviors(
+					new altspace.utilities.behaviors.Object3DSync(),
+
+					// sync-n-skeleton-parent
+					new altspaceutil.behaviors.NativeComponent('n-skeleton-parent', { part: initData.part, side: initData.side, userId: initData.ownerUserId }),
+					new altspaceutil.behaviors.NativeComponentSync('n-skeleton-parent'),
+
+					// sync-n-text
+					new altspaceutil.behaviors.NativeComponent('n-text', { text: initData.side, height: 0.4, fontSize: 1, verticalAlign: 'top' }),
+					new altspaceutil.behaviors.NativeComponentSync('n-text')
+				);
+
+				return obj;
+			}
+		</script>
+	</body>
+</html>

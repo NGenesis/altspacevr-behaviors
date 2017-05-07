@@ -4,9 +4,9 @@
 		<meta charset=utf-8>
 		<meta name="author" content="Genesis">
 		<title>NativeComponent Behavior Example</title>
-		<script src="https://cdn.rawgit.com/mrdoob/three.js/r84/build/three.min.js"></script>
-		<script src="https://cdn.rawgit.com/AltspaceVR/AltspaceSDK/v2.2.0/dist/altspace.min.js"></script>
-		<script src="../js/NativeComponent.js"></script>
+		<script src="https://cdn.rawgit.com/mrdoob/three.js/r85/build/three.min.js"></script>
+		<script src="https://cdn.rawgit.com/AltspaceVR/AltspaceSDK/v2.4.4/dist/altspace.min.js"></script>
+		<script src="../js/NativeComponent.min.js"></script>
 	</head>
 	<body>
 		<script>
@@ -16,7 +16,7 @@
 			enclosure.requestFullspace().then(function() {
 				// n-layout-browser (3D Enclosure)
 				var nlayoutbrowser = new THREE.Mesh(new THREE.BoxBufferGeometry(5, 5, 5), Object.assign(new THREE.MeshBasicMaterial(), { visible: false }));
-				nlayoutbrowser.position.set(15, 0, -15);
+				nlayoutbrowser.position.set(15, 2.5, -15);
 				nlayoutbrowser.scale.set(5, 5, 5);
 				sim.scene.add(nlayoutbrowser);
 				nlayoutbrowser.addBehaviors(
@@ -26,7 +26,7 @@
 
 				// n-layout-browser (2D Enclosure)
 				var nlayoutbrowser = new THREE.Mesh(new THREE.BoxBufferGeometry(5, 5, 5), Object.assign(new THREE.MeshBasicMaterial({ color: 0xccdd33, transparent: true, opacity: 0.2 }), { visible: false }));
-				nlayoutbrowser.position.set(-15, 0, -15);
+				nlayoutbrowser.position.set(-15, 2.5, -15);
 				nlayoutbrowser.scale.set(5, 5, 5);
 				sim.scene.add(nlayoutbrowser);
 				nlayoutbrowser.addBehaviors(
@@ -36,13 +36,13 @@
 
 				// n-sphere-collider
 				var nspherecollider = new THREE.Mesh(new THREE.SphereBufferGeometry(1, 8, 8), new THREE.MeshBasicMaterial({ color: 0x00ff00 }));
-				nspherecollider.position.set(-10, 0, 0);
+				nspherecollider.position.set(-10, 1, 0);
 				sim.scene.add(nspherecollider);
 				nspherecollider.addBehaviors(new altspaceutil.behaviors.NativeComponent('n-sphere-collider', { radius: 1 }), new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-sphere-collider', height: 4, fontSize: 4, verticalAlign: 'top' }));
 
 				// n-box-collider
 				var nboxcollider = new THREE.Mesh(new THREE.BoxBufferGeometry(2, 2, 2), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
-				nboxcollider.position.set(-5, 0, 0);
+				nboxcollider.position.set(-5, 1, 0);
 				sim.scene.add(nboxcollider);
 				nboxcollider.addBehaviors(
 					new altspaceutil.behaviors.NativeComponent('n-box-collider', { size: { x: 2, y: 2, z: 2 } }),
@@ -50,17 +50,29 @@
 				);
 
 				// n-capsule-collider
-				var ncapsulecollider = new THREE.Mesh(new THREE.CylinderBufferGeometry(1, 1, 2, 10), new THREE.MeshBasicMaterial({ color: 0xaaaa00 }));
-				ncapsulecollider.position.set(0, 0, 0);
+				function makeCapsuleGeometry(radius, height, radiusSegments) {
+					var base = new THREE.CylinderGeometry(radius, radius, height, radiusSegments);
+					var end = new THREE.SphereGeometry(radius, radiusSegments, radiusSegments, 0.92);
+					var matrix = new THREE.Matrix4();
+					matrix.makeTranslation(0, height / 2, 0);
+					end.applyMatrix(matrix);
+					base.merge(end);
+					matrix.makeTranslation(0, -height, 0);
+					end.applyMatrix(matrix);
+					base.merge(end);
+					return new THREE.BufferGeometry().fromGeometry(base);
+				}
+				var ncapsulecollider = new THREE.Mesh(makeCapsuleGeometry(0.8, 0.8, 10), new THREE.MeshBasicMaterial({ color: 0xaaaa00 }));
+				ncapsulecollider.position.set(0, 1.25, 0);
 				sim.scene.add(ncapsulecollider);
 				ncapsulecollider.addBehaviors(
-					new altspaceutil.behaviors.NativeComponent('n-capsule-collider', { radius: 1, height: 2, direction: 'y' }),
-					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-capsule-collider', height: 4, fontSize: 4, verticalAlign: 'top' })
+					new altspaceutil.behaviors.NativeComponent('n-capsule-collider', { radius: 0.8, height: 2.5, direction: 'y' }),
+					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-capsule-collider', height: 3.5, fontSize: 4, verticalAlign: 'top' })
 				);
 
 				// n-mesh-collider
 				var nmeshcollider = new THREE.Mesh(new THREE.TorusKnotBufferGeometry(2, 0.2, 64, 16), new THREE.MeshBasicMaterial({ color: 0x00aaaa }));
-				nmeshcollider.position.set(5, 0, 0);
+				nmeshcollider.position.set(5, 1, 0);
 				sim.scene.add(nmeshcollider);
 				nmeshcollider.addBehaviors(
 					new altspaceutil.behaviors.NativeComponent('n-mesh-collider', { convex: false, type: 'environment' }),
@@ -69,7 +81,7 @@
 
 				// n-spawner
 				var nspawner = new THREE.Object3D();
-				nspawner.position.set(-10, 0, 5);
+				nspawner.position.set(-10, 1, 5);
 				sim.scene.add(nspawner);
 				nspawner.addBehaviors(
 					new altspaceutil.behaviors.NativeComponent('n-spawner', { res: 'interactables/basketball' }),
@@ -78,7 +90,7 @@
 
 				// n-object
 				var nobject = new THREE.Object3D();
-				nobject.position.set(-5, 0, 5);
+				nobject.position.set(-5, 1, 5);
 				sim.scene.add(nobject);
 				nobject.addBehaviors(
 					new altspaceutil.behaviors.NativeComponent('n-object', { res: 'objects/target-archery' }),
@@ -87,8 +99,8 @@
 				);
 
 				// n-container
-				var ncontainer = new THREE.Mesh(new THREE.BoxBufferGeometry(2, 2, 2), new THREE.MeshBasicMaterial({ color: 0xffbbee, transparent: true, opacity: 0.3 }));
-				ncontainer.position.set(0, 0, 5);
+				var ncontainer = new THREE.Mesh(new THREE.BoxBufferGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 0xffbbee, transparent: true, opacity: 0.3 }));
+				ncontainer.position.set(0, 1, 5);
 				sim.scene.add(ncontainer);
 				ncontainer.addEventListener('container-count-changed', function(event) {
 					event.target.getBehaviorByType('n-text').data.text = 'n-container\nCount: ' + event.target.getBehaviorByType('n-container').count;
@@ -113,7 +125,7 @@
 
 				// n-sound
 				var nsound = new THREE.Object3D();
-				nsound.position.set(5, 0, 5);
+				nsound.position.set(5, 1, 5);
 				sim.scene.add(nsound);
 				nsound.addBehaviors(
 					new altspaceutil.behaviors.NativeComponent('n-sound', {
@@ -199,13 +211,13 @@
 				nportal.position.set(0, 0, 10);
 				sim.scene.add(nportal);
 				nportal.addBehaviors(
-					new altspaceutil.behaviors.NativeComponent('n-portal', {}, { targetEntity: nspherecollider }),
+					new altspaceutil.behaviors.NativeComponent('n-portal', {}, { targetEntity: nspawner }),
 					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-portal\nCurrent Space', height: 6, fontSize: 3, verticalAlign: 'top' })
 				);
 
 				// n-text / n-billboard
 				var ntext = new THREE.Object3D();
-				ntext.position.set(-15, 2, 10);
+				ntext.position.set(-5, 2.5, 10);
 				sim.scene.add(ntext);
 				ntext.addBehaviors(
 					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-text / n-billboard', fontSize: 3, width: 100 }),
