@@ -2,7 +2,7 @@
 Behavior types for common functionality compatible with [AltspaceSDK](https://github.com/AltspaceVR/AltspaceSDK/) behavior design pattern.
 
 ## Usage
-Include the loader library in your project:
+Include the utility library in your project:
 ```html
 <script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.6.0/js/altspaceutil.min.js"></script>
 ```
