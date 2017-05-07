@@ -292,7 +292,9 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 
 	'n-cockpit-parent': {
 		config: {
-			sendUpdates: false
+			sendUpdates: false,
+			recursiveMesh: true,
+			inheritParentData: true
 		}
 	},
 
