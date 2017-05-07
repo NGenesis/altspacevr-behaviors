@@ -7,5 +7,7 @@ Behavior types for common functionality compatible with [AltspaceSDK](https://gi
   * Subscribes to avatar and user preference update events for a given list of users.
 * altspaceutil.behaviors.NativeComponent
   * Provides support for AltspaceVR native components to be attached to objects, providing sane configuration defaults where appropriate.
+* altspaceutil.behaviors.NativeComponentSync
+  * Provides support for AltspaceVR native component data to be synchronized over Firebase when used with SceneSync, Object3DSync and NativeComponent behaviors.
 
 **Please be aware that these behaviors may become deprecated over time as AltspaceSDK changes and new functionality is introduced.**
