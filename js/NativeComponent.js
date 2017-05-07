@@ -430,7 +430,6 @@ function initCollisionEventHandler() {
 				}
 
 				this.object3d.dispatchEvent(event);
-				console.log(event);
 			}
 		}).bind(this));
 
@@ -445,7 +444,6 @@ function initCollisionEventHandler() {
 				};
 
 				this.object3d.dispatchEvent(event);
-				console.log(event);
 			}
 		}).bind(this));
 	}
