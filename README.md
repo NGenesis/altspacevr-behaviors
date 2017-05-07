@@ -1,13 +1,13 @@
 # AltspaceVR Behaviors
 Behavior types for common functionality compatible with [AltspaceSDK](https://github.com/AltspaceVR/AltspaceSDK/) behavior design pattern.
 
-* altspaceutil.behaviors.OrbitControls
+* altspaceutil.behaviors.OrbitControls ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/NativeComponent.html))
   * Provides a convenience wrapper for THREE.OrbitControls when working with [altspace.utilities.Simulation](https://altspacevr.github.io/AltspaceSDK/doc/js/module-altspace_utilities.Simulation.html).
-* altspaceutil.behaviors.UserEvents
+* altspaceutil.behaviors.UserEvents ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/OrbitControls.html))
   * Subscribes to avatar and user preference update events for a given list of users.
-* altspaceutil.behaviors.NativeComponent
+* altspaceutil.behaviors.NativeComponent ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/UserEvents.html))
   * Provides support for AltspaceVR native components to be attached to objects, providing sane configuration defaults where appropriate.
-* altspaceutil.behaviors.NativeComponentSync
+* altspaceutil.behaviors.NativeComponentSync ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/NativeComponentSync.html))
   * Provides support for AltspaceVR native component data to be synchronized over Firebase when used with SceneSync, Object3DSync and NativeComponent behaviors.
 
 **Please be aware that these behaviors may become deprecated over time as AltspaceSDK changes and new functionality is introduced.**
