@@ -1,6 +1,13 @@
 # AltspaceVR Behaviors
 Behavior types for common functionality compatible with [AltspaceSDK](https://github.com/AltspaceVR/AltspaceSDK/) behavior design pattern.
 
+## Usage
+Include the loader library in your project:
+```html
+<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.6.0/js/altspaceutil.min.js"></script>
+```
+
+## Supported Behaviors
 * altspaceutil.behaviors.OrbitControls ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/OrbitControls.html))
   * Provides a convenience wrapper for THREE.OrbitControls when working with [altspace.utilities.Simulation](https://altspacevr.github.io/AltspaceSDK/doc/js/module-altspace_utilities.Simulation.html).
 * altspaceutil.behaviors.UserEvents ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/UserEvents.html))
