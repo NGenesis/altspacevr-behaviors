@@ -65,6 +65,9 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			radius: 0,
 			type: 'environment'
 		},
+		config: {
+			meshComponent: true
+		},
 		initComponent: initCollisionEventHandler
 	},
 
@@ -74,6 +77,9 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			center: { 'x': 0, 'y': 0, 'z': 0 },
 			size: { 'x': 0, 'y': 0, 'z': 0 },
 			type: 'environment'
+		},
+		config: {
+			meshComponent: true
 		},
 		initComponent: initCollisionEventHandler
 	},
@@ -87,6 +93,9 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			direction: 'y',
 			type: 'environment'
 		},
+		config: {
+			meshComponent: true
+		},
 		initComponent: initCollisionEventHandler
 	},
 
@@ -98,7 +107,8 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 		},
 		config: {
 			recursiveMesh: true,
-			inheritParentData: true
+			inheritParentData: true,
+			meshComponent: true
 		},
 		initComponent: initCollisionEventHandler
 	},
@@ -106,6 +116,9 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 	'n-container': {
 		data: {
 			capacity: 4
+		},
+		config: {
+			meshComponent: true
 		},
 		initComponent: function() {
 			this.count = 0;
@@ -262,7 +275,7 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			}
 		},
 		update: function() {
-			altspace.updateNativeComponent(this.component, this.type, this.data);
+			if(this.initialized) altspace.updateNativeComponent(this.component, this.type, this.data);
 
 			if(this.playHandlerType) {
 				this.component.removeEventListener(this.playHandlerType, this.playHandler);
@@ -286,7 +299,8 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 		},
 		config: {
 			recursiveMesh: true,
-			inheritParentData: true
+			inheritParentData: true,
+			meshComponent: true
 		}
 	},
 
@@ -294,13 +308,15 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 		config: {
 			sendUpdates: false,
 			recursiveMesh: true,
-			inheritParentData: true
+			inheritParentData: true,
+			meshComponent: true
 		}
 	},
 
 	'n-billboard': {
 		config: {
-			sendUpdates: false
+			sendUpdates: false,
+			meshComponent: true
 		}
 	},
 
@@ -330,7 +346,7 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 				this.data.targetQuaternion = { x: quaternion.x, y: quaternion.y, z: quaternion.z, w: quaternion.w };
 			}
 
-			altspace.updateNativeComponent(this.component, this.type, this.data);
+			if(this.initialized) altspace.updateNativeComponent(this.component, this.type, this.data);
 		}
 	},
 
@@ -352,6 +368,9 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			isKinematic: false,
 			positionConstraints: [false, false, false],
 			rotationConstraints: [false, false, false],
+		},
+		config: {
+			meshComponent: true
 		},
 		initComponent: function() {
 			if(altspace.inClient) {
@@ -454,12 +473,13 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 
 	this.nativeEvents = {};
 	this.defaults = altspaceutil.behaviors.NativeComponentDefaults[this.type];
-	this.config = Object.assign({ sendUpdates: true, recursiveMesh: false, recursive: false, useCollider: false, updateOnStaleData: true, sharedComponent: true, inheritParentData: false }, (this.defaults && this.defaults.config) ? JSON.parse(JSON.stringify(this.defaults.config)) : {}, _config);
+	this.config = Object.assign({ sendUpdates: true, recursiveMesh: false, recursive: false, useCollider: false, updateOnStaleData: true, sharedComponent: true, inheritParentData: false, meshComponent: false }, (this.defaults && this.defaults.config) ? JSON.parse(JSON.stringify(this.defaults.config)) : {}, _config);
 	this.data = Object.assign((this.defaults && this.defaults.data) ? JSON.parse(JSON.stringify(this.defaults.data)) : {}, _data);
 
 	this.awake = function(o, s) {
 		this.scene = s;
 		this.component = this.object3d = o;
+		this.initialized = false;
 
 		if(!(this.component instanceof THREE.Mesh)) {
 			// Cannot Have Multiple Components Of The Same Type Per Mesh, Create New Placeholder For Subsequent Components
@@ -509,7 +529,6 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 			}
 		}
 
-		if(altspace.inClient) altspace.addNativeComponent(this.component, this.type);
 		this.update();
 
 		// Add Component To Descendants
@@ -541,29 +560,47 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 			}).bind(this));
 		}
 
-		if(altspace.inClient && this.config.sendUpdates) {
-			if(this.config.updateOnStaleData) {
-				var newData = JSON.stringify(this.data);
-				if(this.oldData !== newData) {
+		if(altspace.inClient) {
+			if(!this.initialized) {
+				if(!this.config.meshComponent || this.object3d instanceof THREE.Mesh) {
+					this.initialized = true;
+				} else if(this.config.sharedComponent && this.sharedData) {
+					// Initialize Shared Components That Previously Offered No Functional Benefit
+					for(var behavior of this.sharedData.behaviors) {
+						if(behavior.initialized) {
+							this.initialized = true;
+							break;
+						}
+					}
+				}
+
+				if(this.initialized) altspace.addNativeComponent(this.component, this.type);
+			}
+
+			if(this.config.sendUpdates) {
+				if(this.config.updateOnStaleData) {
+					var newData = JSON.stringify(this.data);
+					if(this.oldData !== newData) {
+						if(this.defaults && this.defaults.update) {
+							this.defaults.update.bind(this)();
+						} else if(this.initialized) {
+							altspace.updateNativeComponent(this.component, this.type, this.data);
+						}
+						this.oldData = newData;
+					}
+				} else {
 					if(this.defaults && this.defaults.update) {
 						this.defaults.update.bind(this)();
-					} else {
+					} else if(this.initialized) {
 						altspace.updateNativeComponent(this.component, this.type, this.data);
 					}
-					this.oldData = newData;
-				}
-			} else {
-				if(this.defaults && this.defaults.update) {
-					this.defaults.update.bind(this)();
-				} else {
-					altspace.updateNativeComponent(this.component, this.type, this.data);
 				}
 			}
 		}
 	}
 
 	this.callComponent = function(functionName, functionArgs) {
-		if(altspace.inClient) altspace.callNativeComponent(this.component, this.type, functionName, functionArgs);
+		if(this.initialized) altspace.callNativeComponent(this.component, this.type, functionName, functionArgs);
 		if(this.defaults && this.defaults.callComponent) this.defaults.callComponent.bind(this)(functionName, functionArgs);
 
 		if(this.config.recursive || this.config.recursiveMesh && !this.parent) {
@@ -590,7 +627,7 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 			if(this.nativeEvents.hasOwnProperty(nativeEvent)) this.nativeEvents[nativeEvent].clear();
 		}
 
-		if(altspace.inClient) altspace.removeNativeComponent(this.component, this.type);
+		if(this.initialized) altspace.removeNativeComponent(this.component, this.type);
 
 		if(this.config.sharedComponent && this.sharedData) {
 			// Decrease Reference Count
