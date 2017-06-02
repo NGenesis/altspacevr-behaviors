@@ -40,15 +40,16 @@ altspaceutil.behaviors.UserEvents = function(config) {
 
 	this.refreshTime = config.refreshTime || 5000;
 	this.trace = config.trace || false;
-	this.time = 0;
-	this.loading = false;
-
-	this.users = {};
 	this.userIds = config.userIds || [];
 
 	this.awake = function(o) {
 		this.object3d = o;
+		this.time = 0;
+		this.loading = false;
+		this.users = {};
 		this.userIds = this.userIds.constructor === Array ? this.userIds : [this.userIds];
+
+		altspaceutil.manageBehavior(this, this.object3d);
 
 		this.dataRequest = new THREE.FileLoader();
 		this.dataRequest.setWithCredentials(true);
@@ -73,6 +74,8 @@ altspaceutil.behaviors.UserEvents = function(config) {
 	}
 
 	this.onLoaded = function(obj) {
+		if(!this.loading) return;
+
 		var json = JSON.parse(obj);
 		var self = this;
 
@@ -229,12 +232,14 @@ altspaceutil.behaviors.UserEvents = function(config) {
 	}
 
 	this.onError = function(xhr) {
-		if(this.trace) {
-			var url = xhr.target.responseURL || '';
-			console.log('Error loading avatar data ' + url);
-		}
+		if(this.loading) {
+			if(this.trace) {
+				var url = xhr.target.responseURL || '';
+				console.log('Error loading avatar data ' + url);
+			}
 
-		this.loading = false;
+			this.loading = false;
+		}
 	}
 
 	/**
@@ -298,5 +303,13 @@ altspaceutil.behaviors.UserEvents = function(config) {
 
 		if(typeof(color[0]) === 'string') return getColorFromName(color[0]);
 		return getColorFromRGB(color[0], color[1], color[2]);
+	}
+
+	this.dispose = function() {
+		this.dataRequest = null;
+		this.object3d = null;
+		this.time = 0;
+		this.loading = false;
+		this.users = {};
 	}
 }

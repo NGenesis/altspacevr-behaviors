@@ -1,39 +1,3 @@
-'use strict';
-
-window.altspaceutil = window.altspaceutil || {};
-altspaceutil.behaviors = altspaceutil.behaviors || {};
-
-// Native Event Helpers
-altspaceutil.addNativeEventListener = function(name, callback) {
-	return (altspace.inClient && altspace._internal && altspace._internal.couiEngine) ? altspace._internal.couiEngine.on(name, callback) : null;
-}
-
-altspaceutil.removeNativeEventListener = function(name, callback) {
-	if(altspace.inClient && altspace._internal && altspace._internal.couiEngine) altspace._internal.couiEngine.off(name, callback);
-}
-
-altspaceutil.getObject3DById = function(meshId) {
-	return (altspace.inClient && altspace._internal) ? altspace._internal.getObject3DById(meshId) : null;
-}
-
-altspaceutil.getThreeJSScene = function(meshId) {
-	return (altspace.inClient && altspace._internal) ? altspace._internal.getThreeJSScene() : null;
-}
-
-altspaceutil.getAbsoluteURL = function(url) {
-	if(url && !url.startsWith('http')) {
-		if(url.startsWith('/')) {
-			url = location.origin + url;
-		} else {
-			var currPath = location.pathname;
-			if(!currPath.endsWith('/')) currPath = location.pathname.split('/').slice(0, -1).join('/') + '/';
-			url = location.origin + currPath + url;
-		}
-	}
-
-	return url;
-}
-
 altspaceutil.behaviors.NativeComponentDefaults = {
 	'n-object': {
 		data: {
@@ -229,8 +193,21 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			this.data.src = altspaceutil.getAbsoluteURL(this.data.src);
 
 			if(altspace.inClient) {
+				// Override A-Frame Callback For NativeSoundLoadedEvent To Suppress Errors That Occur When Object Doesn't Exist
+				if(!altspaceutil.overrideNativeSoundLoadedEvent) {
+					altspaceutil.overrideNativeSoundLoadedEvent = true;
+
+					altspaceutil.removeAllNativeEventListeners('NativeSoundLoadedEvent');
+					altspaceutil.addNativeEventListener('NativeSoundLoadedEvent', function(meshId) {
+						altspace._internal.forwardEventToChildIFrames('NativeSoundLoadedEvent', arguments);
+
+						var object3D = altspace._internal.getObject3DById(meshId);
+						if(object3D && object3D.el) targetEl.emit('n-sound-loaded', null, true);
+					});
+				}
+
 				// Handle Sound Loaded
-				this.nativeEvents['NativeSoundLoadedEvent'] = altspaceutil.addNativeEventListener('NativeSoundLoadedEvent', (function(meshId, count, oldCount) {
+				this.nativeEvents['NativeSoundLoadedEvent'] = altspaceutil.addNativeEventListener('NativeSoundLoadedEvent', (function(meshId) {
 					var object3d = altspaceutil.getObject3DById(meshId);
 					if(object3d && object3d === this.component) {
 						/**
@@ -352,7 +329,8 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 
 	'n-gltf': {
 		data: {
-			url: ''
+			url: '',
+			sceneIndex: 0
 		},
 		initComponent: function() {
 			this.data.url = altspaceutil.getAbsoluteURL(this.data.url);
@@ -480,6 +458,8 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 		this.scene = s;
 		this.component = this.object3d = o;
 		this.initialized = false;
+
+		altspaceutil.manageBehavior(this, this.object3d);
 
 		if(!(this.component instanceof THREE.Mesh)) {
 			// Cannot Have Multiple Components Of The Same Type Per Mesh, Create New Placeholder For Subsequent Components
@@ -644,6 +624,11 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 			this.object3d.remove(this.placeholder);
 		}
 	}
+
+	this.clone = function() {
+		if(this.parent) return null;
+		return new altspaceutil.behaviors.NativeComponent(this.type, this.data, this.config);
+	}
 }
 
 /**
@@ -664,11 +649,13 @@ altspaceutil.behaviors.NativeComponentSync = function(_type, _config) {
 
 	this.awake = function(o) {
 		this.object3d = o;
+
+		altspaceutil.manageBehavior(this, this.object3d);
+
 		this.component = this.object3d.getBehaviorByType(this.componentType);
 		this.sync = this.config.syncRef || this.object3d.getBehaviorByType('Object3DSync');
 		this.dataRef = this.sync.dataRef.child(this.componentType).child('data');
-
-		this.dataRef.on('value', (function(snapshot) {
+		this.dataRefUpdate = this.dataRef.on('value', (function(snapshot) {
 			if(this.sync.isMine) return;
 
 			var data = snapshot.val();
@@ -702,5 +689,20 @@ altspaceutil.behaviors.NativeComponentSync = function(_type, _config) {
 
 	this.dispose = function() {
 		if(this.intervalId) clearInterval(this.intervalId);
+
+		if(this.dataRefUpdate) {
+			this.dataRefUpdate.off();
+			this.dataRefUpdate = null;
+		}
+
+		this.object3d = null;
+		this.component = null;
+		this.sync = null;
+		this.dataRef = null;
+		this.oldData = null;
+	}
+
+	this.clone = function() {
+		return new altspaceutil.behaviors.NativeComponentSync(this.componentType, this.config);
 	}
 }
