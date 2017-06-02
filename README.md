@@ -4,7 +4,7 @@ Behavior types for common functionality compatible with [AltspaceSDK](https://gi
 ## Usage
 Include the utility library in your project:
 ```html
-<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.6.3/js/altspaceutil.min.js"></script>
+<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.6.4/js/altspaceutil.min.js"></script>
 ```
 
 ## Supported Behaviors
