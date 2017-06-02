@@ -39,6 +39,11 @@ altspaceutil.getAbsoluteURL = function(url) {
 	return url;
 }
 
+// Produce a base path from the specified file URL.
+altspaceutil.getBasePath = function(url) {
+	return url.split('/').slice(0, -1).join('/') + '/';
+}
+
 // Managed Behavior Helpers
 altspaceutil.manageBehavior = function(behavior, object3d) {
 	behavior.__isManaged = true;
@@ -56,7 +61,6 @@ altspaceutil.manageBehavior = function(behavior, object3d) {
 				for(var behavior of child.__behaviorList) {
 					if(behavior.__isInitialized && behavior.__isManaged) {
 						try {
-							console.log(behavior, child);
 							if(behavior.dispose) behavior.dispose.call(behavior, child);
 							behavior.__isInitialized = false;
 						} catch(error) {
