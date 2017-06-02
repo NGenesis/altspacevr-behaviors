@@ -690,15 +690,12 @@ altspaceutil.behaviors.NativeComponentSync = function(_type, _config) {
 	this.dispose = function() {
 		if(this.intervalId) clearInterval(this.intervalId);
 
-		if(this.dataRefUpdate) {
-			this.dataRefUpdate.off();
-			this.dataRefUpdate = null;
-		}
-
+		if(this.dataRefUpdate && this.dataRef) this.dataRef.off('value', this.dataRefUpdate);
 		this.object3d = null;
 		this.component = null;
 		this.sync = null;
 		this.dataRef = null;
+		this.dataRefUpdate = null;
 		this.oldData = null;
 	}
 
