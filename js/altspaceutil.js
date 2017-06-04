@@ -677,7 +677,7 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 		if((this.config.recursive || this.config.recursiveMesh) && (!this.parent || linkedParent)) {
 			this.object3d.traverse((function(child) {
 				if(child !== this.object3d && child !== this.placeholder && (this.config.recursive || (this.config.recursiveMesh && child instanceof THREE.Mesh))) {
-					child.addBehavior(Object.assign(new altspaceutil.behaviors.NativeComponent(this.type, this.data, this.config), { parent: this }));
+					if(!child.getBehaviorByType(this.type)) child.addBehavior(Object.assign(new altspaceutil.behaviors.NativeComponent(this.type, this.data, this.config), { parent: this }));
 				}
 			}).bind(this));
 		}
