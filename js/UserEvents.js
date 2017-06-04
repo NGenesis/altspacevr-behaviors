@@ -1,11 +1,6 @@
-'use strict';
-
-window.altspaceutil = window.altspaceutil || {};
-altspaceutil.behaviors = altspaceutil.behaviors || {};
-
 /**
  * An identifier that represents the user's avatar type preference.
- * @typedef {String} module:altspace/utilities/behaviors.UserEvents~AvatarId
+ * @typedef {String} module:altspaceutil/behaviors.UserEvents~AvatarId
  **/
 
 /**
@@ -21,11 +16,10 @@ altspaceutil.behaviors = altspaceutil.behaviors || {};
  * returns true, otherwise no action is taken.
  * @param {Number} [config.refreshTime=5000] Duration to wait between user updates, in milliseconds.
  * @param {Boolean} [config.trace=false] Specifies whether debugging information should be displayed.
- * @memberof module:altspace/utilities/behaviors
+ * @memberof module:altspaceutil/behaviors
  **/
 altspaceutil.behaviors.UserEvents = function(config) {
-	config = config || {};
-
+	this.config = config || {};
 	this.type = 'UserEvents';
 
 	/**
@@ -34,13 +28,13 @@ altspaceutil.behaviors.UserEvents = function(config) {
 	* @callback onRequestData
 	* @param {String} userId User ID of a user who will have their data requested.
 	* @param {THREE.Object3D} object The object that will emit the request.
-	* @memberof module:altspace/utilities/behaviors.UserEvents
+	* @memberof module:altspaceutil/behaviors.UserEvents
 	*/
-	this.onRequestData = config.onRequestData || null;
+	this.onRequestData = this.config.onRequestData || null;
 
-	this.refreshTime = config.refreshTime || 5000;
-	this.trace = config.trace || false;
-	this.userIds = config.userIds || [];
+	this.refreshTime = this.config.refreshTime || 5000;
+	this.trace = this.config.trace || false;
+	this.userIds = this.config.userIds || [];
 
 	this.awake = function(o) {
 		this.object3d = o;
@@ -159,7 +153,7 @@ altspaceutil.behaviors.UserEvents = function(config) {
 					* @property {String} username Username of the user.
 					* @property {String} displayName Display name of the user.
 					* @property {THREE.Object3D} target - The object which emitted the event.
-					* @memberof module:altspace/utilities/behaviors.UserEvents
+					* @memberof module:altspaceutil/behaviors.UserEvents
 					*/
 					this.object3d.dispatchEvent({
 						type: 'userchange',
@@ -187,7 +181,7 @@ altspaceutil.behaviors.UserEvents = function(config) {
 					* @property {Object} textures Texture identifier preferences for the avatar.  This typically provides
 					* 'hair', 'skin' and 'clothing' properties for Rubenoid avatars.
 					* @property {THREE.Object3D} target - The object which emitted the event.
-					* @memberof module:altspace/utilities/behaviors.UserEvents
+					* @memberof module:altspaceutil/behaviors.UserEvents
 					*/
 					this.object3d.dispatchEvent({
 						type: 'avatarchange',
@@ -212,7 +206,7 @@ altspaceutil.behaviors.UserEvents = function(config) {
 					* @property {String} displayName Display name of the user.
 					* @property {Boolean} online Specifies whether user is currently logged in.
 					* @property {THREE.Object3D} target - The object which emitted the event.
-					* @memberof module:altspace/utilities/behaviors.UserEvents
+					* @memberof module:altspaceutil/behaviors.UserEvents
 					*/
 					this.object3d.dispatchEvent({
 						type: 'avatarstatus',
@@ -247,7 +241,7 @@ altspaceutil.behaviors.UserEvents = function(config) {
 	*
 	* @method subscribeUser
 	* @param {String} userId - User ID to receive events for.
-	* @memberof module:altspace/utilities/behaviors.UserEvents
+	* @memberof module:altspaceutil/behaviors.UserEvents
 	*/
 	this.subscribeUser = function(userId) {
 		var index = this.userIds.indexOf(userId);
@@ -259,7 +253,7 @@ altspaceutil.behaviors.UserEvents = function(config) {
 	*
 	* @method unsubscribeUser
 	* @param {String} userId - User ID to stop receiving events for.
-	* @memberof module:altspace/utilities/behaviors.UserEvents
+	* @memberof module:altspaceutil/behaviors.UserEvents
 	*/
 	this.unsubscribeUser = function(userId) {
 		var index = this.userIds.indexOf(userId);
@@ -311,5 +305,9 @@ altspaceutil.behaviors.UserEvents = function(config) {
 		this.time = 0;
 		this.loading = false;
 		this.users = {};
+	}
+
+	this.clone = function() {
+		return new altspaceutil.behaviors.UserEvents(this.config);
 	}
 }

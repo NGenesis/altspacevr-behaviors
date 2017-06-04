@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang=en>
+	<head>
+		<meta charset=utf-8>
+		<meta name="author" content="Genesis">
+		<title>PreloadNativeSounds Behavior Example</title>
+		<script src="https://cdn.rawgit.com/mrdoob/three.js/r85/build/three.min.js"></script>
+		<script src="https://cdn.rawgit.com/mrdoob/three.js/r85/examples/js/controls/OrbitControls.js"></script>
+		<script src="https://cdn.rawgit.com/AltspaceVR/AltspaceSDK/v2.4.5/dist/altspace.min.js"></script>
+		<script src="../js/altspaceutil.min.js"></script>
+	</head>
+	<body>
+		<script>
+			var sim = new altspace.utilities.Simulation();
+			sim.camera.addBehavior(new altspaceutil.behaviors.PreloadNativeSounds(['test.mp3', 'test.ogg']));
+
+			var cube = new THREE.Mesh(new THREE.BoxGeometry(100, 100, 100), new THREE.MeshBasicMaterial());
+			sim.scene.add(cube);
+
+			cube.addEventListener('cursordown', function(event) {
+				var sound = cube.getBehaviorByType('n-sound');
+				if(sound) cube.removeBehavior(sound);
+				cube.addBehavior(new altspaceutil.behaviors.NativeComponent('n-sound', { src: /Mobile/i.test(navigator.userAgent) ? 'test.mp3' : 'test.ogg', oneshot: true, autoplay: true }));
+			});
+		</script>
+	</body>
+</html>

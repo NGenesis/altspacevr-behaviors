@@ -1,5 +1,12 @@
 @echo off
-call uglifyjs ../js/common.js ../js/NativeComponent.js ../js/OrbitControls.js ../js/UserEvents.js -m -o ../js/altspaceutil.min.js -c --source-map ../js/altspaceutil.min.js.map
-call uglifyjs ../js/common.js ../js/NativeComponent.js -m -o ../js/NativeComponent.min.js -c
-call uglifyjs ../js/common.js ../js/OrbitControls.js -m -o ../js/OrbitControls.min.js -c
-call uglifyjs ../js/common.js ../js/UserEvents.js -m -o ../js/UserEvents.min.js -c
+cd ../js/
+
+call uglifyjs common.js NativeComponent.js -m -o NativeComponent.min.js -c
+call uglifyjs common.js OrbitControls.js -m -o OrbitControls.min.js -c
+call uglifyjs common.js UserEvents.js -m -o UserEvents.min.js -c
+call uglifyjs common.js PreloadNativeSounds.js -m -o PreloadNativeSounds.min.js -c
+
+copy /b common.js + NativeComponent.js + OrbitControls.js + UserEvents.js + PreloadNativeSounds.js altspaceutil.js
+call uglifyjs altspaceutil.js -m -o altspaceutil.min.js -c --source-map altspaceutil.min.js.map
+
+cd ../build/
