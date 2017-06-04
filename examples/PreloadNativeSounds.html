@@ -12,7 +12,7 @@
 	<body>
 		<script>
 			var sim = new altspace.utilities.Simulation();
-			sim.camera.addBehavior(new altspaceutil.behaviors.PreloadNativeSounds(['test.mp3', 'test.ogg']));
+			sim.scene.addBehavior(new altspaceutil.behaviors.PreloadNativeSounds(['test.mp3', 'test.ogg']));
 
 			var cube = new THREE.Mesh(new THREE.BoxGeometry(100, 100, 100), new THREE.MeshBasicMaterial());
 			sim.scene.add(cube);
