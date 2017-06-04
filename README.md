@@ -1,5 +1,5 @@
-# AltspaceVR Behaviors
-Behavior types for common functionality compatible with [AltspaceSDK](https://github.com/AltspaceVR/AltspaceSDK/) behavior design pattern.
+# AltspaceUtil
+Provides helper functions and behavior types for common functionality compatible with [AltspaceSDK](https://github.com/AltspaceVR/AltspaceSDK/) behavior design pattern.
 
 ## Usage
 Include the utility library in your project:
@@ -7,7 +7,7 @@ Include the utility library in your project:
 <script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.7.0/js/altspaceutil.min.js"></script>
 ```
 
-## Supported Behaviors
+## Behaviors
 * altspaceutil.behaviors.NativeComponent ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/NativeComponent.html))
   * Provides support for AltspaceVR native components to be attached to objects, providing sane configuration defaults where appropriate.
 * altspaceutil.behaviors.NativeComponentSync ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/NativeComponentSync.html))
