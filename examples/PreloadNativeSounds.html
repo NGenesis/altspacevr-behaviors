@@ -20,7 +20,7 @@
 			cube.addEventListener('cursordown', function(event) {
 				var sound = cube.getBehaviorByType('n-sound');
 				if(sound) cube.removeBehavior(sound);
-				cube.addBehavior(new altspaceutil.behaviors.NativeComponent('n-sound', { src: /Mobile/i.test(navigator.userAgent) ? 'test.mp3' : 'test.ogg', oneshot: true, autoplay: true }));
+				cube.addBehavior(new altspaceutil.behaviors.NativeComponent('n-sound', { src: /Mobile/i.test(navigator.userAgent) ? 'test.mp3' : 'test.ogg', oneshot: true, autoplay: true }, { useCollider: true }));
 			});
 		</script>
 	</body>
