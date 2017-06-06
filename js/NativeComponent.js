@@ -1,3 +1,5 @@
+altspaceutil.behaviors.NativeComponentPlaceholderMesh = altspaceutil.behaviors.NativeComponentPlaceholderMesh || new THREE.Mesh(new THREE.BoxBufferGeometry(0.001, 0.001, 0.001), Object.assign(new THREE.MeshBasicMaterial(), { visible: false }));
+
 altspaceutil.behaviors.NativeComponentDefaults = {
 	'n-object': {
 		data: {
@@ -475,13 +477,13 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 			// Create Placeholder Mesh
 			if(this.config.sharedComponent) {
 				this.sharedData = this.object3d.userData._sharedNativeComponent = this.object3d.userData._sharedNativeComponent || {};
-				this.sharedData.placeholder = this.sharedData.placeholder || new THREE.Mesh(new THREE.BoxBufferGeometry(0.001, 0.001, 0.001), Object.assign(new THREE.MeshBasicMaterial(), { visible: false }));
+				this.sharedData.placeholder = this.sharedData.placeholder || altspaceutil.behaviors.NativeComponentPlaceholderMesh.clone();
 				this.sharedData.behaviors = this.sharedData.behaviors || [];
 				this.sharedData.behaviors.push(this);
 				if(!this.sharedData.placeholder.parent) this.object3d.add(this.sharedData.placeholder);
 			}
 
-			this.component = this.placeholder = (this.sharedData && this.sharedData.placeholder) ? this.sharedData.placeholder : new THREE.Mesh(new THREE.BoxBufferGeometry(0.001, 0.001, 0.001), Object.assign(new THREE.MeshBasicMaterial(), { visible: false }));
+			this.component = this.placeholder = (this.sharedData && this.sharedData.placeholder) ? this.sharedData.placeholder : altspaceutil.behaviors.NativeComponentPlaceholderMesh.clone();
 			this.object3d.add(this.placeholder);
 		}
 
