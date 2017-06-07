@@ -239,18 +239,20 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			}
 		},
 		callComponent: function(functionName, functionArgs) {
-			if(functionName === 'play') {
-				this.component.dispatchEvent({
-					type: 'sound-played',
-					bubbles: true,
-					target: this.component
-				});
-			} else if(functionName === 'pause') {
-				this.component.dispatchEvent({
-					type: 'sound-paused',
-					bubbles: true,
-					target: this.component
-				});
+			if(this.component) {
+				if(functionName === 'play') {
+					this.component.dispatchEvent({
+						type: 'sound-played',
+						bubbles: true,
+						target: this.component
+					});
+				} else if(functionName === 'pause') {
+					this.component.dispatchEvent({
+						type: 'sound-paused',
+						bubbles: true,
+						target: this.component
+					});
+				}
 			}
 		},
 		update: function() {
