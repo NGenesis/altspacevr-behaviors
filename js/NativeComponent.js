@@ -316,6 +316,7 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 	'n-portal': {
 		data: {
 			targetSpace: null, // defaults to current space when omited
+			targetEvent: null, // defaults to current space when omited
 			targetPosition: { x: 0, y: 0, z: 0 },
 			targetQuaternion: { x: 0, y: 0, z: 0, w: 1 }
 		},

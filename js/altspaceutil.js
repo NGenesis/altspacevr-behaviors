@@ -401,18 +401,20 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			}
 		},
 		callComponent: function(functionName, functionArgs) {
-			if(functionName === 'play') {
-				this.component.dispatchEvent({
-					type: 'sound-played',
-					bubbles: true,
-					target: this.component
-				});
-			} else if(functionName === 'pause') {
-				this.component.dispatchEvent({
-					type: 'sound-paused',
-					bubbles: true,
-					target: this.component
-				});
+			if(this.component) {
+				if(functionName === 'play') {
+					this.component.dispatchEvent({
+						type: 'sound-played',
+						bubbles: true,
+						target: this.component
+					});
+				} else if(functionName === 'pause') {
+					this.component.dispatchEvent({
+						type: 'sound-paused',
+						bubbles: true,
+						target: this.component
+					});
+				}
 			}
 		},
 		update: function() {
@@ -476,6 +478,7 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 	'n-portal': {
 		data: {
 			targetSpace: null, // defaults to current space when omited
+			targetEvent: null, // defaults to current space when omited
 			targetPosition: { x: 0, y: 0, z: 0 },
 			targetQuaternion: { x: 0, y: 0, z: 0, w: 1 }
 		},
