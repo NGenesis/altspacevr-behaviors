@@ -762,6 +762,8 @@ altspaceutil.behaviors.TransformControls = function(_config) {
  * behavior is associated with will be used as the target.
  * @param {Number} [scale=1] Adjusts the scale of the transform gizmo.
  * @param {Boolean} [allow-negative-scale=false] Specifies whether the scale transform gizmo will allow the target's scale to be negative.
+ * @param {Boolean} [sync-events=true] Specifies whether the sync ownership is gained when drag events are fired.  Requires {sync} and {sync-transform} 
+ * components be present on the target object.
  * @memberof module:altspaceutil/behaviors
  **/
 if(window.AFRAME) {
@@ -772,11 +774,29 @@ if(window.AFRAME) {
 			followTarget: { type: 'boolean', default: true },
 			target: { type: 'selector' },
 			scale: { type: 'number', default: 1 },
-			allowNegativeScale: {type: 'boolean', default: false }
+			allowNegativeScale: { type: 'boolean', default: false },
+			syncEvents: { type: 'boolean', default: true }
 		},
 		init: function() {
 			this.behavior = new altspaceutil.behaviors.TransformControls({ controlType: this.data.controlType, showButtons: this.data.showButtons, followTarget: this.data.followTarget, target: this.data.target ? this.data.target.object3D : null, scale: this.data.scale, allowNegativeScale: this.data.allowNegativeScale });
 			this.el.object3D.addBehavior(this.behavior);
+
+			// Handle Sync System Ownership When Gizmo Is Dragged
+			if(this.data.syncEvents) {
+				var onDragEvent = (function(event) {
+					var target = this.el.object3D.getBehaviorByType('TransformControls').getTarget().el;
+					if(target && target.components.sync && target.components.sync.isConnected) {
+						target.components.sync.takeOwnership();
+						target.setAttribute('position', target.object3D.position);
+						target.setAttribute('rotation', { x: THREE.Math.radToDeg(target.object3D.rotation.x), y: THREE.Math.radToDeg(target.object3D.rotation.y), z: THREE.Math.radToDeg(target.object3D.rotation.z) });
+						target.setAttribute('scale', target.object3D.scale);
+					}
+				}).bind(this);
+
+				this.el.object3D.addEventListener('transform-controls-dragbegin', onDragEvent);
+				this.el.object3D.addEventListener('transform-controls-dragmove', onDragEvent);
+				this.el.object3D.addEventListener('transform-controls-dragend', onDragEvent);
+			}
 		},
 		remove: function() {
 			if(this.behavior) this.el.object3D.removeBehavior(this.behavior);
