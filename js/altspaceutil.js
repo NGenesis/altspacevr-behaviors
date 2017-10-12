@@ -1801,6 +1801,18 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 	this.dispatchDragMoveEvent = function(dragDelta) {
 		if(dragDelta.x === 0 && dragDelta.y === 0 && dragDelta.z === 0) return;
 
+		/**
+		* Fires an event when the transform gizmo is being dragged.
+		*
+		* @event transform-controls-dragmove
+		* @property {TransformControls} behavior The behavior that controls the transform gizmo.
+		* @property {THREE.Object3D} parent The object that the transform gizmo is parented to.
+		* @property {THREE.Object3D} transformTarget The object that the transform gizmo will manipulate.
+		* @property {String} transformType - The type of transform being performed.  Possible values are 'position', 'rotate' and 'scale'.
+		* @property {String} transformAxis - The axis that the transform is being performed on.  Possible values are 'x', 'y', 'z' (for single axes) and 'xyz' (for all axes).
+		* @property {THREE.Vector3} transformDelta - The transform delta that was applied to the target object.
+		* @memberof module:altspaceutil/behaviors.TransformControls
+		*/
 		var self = this;
 		this.object3d.dispatchEvent({
 			type: 'transform-controls-dragmove',
@@ -1818,6 +1830,17 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 	}
 
 	this.dispatchDragBeginEvent = function() {
+		/**
+		* Fires an event when the transform gizmo starts being dragged.
+		*
+		* @event transform-controls-dragbegin
+		* @property {TransformControls} behavior The behavior that controls the transform gizmo.
+		* @property {THREE.Object3D} parent The object that the transform gizmo is parented to.
+		* @property {THREE.Object3D} transformTarget The object that the transform gizmo will manipulate.
+		* @property {String} transformType - The type of transform being performed.  Possible values are 'position', 'rotate' and 'scale'.
+		* @property {String} transformAxis - The axis that the transform is being performed on.  Possible values are 'x', 'y', 'z' (for single axes) and 'xyz' (for all axes).
+		* @memberof module:altspaceutil/behaviors.TransformControls
+		*/
 		var self = this;
 		this.object3d.dispatchEvent({
 			type: 'transform-controls-dragbegin',
@@ -1835,6 +1858,17 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 
 	this.dispatchDragEndEvent = function(dragAxis) {
 		var self = this;
+		/**
+		* Fires an event when the transform gizmo is no longer being dragged.
+		*
+		* @event transform-controls-dragend
+		* @property {TransformControls} behavior The behavior that controls the transform gizmo.
+		* @property {THREE.Object3D} parent The object that the transform gizmo is parented to.
+		* @property {THREE.Object3D} transformTarget The object that the transform gizmo will manipulate.
+		* @property {String} transformType - The type of transform being performed.  Possible values are 'position', 'rotate' and 'scale'.
+		* @property {String} transformAxis - The axis that the transform is being performed on.  Possible values are 'x', 'y', 'z' (for single axes) and 'xyz' (for all axes).
+		* @memberof module:altspaceutil/behaviors.TransformControls
+		*/
 		this.object3d.dispatchEvent({
 			type: 'transform-controls-dragend',
 			detail: {
@@ -1908,6 +1942,13 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 		this.onDragMove = null;
 	}
 
+	/**
+	* Sets the active control type.
+	*
+	* @method setActiveControl
+	* @param {String} The active control type.  Possible values are 'none', 'position', 'rotate' and 'scale'.
+	* @memberof module:altspaceutil/behaviors.TransformControls
+	*/
 	this.setActiveControl = function(controlType) {
 		if(!this.controls && ['none', 'position', 'rotate', 'scale'].indexOf(controlType) >= 0) {
 			this.config.controlType = controlType;
@@ -1930,20 +1971,55 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 		}
 	}
 
+	/**
+	* Gets the active control type.
+	*
+	* @method getActiveControl
+	* @returns {String} The active control type.  Possible values are 'none', 'position', 'rotate' and 'scale'.
+	* @memberof module:altspaceutil/behaviors.TransformControls
+	*/
 	this.getActiveControl = function() {
 		return this.selectedControlType;
 	}
 
+	/**
+	* Sets the target object that the transform gizmo will manipulate.
+	*
+	* @method setTarget
+	* @param {THREE.Object3D} The target object that the transform gizmo will manipulate.
+	* @memberof module:altspaceutil/behaviors.TransformControls
+	*/
 	this.setTarget = function(target) {
 		this.target = this.config.target = target;
 	}
 
+	/**
+	* Gets the target object that the transform gizmo will manipulate.
+	*
+	* @method getTarget
+	* @returns {THREE.Object3D} The target object that the transform gizmo will manipulate.
+	* @memberof module:altspaceutil/behaviors.TransformControls
+	*/
 	this.getTarget = function() {
 		return this.target;
 	}
 }
 
 // A-Frame Wrapper
+/**
+ * The altspace-transform-controls component enables an object's position, rotation and scale to be manipulated
+ * in AltspaceVR with a draggable transform gizmo.
+ *
+ * @class altspace-transform-controls
+ * @param {String} [control-type=none] The default control type to be selected.  Supported control types are 'none', 'position', 'rotate' or 'scale'.
+ * @param {Boolean} [show-buttons=false] Specifies whether buttons should be displayed to toggle between control types.
+ * @param {Boolean} [follow-target=true] Specified whether the transform gizmo should follow the object that is being manipulated.
+ * @param {Selector} [target] The target that the transform gizmo should manipulate when interacted with.  If omitted, the object that the 
+ * behavior is associated with will be used as the target.
+ * @param {Number} [scale=1] Adjusts the scale of the transform gizmo.
+ * @param {Boolean} [allow-negative-scale=false] Specifies whether the scale transform gizmo will allow the target's scale to be negative.
+ * @memberof module:altspaceutil/behaviors
+ **/
 if(window.AFRAME) {
 	AFRAME.registerComponent('altspace-transform-controls', {
 		schema: {
