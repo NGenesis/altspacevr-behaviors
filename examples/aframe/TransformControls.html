@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang=en>
+	<head>
+		<meta charset=utf-8>
+		<meta name="author" content="Genesis">
+		<title>TransformControls Example</title>
+		<script src="https://aframe.io/releases/0.3.0/aframe.min.js"></script>
+		<script src="https://cdn.rawgit.com/AltspaceVR/AltspaceSDK/v2.6.1/dist/altspace.min.js"></script>
+		<script src="../../js/altspaceutil.min.js"></script>
+	</head>
+	<body>
+		<a-scene altspace="fullspace:true">
+			<a-box color="purple" width="0.5" depth="0.5" height="0.5" position="0 1 0" altspace-transform-controls="control-type: none; show-buttons: true" material="transparent: true; opacity: 0.5"></a-box>
+			<a-box color="purple" width="0.5" depth="0.5" height="0.5" position="2 1 0" altspace-transform-controls="control-type: position" material="transparent: true; opacity: 0.5"></a-box>
+			<a-box color="purple" width="0.5" depth="0.5" height="0.5" position="4 1 0" altspace-transform-controls="control-type: rotate" material="transparent: true; opacity: 0.5"></a-box>
+			<a-box id="target" color="purple" width="0.5" depth="0.5" height="0.5" position="6 1 0" altspace-transform-controls="control-type: scale" material="transparent: true; opacity: 0.5"></a-box>
+			<a-entity position="8 1 0" altspace-transform-controls="control-type: position; follow-target: false; target: #target"></a-entity>
+		</a-scene>
+	</body>
+</html>

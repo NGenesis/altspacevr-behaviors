@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang=en>
+	<head>
+		<meta charset=utf-8>
+		<meta name="author" content="Genesis">
+		<title>TransformControls Example</title>
+		<script src="https://cdn.rawgit.com/mrdoob/three.js/r87/build/three.min.js"></script>
+		<script src="https://cdn.rawgit.com/AltspaceVR/AltspaceSDK/v2.6.1/dist/altspace.min.js"></script>
+		<script src="../js/altspaceutil.min.js"></script>
+	</head>
+	<body>
+		<script>
+			var sim = new altspace.utilities.Simulation();
+
+			altspace.getEnclosure().then(function(enclosure) {
+				enclosure.requestFullspace().then(function() {
+					var transformCube = new THREE.Mesh(new THREE.BoxBufferGeometry(0.5, 0.5, 0.5), new THREE.MeshBasicMaterial({ color: 'purple', transparent: true, opacity: 0.5 }));
+					transformCube.addBehavior(new altspaceutil.behaviors.TransformControls({ controlType: 'none', showButtons: true }));
+					sim.scene.add(transformCube);
+					transformCube.position.set(0, 1, 0);
+					transformCube.getBehaviorByType('TransformControls').setActiveControl('none');
+
+					transformCube.addEventListener('transform-controls-dragbegin', function(event) {
+						console.log('transform-controls-dragbegin', event);
+					});
+
+					transformCube.addEventListener('transform-controls-dragmove', function(event) {
+						event.detail.transformTarget.material.color.r += event.detail.transformDelta.x;
+						event.detail.transformTarget.material.color.g += event.detail.transformDelta.y;
+						event.detail.transformTarget.material.color.b += event.detail.transformDelta.z;
+					});
+
+					transformCube.addEventListener('transform-controls-dragend', function(event) {
+						console.log('transform-controls-dragend', event);
+					});
+
+					var transformCube = new THREE.Mesh(new THREE.BoxBufferGeometry(0.5, 0.5, 0.5), new THREE.MeshBasicMaterial({ color: 'purple', transparent: true, opacity: 0.5 }));
+					transformCube.addBehavior(new altspaceutil.behaviors.TransformControls({ controlType: 'position' }));
+					sim.scene.add(transformCube);
+					transformCube.position.set(2, 1, 0);
+
+					var transformCube = new THREE.Mesh(new THREE.BoxBufferGeometry(0.5, 0.5, 0.5), new THREE.MeshBasicMaterial({ color: 'purple', transparent: true, opacity: 0.5 }));
+					transformCube.addBehavior(new altspaceutil.behaviors.TransformControls({ controlType: 'rotate' }));
+					sim.scene.add(transformCube);
+					transformCube.position.set(4, 1, 0);
+
+					var transformCube = new THREE.Mesh(new THREE.BoxBufferGeometry(0.5, 0.5, 0.5), new THREE.MeshBasicMaterial({ color: 'purple', transparent: true, opacity: 0.5 }));
+					transformCube.addBehavior(new altspaceutil.behaviors.TransformControls({ controlType: 'scale' }));
+					sim.scene.add(transformCube);
+					transformCube.position.set(6, 1, 0);
+
+					var transformParent = new THREE.Object3D();
+					transformParent.addBehavior(new altspaceutil.behaviors.TransformControls({ controlType: 'position', followTarget: false, target: transformCube }));
+					sim.scene.add(transformParent);
+					transformParent.position.set(8, 1, 0);
+				});
+			});
+		</script>
+	</body>
+</html>

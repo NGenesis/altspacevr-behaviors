@@ -4,7 +4,7 @@ Provides helper functions and behavior types for common functionality compatible
 ## Usage
 Include the utility library in your project:
 ```html
-<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.7.2/js/altspaceutil.min.js"></script>
+<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.8.0/js/altspaceutil.min.js"></script>
 ```
 
 ## Behaviors
@@ -12,6 +12,8 @@ Include the utility library in your project:
   * Provides support for AltspaceVR native components to be attached to objects, providing sane configuration defaults where appropriate.
 * altspaceutil.behaviors.NativeComponentSync ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/NativeComponentSync.html))
   * Provides support for AltspaceVR native component data to be synchronized over Firebase when used with SceneSync, Object3DSync and NativeComponent behaviors.
+* altspaceutil.behaviors.TransformControls ([Example - three.js](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/TransformControls.html), [Example - A-Frame](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/aframe/TransformControls.html))
+  * Enables an object's position, rotation and scale to be manipulated in AltspaceVR using a draggable transform gizmo.
 * altspaceutil.behaviors.OrbitControls ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/OrbitControls.html))
   * Provides a convenience wrapper for THREE.OrbitControls when working with [altspace.utilities.Simulation](https://altspacevr.github.io/AltspaceSDK/doc/js/module-altspace_utilities.Simulation.html).
 * altspaceutil.behaviors.UserEvents ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/UserEvents.html))
