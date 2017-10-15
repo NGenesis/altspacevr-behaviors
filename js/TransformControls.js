@@ -22,6 +22,27 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 		this.scene = s;
 		this.target = this.config.target || this.object3d;
 
+		if(!altspaceutil.behaviors.TransformControls.Materials) {
+			altspaceutil.behaviors.TransformControls.Materials = {
+				'red': new THREE.MeshBasicMaterial({ color: 0xFF0000 }),
+				'green': new THREE.MeshBasicMaterial({ color: 0x00FF00 }),
+				'blue': new THREE.MeshBasicMaterial({ color: 0x0000FF }),
+				'yellow': new THREE.MeshBasicMaterial({ color: 0xFFFF00 }),
+				'orange': new THREE.MeshBasicMaterial({ color: 0xFFCC00 }),
+				'hidden': new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, visible: false }),
+				'red-transclucent': new THREE.MeshBasicMaterial({ color: 0xFF0000, transparent: true, opacity: 0.2 }),
+				'green-transclucent': new THREE.MeshBasicMaterial({ color: 0x00FF00, transparent: true, opacity: 0.2 }),
+				'blue-transclucent': new THREE.MeshBasicMaterial({ color: 0x0000FF, transparent: true, opacity: 0.2 })
+			};
+		}
+
+		if(!altspaceutil.behaviors.TransformControls.Geometries) {
+			altspaceutil.behaviors.TransformControls.Geometries = {
+				'button': new THREE.BoxBufferGeometry(0.2, 0.2, 0.2),
+				'intersector': new THREE.PlaneBufferGeometry(100000, 100000)
+			};
+		}
+
 		altspaceutil.manageBehavior(this, this.object3d);
 
 		this.objectState = {};
@@ -29,13 +50,6 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 		this.selectedControlType = this.config.controlType;
 		this.selectedControl = null;
 		this.controlTypeButtons = null;
-		this.colorMaterials = {
-			'red': new THREE.MeshBasicMaterial({ color: 0xFF0000 }),
-			'green': new THREE.MeshBasicMaterial({ color: 0x00FF00 }),
-			'blue': new THREE.MeshBasicMaterial({ color: 0x0000FF }),
-			'yellow': new THREE.MeshBasicMaterial({ color: 0xFFFF00 }),
-			'orange': new THREE.MeshBasicMaterial({ color: 0xFFCC00 })
-		};
 
 		this.scene.addEventListener('cursormove', (function(event) {
 			if(!this.selectedControl) {
@@ -75,7 +89,7 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 					this.hoveredAxis.traverse((function(child) {
 						if(!child.userData.material && child.material.visible) {
 							child.userData.material = child.material;
-							child.material = this.colorMaterials['orange'];
+							child.material = altspaceutil.behaviors.TransformControls.Materials['orange'];
 							child.geometry.uvsNeedUpdate = true;
 						}
 					}).bind(this));
@@ -84,11 +98,19 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 		}).bind(this));
 
 		var createAxisOrigin = (function(name, color, size) {
-			return Object.assign(new THREE.Mesh(new THREE.BoxBufferGeometry(size.width, size.height, size.depth), this.colorMaterials[color]), { name: name });
+			return Object.assign(new THREE.Mesh(new THREE.BoxBufferGeometry(size.width, size.height, size.depth), altspaceutil.behaviors.TransformControls.Materials[color]), { name: name });
 		}).bind(this);
 
 		var createPositionAxis = (function(name, color, size, position, rotation) {
-			var axis = Object.assign(new THREE.Mesh(new THREE.BoxGeometry(size.width, size.height, size.depth), this.colorMaterials[color]), { name: name });
+			if(altspaceutil.behaviors.TransformControls.Geometries['axis-position-' + name]) {
+				var axis = Object.assign(new THREE.Mesh(altspaceutil.behaviors.TransformControls.Geometries['axis-position-' + name].clone(), altspaceutil.behaviors.TransformControls.Materials[color]), { name: name });
+				axis.position.set(position.x, position.y, position.z);
+				axis.rotation.set(rotation.x, rotation.y, rotation.z);
+
+				return axis;
+			}
+
+			var axis = Object.assign(new THREE.Mesh(new THREE.BoxGeometry(size.width, size.height, size.depth), altspaceutil.behaviors.TransformControls.Materials[color]), { name: name });
 			axis.position.set(position.x, position.y, position.z);
 			axis.rotation.set(rotation.x, rotation.y, rotation.z);
 
@@ -103,19 +125,31 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 			axis.geometry.merge(axisEndGeometry);
 			axis.geometry = new THREE.BufferGeometry().fromGeometry(axis.geometry);
 
+			altspaceutil.behaviors.TransformControls.Geometries['axis-position-' + name] = axis.geometry;
+
 			return axis;
 		}).bind(this);
 
 		var createRotateAxis = (function(name, color, size, rotation) {
-			var axis = Object.assign(new THREE.Mesh(new THREE.RingBufferGeometry(size.radius * 0.8, size.radius * 1.5, 10, 1), Object.assign(this.colorMaterials[color].clone(), { side: THREE.DoubleSide, visible: false })), { name: name });
+			if(!altspaceutil.behaviors.TransformControls.Geometries['axis-rotate-' + name]) altspaceutil.behaviors.TransformControls.Geometries['axis-rotate-' + name] = new THREE.RingBufferGeometry(size.radius * 0.8, size.radius * 1.5, 10, 1);
+
+			var axis = Object.assign(new THREE.Mesh(altspaceutil.behaviors.TransformControls.Geometries['axis-rotate-' + name], altspaceutil.behaviors.TransformControls.Materials['hidden']), { name: name });
 			axis.rotation.set(rotation.x, rotation.y, rotation.z);
-			var axisGizmo = Object.assign(new THREE.Mesh(new THREE.TorusBufferGeometry(size.radius, size.tube, size.radialSegments, size.tubularSegments), this.colorMaterials[color]), { name: name });
+			var axisGizmo = Object.assign(new THREE.Mesh(new THREE.TorusBufferGeometry(size.radius, size.tube, size.radialSegments, size.tubularSegments), altspaceutil.behaviors.TransformControls.Materials[color]), { name: name });
 			axis.add(axisGizmo);
 			return axis;
 		}).bind(this);
 
 		var createScaleAxis = (function(name, color, size, position, rotation) {
-			var axis = Object.assign(new THREE.Mesh(new THREE.BoxGeometry(size.width, size.height, size.depth), this.colorMaterials[color]), { name: name });
+			if(altspaceutil.behaviors.TransformControls.Geometries['axis-scale-' + name]) {
+				var axis = Object.assign(new THREE.Mesh(altspaceutil.behaviors.TransformControls.Geometries['axis-scale-' + name].clone(), altspaceutil.behaviors.TransformControls.Materials[color]), { name: name });
+				axis.position.set(position.x, position.y, position.z);
+				axis.rotation.set(rotation.x, rotation.y, rotation.z);
+
+				return axis;
+			}
+
+			var axis = Object.assign(new THREE.Mesh(new THREE.BoxGeometry(size.width, size.height, size.depth), altspaceutil.behaviors.TransformControls.Materials[color]), { name: name });
 			axis.position.set(position.x, position.y, position.z);
 			axis.rotation.set(rotation.x, rotation.y, rotation.z);
 
@@ -129,6 +163,8 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 
 			axis.geometry.merge(axisEndGeometry);
 			axis.geometry = new THREE.BufferGeometry().fromGeometry(axis.geometry);
+
+			altspaceutil.behaviors.TransformControls.Geometries['axis-scale-' + name] = axis.geometry;
 
 			return axis;
 		}).bind(this);
@@ -192,7 +228,7 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 				dragHoverAxis.traverse((function(child) {
 					if(!child.userData.material && child.material.visible) {
 						child.userData.material = child.material;
-						child.material = this.colorMaterials['orange'];
+						child.material = altspaceutil.behaviors.TransformControls.Materials['orange'];
 						child.geometry.uvsNeedUpdate = true;
 					}
 				}).bind(this));
@@ -353,7 +389,7 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 					this.hoveredAxis.traverse((function(child) {
 						if(!child.userData.material && child.material.visible) {
 							child.userData.material = child.material;
-							child.material = this.colorMaterials['orange'];
+							child.material = altspaceutil.behaviors.TransformControls.Materials['orange'];
 							child.geometry.uvsNeedUpdate = true;
 						}
 					}).bind(this));
@@ -471,9 +507,7 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 			this.controlTypeButtons = new THREE.Group();
 			this.controlTypeButtons.position.set(0.5, 1, 0);
 
-			var buttonGeometry = new THREE.BoxBufferGeometry(0.2, 0.2, 0.2);
-
-			var buttonPosition = Object.assign(new THREE.Mesh(buttonGeometry, Object.assign(this.colorMaterials['red'].clone(), { transparent: true, opacity: 0.2 })), { name: 'position' });
+			var buttonPosition = Object.assign(new THREE.Mesh(altspaceutil.behaviors.TransformControls.Geometries['button'], altspaceutil.behaviors.TransformControls.Materials['red-transclucent']), { name: 'position' });
 			var buttonPositionIcon = this.controls.position.clone();
 			buttonPositionIcon.position.set(-0.025, -0.025, -0.025);
 			buttonPositionIcon.scale.multiplyScalar(0.1);
@@ -481,7 +515,7 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 			buttonPosition.addEventListener('cursordown', onControlTypeButtonDown);
 			buttonPosition.addEventListener('cursorup', onControlTypeButtonUp);
 
-			var buttonRotate = Object.assign(new THREE.Mesh(buttonGeometry, Object.assign(this.colorMaterials['green'].clone(), { transparent: true, opacity: 0.2 })), { name: 'rotate' });
+			var buttonRotate = Object.assign(new THREE.Mesh(altspaceutil.behaviors.TransformControls.Geometries['button'], altspaceutil.behaviors.TransformControls.Materials['green-transclucent']), { name: 'rotate' });
 			var buttonRotateIcon = this.controls.rotate.clone();
 			buttonRotateIcon.scale.multiplyScalar(0.1);
 			buttonRotate.add(buttonRotateIcon);
@@ -489,7 +523,7 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 			buttonRotate.addEventListener('cursordown', onControlTypeButtonDown);
 			buttonRotate.addEventListener('cursorup', onControlTypeButtonUp);
 
-			var buttonScale = Object.assign(new THREE.Mesh(buttonGeometry, Object.assign(this.colorMaterials['blue'].clone(), { transparent: true, opacity: 0.2 })), { name: 'scale' });
+			var buttonScale = Object.assign(new THREE.Mesh(altspaceutil.behaviors.TransformControls.Geometries['button'], altspaceutil.behaviors.TransformControls.Materials['blue-transclucent']), { name: 'scale' });
 			var buttonScaleIcon = this.controls.scale.clone();
 			buttonScaleIcon.position.set(-0.025, -0.025, -0.025);
 			buttonScaleIcon.scale.multiplyScalar(0.1);
@@ -504,14 +538,13 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 		// Raycaster & Intersection Plane For Drag Hit Testing
 		this.raycaster = new THREE.Raycaster();
 
-		var intersectorGeometry = new THREE.PlaneGeometry(100000, 100000);
-		this.intersector = Object.assign(new THREE.Mesh(intersectorGeometry, new THREE.MeshBasicMaterial({ color: 0xFF00FF, side: THREE.DoubleSide, visible: false })), { visible: false });
+		this.intersector = Object.assign(new THREE.Mesh(altspaceutil.behaviors.TransformControls.Geometries['intersector'], altspaceutil.behaviors.TransformControls.Materials['hidden']), { visible: false });
 
 		this.originIntersectors = new THREE.Group();
 		this.originIntersectors.add(
-			Object.assign(new THREE.Mesh(intersectorGeometry, new THREE.MeshBasicMaterial({ color: 0xFF0000, side: THREE.DoubleSide, visible: false })), { name: 'x', visible: false }),
-			Object.assign(new THREE.Mesh(intersectorGeometry, new THREE.MeshBasicMaterial({ color: 0x00FF00, side: THREE.DoubleSide, visible: false })), { name: 'y', visible: false }),
-			Object.assign(new THREE.Mesh(intersectorGeometry, new THREE.MeshBasicMaterial({ color: 0x0000FF, side: THREE.DoubleSide, visible: false })), { name: 'z', visible: false })
+			Object.assign(new THREE.Mesh(altspaceutil.behaviors.TransformControls.Geometries['intersector'], altspaceutil.behaviors.TransformControls.Materials['hidden']), { name: 'x', visible: false }),
+			Object.assign(new THREE.Mesh(altspaceutil.behaviors.TransformControls.Geometries['intersector'], altspaceutil.behaviors.TransformControls.Materials['hidden']), { name: 'y', visible: false }),
+			Object.assign(new THREE.Mesh(altspaceutil.behaviors.TransformControls.Geometries['intersector'], altspaceutil.behaviors.TransformControls.Materials['hidden']), { name: 'z', visible: false })
 		);
 		this.originIntersectors.children[1].rotation.y = Math.PI / 2;
 		this.originIntersectors.children[2].rotation.x = Math.PI / 2;
@@ -527,17 +560,6 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 		this.scene.add(this.controlbase);
 		this.controlbase.scale.setScalar(this.config.scale);
 		if(this.controlTypeButtons) this.controlbase.add(this.controlTypeButtons);
-
-		// Debugging
-		//Object.assign(this.intersector.material, { visible: true, transparent: true, opacity: 0.1 });
-		//this.intersector.visible = true;
-
-		/*this.originIntersectors.traverse(function(child) {
-			if(child instanceof THREE.Mesh) {
-				Object.assign(child.material, { visible: true, transparent: true, opacity: 0.1 });
-				child.visible = true;
-			}
-		});*/
 
 		this.setActiveControl(this.selectedControlType);
 	}
@@ -667,7 +689,6 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 		this.controls = null;
 		this.selectedControlType = null;
 		this.selectedControl = null;
-		this.colorMaterials = null;
 		this.controlbase = null;
 		this.controlTypeButtons = null;
 		this.buttonDownControlType = null;
