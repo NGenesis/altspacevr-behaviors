@@ -1267,16 +1267,52 @@ altspaceutil.behaviors.PreloadNativeSounds = function(sounds) {
  * behavior is associated with will be used as the target.
  * @param {Number} [config.scale=1] Adjusts the scale of the transform gizmo.
  * @param {Boolean} [config.allowNegativeScale=false] Specifies whether the scale transform gizmo will allow the target's scale to be negative.
+ * @param {Object} [config.positionAxisLock] Specifies which axes of the position gizmo can be displayed and manipulated.
+ * @param {Boolean} [config.positionAxisLock.x=true] X axis of the position gizmo.
+ * @param {Boolean} [config.positionAxisLock.y=true] Y axis of the position gizmo.
+ * @param {Boolean} [config.positionAxisLock.z=true] Z axis of the position gizmo.
+ * @param {Object} [config.rotateAxisLock] Specifies which axes of the rotate gizmo can be displayed and manipulated.
+ * @param {Boolean} [config.rotateAxisLock.x=true] X axis of the rotate gizmo.
+ * @param {Boolean} [config.rotateAxisLock.y=true] Y axis of the rotate gizmo.
+ * @param {Boolean} [config.rotateAxisLock.z=true] Z axis of the rotate gizmo.
+ * @param {Object} [config.scaleAxisLock] Specifies which axes of the scale gizmo can be displayed and manipulated.
+ * @param {Boolean} [config.scaleAxisLock.x=true] X axis of the scale gizmo.
+ * @param {Boolean} [config.scaleAxisLock.y=true] Y axis of the scale gizmo.
+ * @param {Boolean} [config.scaleAxisLock.z=true] Z axis of the scale gizmo.
  * @memberof module:altspaceutil/behaviors
  **/
 altspaceutil.behaviors.TransformControls = function(_config) {
 	this.type = 'TransformControls';
 	this.config = Object.assign({ controlType: 'none', showButtons: false, followTarget: true, target: null, scale: 1, allowNegativeScale: false }, _config);
+	this.config.positionAxisLock = Object.assign({ x: true, y: true, z: true }, this.config.positionAxisLock);
+	this.config.rotateAxisLock = Object.assign({ x: true, y: true, z: true }, this.config.rotateAxisLock);
+	this.config.scaleAxisLock = Object.assign({ x: true, y: true, z: true }, this.config.scaleAxisLock);
 
 	this.awake = function(o, s) {
 		this.object3d = o;
 		this.scene = s;
 		this.target = this.config.target || this.object3d;
+
+		if(!altspaceutil.behaviors.TransformControls.Materials) {
+			altspaceutil.behaviors.TransformControls.Materials = {
+				'red': new THREE.MeshBasicMaterial({ color: 0xFF0000 }),
+				'green': new THREE.MeshBasicMaterial({ color: 0x00FF00 }),
+				'blue': new THREE.MeshBasicMaterial({ color: 0x0000FF }),
+				'yellow': new THREE.MeshBasicMaterial({ color: 0xFFFF00 }),
+				'orange': new THREE.MeshBasicMaterial({ color: 0xFFCC00 }),
+				'hidden': new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, visible: false }),
+				'red-transclucent': new THREE.MeshBasicMaterial({ color: 0xFF0000, transparent: true, opacity: 0.2 }),
+				'green-transclucent': new THREE.MeshBasicMaterial({ color: 0x00FF00, transparent: true, opacity: 0.2 }),
+				'blue-transclucent': new THREE.MeshBasicMaterial({ color: 0x0000FF, transparent: true, opacity: 0.2 })
+			};
+		}
+
+		if(!altspaceutil.behaviors.TransformControls.Geometries) {
+			altspaceutil.behaviors.TransformControls.Geometries = {
+				'button': new THREE.BoxBufferGeometry(0.2, 0.2, 0.2),
+				'intersector': new THREE.PlaneBufferGeometry(100000, 100000)
+			};
+		}
 
 		altspaceutil.manageBehavior(this, this.object3d);
 
@@ -1285,19 +1321,12 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 		this.selectedControlType = this.config.controlType;
 		this.selectedControl = null;
 		this.controlTypeButtons = null;
-		this.colorMaterials = {
-			'red': new THREE.MeshBasicMaterial({ color: 0xFF0000 }),
-			'green': new THREE.MeshBasicMaterial({ color: 0x00FF00 }),
-			'blue': new THREE.MeshBasicMaterial({ color: 0x0000FF }),
-			'yellow': new THREE.MeshBasicMaterial({ color: 0xFFFF00 }),
-			'orange': new THREE.MeshBasicMaterial({ color: 0xFFCC00 })
-		};
 
 		this.scene.addEventListener('cursormove', (function(event) {
 			if(!this.selectedControl) {
 				if(this.hoveredAxis) {
 					this.hoveredAxis.traverse((function(child) {
-						if(child.userData.material) {
+						if(child instanceof THREE.Mesh && child.userData.material) {
 							child.material = child.userData.material;
 							delete child.userData.material;
 							child.geometry.uvsNeedUpdate = true;
@@ -1315,7 +1344,7 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 			if(this.hoveredAxis && (!intersection || this.hoveredAxis !== intersection.object)) {
 				if(!this.dragAxis) {
 					this.hoveredAxis.traverse((function(child) {
-						if(child.userData.material) {
+						if(child instanceof THREE.Mesh && child.userData.material) {
 							child.material = child.userData.material;
 							delete child.userData.material;
 							child.geometry.uvsNeedUpdate = true;
@@ -1329,9 +1358,9 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 				this.hoveredAxis = intersection.object;
 				if(!this.dragAxis) {
 					this.hoveredAxis.traverse((function(child) {
-						if(!child.userData.material && child.material.visible) {
+						if(child instanceof THREE.Mesh && !child.userData.material && child.material.visible) {
 							child.userData.material = child.material;
-							child.material = this.colorMaterials['orange'];
+							child.material = altspaceutil.behaviors.TransformControls.Materials['orange'];
 							child.geometry.uvsNeedUpdate = true;
 						}
 					}).bind(this));
@@ -1339,12 +1368,22 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 			}
 		}).bind(this));
 
-		var createAxisOrigin = (function(name, color, size) {
-			return Object.assign(new THREE.Mesh(new THREE.BoxBufferGeometry(size.width, size.height, size.depth), this.colorMaterials[color]), { name: name });
+		var createAxisOrigin = (function(name, color, size, lock) {
+			return Object.assign(lock ? new THREE.Mesh(new THREE.BoxBufferGeometry(size.width, size.height, size.depth), altspaceutil.behaviors.TransformControls.Materials[color]) : new THREE.Group(), { name: name });
 		}).bind(this);
 
-		var createPositionAxis = (function(name, color, size, position, rotation) {
-			var axis = Object.assign(new THREE.Mesh(new THREE.BoxGeometry(size.width, size.height, size.depth), this.colorMaterials[color]), { name: name });
+		var createPositionAxis = (function(name, color, size, position, rotation, lock) {
+			if(!lock) return Object.assign(new THREE.Object3D(), { name: name });
+
+			if(altspaceutil.behaviors.TransformControls.Geometries['axis-position-' + name]) {
+				var axis = Object.assign(new THREE.Mesh(altspaceutil.behaviors.TransformControls.Geometries['axis-position-' + name].clone(), altspaceutil.behaviors.TransformControls.Materials[color]), { name: name });
+				axis.position.set(position.x, position.y, position.z);
+				axis.rotation.set(rotation.x, rotation.y, rotation.z);
+
+				return axis;
+			}
+
+			var axis = Object.assign(new THREE.Mesh(new THREE.BoxGeometry(size.width, size.height, size.depth), altspaceutil.behaviors.TransformControls.Materials[color]), { name: name });
 			axis.position.set(position.x, position.y, position.z);
 			axis.rotation.set(rotation.x, rotation.y, rotation.z);
 
@@ -1359,19 +1398,35 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 			axis.geometry.merge(axisEndGeometry);
 			axis.geometry = new THREE.BufferGeometry().fromGeometry(axis.geometry);
 
+			altspaceutil.behaviors.TransformControls.Geometries['axis-position-' + name] = axis.geometry;
+
 			return axis;
 		}).bind(this);
 
-		var createRotateAxis = (function(name, color, size, rotation) {
-			var axis = Object.assign(new THREE.Mesh(new THREE.RingBufferGeometry(size.radius * 0.8, size.radius * 1.5, 10, 1), Object.assign(this.colorMaterials[color].clone(), { side: THREE.DoubleSide, visible: false })), { name: name });
+		var createRotateAxis = (function(name, color, size, rotation, lock) {
+			if(!lock) return Object.assign(new THREE.Object3D(), { name: name });
+
+			if(!altspaceutil.behaviors.TransformControls.Geometries['axis-rotate-' + name]) altspaceutil.behaviors.TransformControls.Geometries['axis-rotate-' + name] = new THREE.RingBufferGeometry(size.radius * 0.8, size.radius * 1.5, 10, 1);
+
+			var axis = Object.assign(new THREE.Mesh(altspaceutil.behaviors.TransformControls.Geometries['axis-rotate-' + name], altspaceutil.behaviors.TransformControls.Materials['hidden']), { name: name });
 			axis.rotation.set(rotation.x, rotation.y, rotation.z);
-			var axisGizmo = Object.assign(new THREE.Mesh(new THREE.TorusBufferGeometry(size.radius, size.tube, size.radialSegments, size.tubularSegments), this.colorMaterials[color]), { name: name });
+			var axisGizmo = Object.assign(new THREE.Mesh(new THREE.TorusBufferGeometry(size.radius, size.tube, size.radialSegments, size.tubularSegments), altspaceutil.behaviors.TransformControls.Materials[color]), { name: name });
 			axis.add(axisGizmo);
 			return axis;
 		}).bind(this);
 
-		var createScaleAxis = (function(name, color, size, position, rotation) {
-			var axis = Object.assign(new THREE.Mesh(new THREE.BoxGeometry(size.width, size.height, size.depth), this.colorMaterials[color]), { name: name });
+		var createScaleAxis = (function(name, color, size, position, rotation, lock) {
+			if(!lock) return Object.assign(new THREE.Object3D(), { name: name });
+
+			if(altspaceutil.behaviors.TransformControls.Geometries['axis-scale-' + name]) {
+				var axis = Object.assign(new THREE.Mesh(altspaceutil.behaviors.TransformControls.Geometries['axis-scale-' + name].clone(), altspaceutil.behaviors.TransformControls.Materials[color]), { name: name });
+				axis.position.set(position.x, position.y, position.z);
+				axis.rotation.set(rotation.x, rotation.y, rotation.z);
+
+				return axis;
+			}
+
+			var axis = Object.assign(new THREE.Mesh(new THREE.BoxGeometry(size.width, size.height, size.depth), altspaceutil.behaviors.TransformControls.Materials[color]), { name: name });
 			axis.position.set(position.x, position.y, position.z);
 			axis.rotation.set(rotation.x, rotation.y, rotation.z);
 
@@ -1386,36 +1441,38 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 			axis.geometry.merge(axisEndGeometry);
 			axis.geometry = new THREE.BufferGeometry().fromGeometry(axis.geometry);
 
+			altspaceutil.behaviors.TransformControls.Geometries['axis-scale-' + name] = axis.geometry;
+
 			return axis;
 		}).bind(this);
 
 		// Position
 		this.controls.position.name = 'position';
 		this.controls.position.add(
-			createAxisOrigin('xyz', 'yellow', { width: 0.15, height: 0.15, depth: 0.15 }).add(
-				createPositionAxis('x', 'red', { width: 1, height: 0.05, depth: 0.05 }, { x: 0.5, y: 0, z: 0 }, { x: 0, y: 0, z: 0 }),
-				createPositionAxis('y', 'green', { width: 1, height: 0.05, depth: 0.05 }, { x:0, y: 0.5, z: 0 }, { x: 0, y: 0, z: Math.PI / 2 }),
-				createPositionAxis('z', 'blue', { width: 1, height: 0.05, depth: 0.05 }, { x: 0, y: 0, z: 0.5 }, { x: Math.PI / 2, y: 0, z: Math.PI / 2 })
+			createAxisOrigin('xyz', 'yellow', { width: 0.15, height: 0.15, depth: 0.15 }, this.config.positionAxisLock.x || this.config.positionAxisLock.y || this.config.positionAxisLock.z).add(
+				createPositionAxis('x', 'red', { width: 1, height: 0.05, depth: 0.05 }, { x: 0.5, y: 0, z: 0 }, { x: 0, y: 0, z: 0 }, this.config.positionAxisLock.x),
+				createPositionAxis('y', 'green', { width: 1, height: 0.05, depth: 0.05 }, { x: 0, y: 0.5, z: 0 }, { x: 0, y: 0, z: Math.PI / 2 }, this.config.positionAxisLock.y),
+				createPositionAxis('z', 'blue', { width: 1, height: 0.05, depth: 0.05 }, { x: 0, y: 0, z: 0.5 }, { x: Math.PI / 2, y: 0, z: Math.PI / 2 }, this.config.positionAxisLock.z)
 			)
 		);
 
 		// Rotate
 		this.controls.rotate.name = 'rotate';
 		this.controls.rotate.add(
-			createAxisOrigin('xyz', 'yellow', { width: 0.05, height: 0.05, depth: 0.05 }).add(
-				createRotateAxis('x', 'red', { radius: 0.7, tube: 0.03, radialSegments: 8, tubularSegments: 28 }, { x: 0, y: Math.PI / 2, z: 0 }),
-				createRotateAxis('y', 'green', { radius: 0.7, tube: 0.03, radialSegments: 8, tubularSegments: 28 }, { x: Math.PI / 2, y: 0, z: 0 }),
-				createRotateAxis('z', 'blue',{ radius: 0.7, tube: 0.03, radialSegments: 8, tubularSegments: 28 }, { x: 0, y: 0, z: 0 })
+			createAxisOrigin('xyz', 'yellow', { width: 0.05, height: 0.05, depth: 0.05 }, this.config.rotateAxisLock.x || this.config.rotateAxisLock.y || this.config.rotateAxisLock.z).add(
+				createRotateAxis('x', 'red', { radius: 0.7, tube: 0.03, radialSegments: 8, tubularSegments: 28 }, { x: 0, y: Math.PI / 2, z: 0 }, this.config.rotateAxisLock.x),
+				createRotateAxis('y', 'green', { radius: 0.7, tube: 0.03, radialSegments: 8, tubularSegments: 28 }, { x: Math.PI / 2, y: 0, z: 0 }, this.config.rotateAxisLock.y),
+				createRotateAxis('z', 'blue',{ radius: 0.7, tube: 0.03, radialSegments: 8, tubularSegments: 28 }, { x: 0, y: 0, z: 0 }, this.config.rotateAxisLock.z)
 			)
 		);
 
 		// Scale
 		this.controls.scale.name = 'scale';
 		this.controls.scale.add(
-			createAxisOrigin('xyz', 'yellow', { width: 0.15, height: 0.15, depth: 0.15 }).add(
-				createScaleAxis('x', 'red', { width: 1, height: 0.05, depth: 0.05 }, { x: 0.5, y: 0, z: 0 }, { x: 0, y: 0, z: 0 }),
-				createScaleAxis('y', 'green', { width: 1, height: 0.05, depth: 0.05 }, { x:0, y: 0.5, z: 0 }, { x: 0, y: 0, z: Math.PI / 2 }),
-				createScaleAxis('z', 'blue', { width: 1, height: 0.05, depth: 0.05 }, { x: 0, y: 0, z: 0.5 }, { x: Math.PI / 2, y: 0, z: Math.PI / 2 })
+			createAxisOrigin('xyz', 'yellow', { width: 0.15, height: 0.15, depth: 0.15 }, this.config.scaleAxisLock.x || this.config.scaleAxisLock.y || this.config.scaleAxisLock.z).add(
+				createScaleAxis('x', 'red', { width: 1, height: 0.05, depth: 0.05 }, { x: 0.5, y: 0, z: 0 }, { x: 0, y: 0, z: 0 }, this.config.scaleAxisLock.x),
+				createScaleAxis('y', 'green', { width: 1, height: 0.05, depth: 0.05 }, { x:0, y: 0.5, z: 0 }, { x: 0, y: 0, z: Math.PI / 2 }, this.config.scaleAxisLock.y),
+				createScaleAxis('z', 'blue', { width: 1, height: 0.05, depth: 0.05 }, { x: 0, y: 0, z: 0.5 }, { x: Math.PI / 2, y: 0, z: Math.PI / 2 }, this.config.scaleAxisLock.z)
 			)
 		);
 
@@ -1434,7 +1491,7 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 			// Remove Previous Hover Effects
 			if(this.hoveredAxis) {
 				this.hoveredAxis.traverse((function(child) {
-					if(child.userData.material) {
+					if(child instanceof THREE.Mesh && child.userData.material) {
 						child.material = child.userData.material;
 						delete child.userData.material;
 						child.geometry.uvsNeedUpdate = true;
@@ -1446,9 +1503,9 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 			var dragHoverAxis = this.selectedControl.getObjectByName(this.dragAxis);
 			if(dragHoverAxis) {
 				dragHoverAxis.traverse((function(child) {
-					if(!child.userData.material && child.material.visible) {
+					if(child instanceof THREE.Mesh && !child.userData.material && child.material.visible) {
 						child.userData.material = child.material;
-						child.material = this.colorMaterials['orange'];
+						child.material = altspaceutil.behaviors.TransformControls.Materials['orange'];
 						child.geometry.uvsNeedUpdate = true;
 					}
 				}).bind(this));
@@ -1516,67 +1573,75 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 					case 'x':
 					case 'y':
 					case 'z': {
-						eventDragDelta[this.dragAxis] += dragDelta[this.dragAxis];
+						if(this.config.positionAxisLock[this.dragAxis]) {
+							eventDragDelta[this.dragAxis] += dragDelta[this.dragAxis];
+							this.target.position.add(eventDragDelta);
+						}
 						break;
 					}
 					case 'xyz': {
-						if(this.originIntersector.name === 'x') {
-							eventDragDelta.set(dragDelta.x, dragDelta.y, 0);
-						} else if(this.originIntersector.name === 'y') {
-							eventDragDelta.set(0, dragDelta.y, dragDelta.z);
-						} else if(this.originIntersector.name === 'z') {
-							eventDragDelta.set(dragDelta.x, 0, dragDelta.z);
-						} else eventDragDelta.copy(dragDelta);
+						if(this.config.positionAxisLock.x || this.config.positionAxisLock.y || this.config.positionAxisLock.z) {
+							if(this.originIntersector.name === 'x') eventDragDelta.set(this.config.positionAxisLock.x ? dragDelta.x : 0, this.config.positionAxisLock.y ? dragDelta.y : 0, 0);
+							else if(this.originIntersector.name === 'y') eventDragDelta.set(0, this.config.positionAxisLock.y ? dragDelta.y : 0, this.config.positionAxisLock.z ? dragDelta.z : 0);
+							else if(this.originIntersector.name === 'z') eventDragDelta.set(this.config.positionAxisLock.x ? dragDelta.x : 0, 0, this.config.positionAxisLock.z ? dragDelta.z : 0);
+							else eventDragDelta.set(this.config.positionAxisLock.x ? dragDelta.x : 0, this.config.positionAxisLock.y ? dragDelta.y : 0, this.config.positionAxisLock.z ? dragDelta.z : 0);
+
+							this.target.position.add(eventDragDelta);
+						}
 						break;
 					}
 				}
-
-				this.target.position.add(eventDragDelta);
 			} else if(this.selectedControlType === 'scale') {
 				switch(this.dragAxis) {
 					case 'x':
 					case 'y':
 					case 'z': {
-						eventDragDelta[this.dragAxis] += dragDelta[this.dragAxis];
-						this.target.scale.add(eventDragDelta);
+						if(this.config.scaleAxisLock[this.dragAxis]) {
+							eventDragDelta[this.dragAxis] += dragDelta[this.dragAxis];
+							this.target.scale.add(eventDragDelta);
 
-						if(this.target.scale[this.dragAxis] === undefined || isNaN(this.target.scale[this.dragAxis]) || (!this.config.allowNegativeScale && this.target.scale[this.dragAxis] < 0)) this.target.scale[this.dragAxis] = Number.EPSILON;
+							if(this.target.scale[this.dragAxis] === undefined || isNaN(this.target.scale[this.dragAxis]) || (!this.config.allowNegativeScale && this.target.scale[this.dragAxis] < 0)) this.target.scale[this.dragAxis] = Number.EPSILON;
+						}
 						break;
 					}
 					default: {
-						var maxScaleFactor = dragDelta.x;
-						if(Math.abs(dragDelta.y) > Math.abs(maxScaleFactor)) maxScaleFactor = dragDelta.y;
-						if(Math.abs(dragDelta.z) > Math.abs(maxScaleFactor)) maxScaleFactor = dragDelta.z;
+						if(this.config.scaleAxisLock.x || this.config.scaleAxisLock.y || this.config.scaleAxisLock.z) {
+							var maxScaleFactor = dragDelta.x;
+							if(Math.abs(dragDelta.y) > Math.abs(maxScaleFactor)) maxScaleFactor = dragDelta.y;
+							if(Math.abs(dragDelta.z) > Math.abs(maxScaleFactor)) maxScaleFactor = dragDelta.z;
 
-						eventDragDelta.setScalar(maxScaleFactor);
-						this.target.scale.add(eventDragDelta);
+							eventDragDelta.set(this.config.scaleAxisLock.x ? maxScaleFactor : 0, this.config.scaleAxisLock.y ? maxScaleFactor : 0, this.config.scaleAxisLock.z ? maxScaleFactor : 0);
+							this.target.scale.add(eventDragDelta);
 
-						if(this.target.scale.x === undefined || isNaN(this.target.scale.x) || (!this.config.allowNegativeScale && this.target.scale.x < 0)) this.target.scale.x = Number.EPSILON;
-						if(this.target.scale.y === undefined || isNaN(this.target.scale.y) || (!this.config.allowNegativeScale && this.target.scale.y < 0)) this.target.scale.y = Number.EPSILON;
-						if(this.target.scale.z === undefined || isNaN(this.target.scale.z) || (!this.config.allowNegativeScale && this.target.scale.z < 0)) this.target.scale.z = Number.EPSILON;
+							if(this.target.scale.x === undefined || isNaN(this.target.scale.x) || (!this.config.allowNegativeScale && this.target.scale.x < 0)) this.target.scale.x = Number.EPSILON;
+							if(this.target.scale.y === undefined || isNaN(this.target.scale.y) || (!this.config.allowNegativeScale && this.target.scale.y < 0)) this.target.scale.y = Number.EPSILON;
+							if(this.target.scale.z === undefined || isNaN(this.target.scale.z) || (!this.config.allowNegativeScale && this.target.scale.z < 0)) this.target.scale.z = Number.EPSILON;
+						}
 						break;
 					}
 				}
 			} else if(this.selectedControlType === 'rotate') {
-				switch(this.dragAxis) {
-					case 'x': {
-						var deltaRotation = Math.atan2(rotateDragDelta.z, rotateDragDelta.y) - Math.atan2(lastRotateDragDelta.z, lastRotateDragDelta.y);
-						eventDragDelta[this.dragAxis] += deltaRotation;
-						break;
+				if(this.config.rotateAxisLock[this.dragAxis]) {
+					switch(this.dragAxis) {
+						case 'x': {
+							var deltaRotation = Math.atan2(rotateDragDelta.z, rotateDragDelta.y) - Math.atan2(lastRotateDragDelta.z, lastRotateDragDelta.y);
+							eventDragDelta[this.dragAxis] += deltaRotation;
+							break;
+						}
+						case 'y': {
+							var deltaRotation = Math.atan2(rotateDragDelta.x, rotateDragDelta.z) - Math.atan2(lastRotateDragDelta.x, lastRotateDragDelta.z);
+							eventDragDelta[this.dragAxis] += deltaRotation;
+							break;
+						}
+						case 'z': {
+							var deltaRotation = Math.atan2(rotateDragDelta.y, rotateDragDelta.x) - Math.atan2(lastRotateDragDelta.y, lastRotateDragDelta.x);
+							eventDragDelta[this.dragAxis] += deltaRotation;
+							break;
+						}
 					}
-					case 'y': {
-						var deltaRotation = Math.atan2(rotateDragDelta.x, rotateDragDelta.z) - Math.atan2(lastRotateDragDelta.x, lastRotateDragDelta.z);
-						eventDragDelta[this.dragAxis] += deltaRotation;
-						break;
-					}
-					case 'z': {
-						var deltaRotation = Math.atan2(rotateDragDelta.y, rotateDragDelta.x) - Math.atan2(lastRotateDragDelta.y, lastRotateDragDelta.x);
-						eventDragDelta[this.dragAxis] += deltaRotation;
-						break;
-					}
-				}
 
-				this.target.rotation[this.dragAxis] += eventDragDelta[this.dragAxis];
+					this.target.rotation[this.dragAxis] += eventDragDelta[this.dragAxis];
+				}
 			}
 
 			this.updateTransform();
@@ -1596,7 +1661,7 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 				var dragHoverAxis = this.selectedControl.getObjectByName(dragAxis);
 				if(dragHoverAxis) {
 					dragHoverAxis.traverse((function(child) {
-						if(child.userData.material) {
+						if(child instanceof THREE.Mesh && child.userData.material) {
 							child.material = child.userData.material;
 							delete child.userData.material;
 							child.geometry.uvsNeedUpdate = true;
@@ -1607,9 +1672,9 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 				// Apply Previous Hover Effect
 				if(this.hoveredAxis) {
 					this.hoveredAxis.traverse((function(child) {
-						if(!child.userData.material && child.material.visible) {
+						if(child instanceof THREE.Mesh && !child.userData.material && child.material.visible) {
 							child.userData.material = child.material;
-							child.material = this.colorMaterials['orange'];
+							child.material = altspaceutil.behaviors.TransformControls.Materials['orange'];
 							child.geometry.uvsNeedUpdate = true;
 						}
 					}).bind(this));
@@ -1645,67 +1710,75 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 					case 'x':
 					case 'y':
 					case 'z': {
-						eventDragDelta[dragAxis] += dragDelta[dragAxis];
+						if(this.config.positionAxisLock[dragAxis]) {
+							eventDragDelta[dragAxis] += dragDelta[dragAxis];
+							this.target.position.add(eventDragDelta);
+						}
 						break;
 					}
 					case 'xyz': {
-						if(this.originIntersector.name === 'x') {
-							eventDragDelta.set(dragDelta.x, dragDelta.y, 0);
-						} else if(this.originIntersector.name === 'y') {
-							eventDragDelta.set(0, dragDelta.y, dragDelta.z);
-						} else if(this.originIntersector.name === 'z') {
-							eventDragDelta.set(dragDelta.x, 0, dragDelta.z);
-						} else eventDragDelta.copy(dragDelta);
+						if(this.config.positionAxisLock.x || this.config.positionAxisLock.y || this.config.positionAxisLock.z) {
+							if(this.originIntersector.name === 'x') eventDragDelta.set(this.config.positionAxisLock.x ? dragDelta.x : 0, this.config.positionAxisLock.y ? dragDelta.y : 0, 0);
+							else if(this.originIntersector.name === 'y') eventDragDelta.set(0, this.config.positionAxisLock.y ? dragDelta.y : 0, this.config.positionAxisLock.z ? dragDelta.z : 0);
+							else if(this.originIntersector.name === 'z') eventDragDelta.set(this.config.positionAxisLock.x ? dragDelta.x : 0, 0, this.config.positionAxisLock.z ? dragDelta.z : 0);
+							else eventDragDelta.set(this.config.positionAxisLock.x ? dragDelta.x : 0, this.config.positionAxisLock.y ? dragDelta.y : 0, this.config.positionAxisLock.z ? dragDelta.z : 0);
+
+							this.target.position.add(eventDragDelta);
+						}
 						break;
 					}
 				}
-
-				this.target.position.add(eventDragDelta);
 			} else if(this.selectedControlType === 'scale') {
 				switch(dragAxis) {
 					case 'x':
 					case 'y':
 					case 'z': {
-						eventDragDelta[dragAxis] += dragDelta[dragAxis];
-						this.target.scale.add(eventDragDelta);
+						if(this.config.scaleAxisLock[dragAxis]) {
+							eventDragDelta[dragAxis] += dragDelta[dragAxis];
+							this.target.scale.add(eventDragDelta);
 
-						if(this.target.scale[dragAxis] === undefined || isNaN(this.target.scale[dragAxis]) || (!this.config.allowNegativeScale && this.target.scale[dragAxis] < 0)) this.target.scale[dragAxis] = Number.EPSILON;
+							if(this.target.scale[dragAxis] === undefined || isNaN(this.target.scale[dragAxis]) || (!this.config.allowNegativeScale && this.target.scale[dragAxis] < 0)) this.target.scale[dragAxis] = Number.EPSILON;
+						}
 						break;
 					}
 					default: {
-						var maxScaleFactor = dragDelta.x;
-						if(Math.abs(dragDelta.y) > Math.abs(maxScaleFactor)) maxScaleFactor = dragDelta.y;
-						if(Math.abs(dragDelta.z) > Math.abs(maxScaleFactor)) maxScaleFactor = dragDelta.z;
+						if(this.config.scaleAxisLock.x || this.config.scaleAxisLock.y || this.config.scaleAxisLock.z) {
+							var maxScaleFactor = dragDelta.x;
+							if(Math.abs(dragDelta.y) > Math.abs(maxScaleFactor)) maxScaleFactor = dragDelta.y;
+							if(Math.abs(dragDelta.z) > Math.abs(maxScaleFactor)) maxScaleFactor = dragDelta.z;
 
-						eventDragDelta.setScalar(maxScaleFactor);
-						this.target.scale.add(eventDragDelta);
+							eventDragDelta.set(this.config.scaleAxisLock.x ? maxScaleFactor : 0, this.config.scaleAxisLock.y ? maxScaleFactor : 0, this.config.scaleAxisLock.z ? maxScaleFactor : 0);
+							this.target.scale.add(eventDragDelta);
 
-						if(this.target.scale.x === undefined || isNaN(this.target.scale.x) || (!this.config.allowNegativeScale && this.target.scale.x < 0)) this.target.scale.x = Number.EPSILON;
-						if(this.target.scale.y === undefined || isNaN(this.target.scale.y) || (!this.config.allowNegativeScale && this.target.scale.y < 0)) this.target.scale.y = Number.EPSILON;
-						if(this.target.scale.z === undefined || isNaN(this.target.scale.z) || (!this.config.allowNegativeScale && this.target.scale.z < 0)) this.target.scale.z = Number.EPSILON;
+							if(this.target.scale.x === undefined || isNaN(this.target.scale.x) || (!this.config.allowNegativeScale && this.target.scale.x < 0)) this.target.scale.x = Number.EPSILON;
+							if(this.target.scale.y === undefined || isNaN(this.target.scale.y) || (!this.config.allowNegativeScale && this.target.scale.y < 0)) this.target.scale.y = Number.EPSILON;
+							if(this.target.scale.z === undefined || isNaN(this.target.scale.z) || (!this.config.allowNegativeScale && this.target.scale.z < 0)) this.target.scale.z = Number.EPSILON;
+						}
 						break;
 					}
 				}
 			} else if(this.selectedControlType === 'rotate') {
-				switch(dragAxis) {
-					case 'x': {
-						var deltaRotation = Math.atan2(rotateDragDelta.z, rotateDragDelta.y) - Math.atan2(lastRotateDragDelta.z, lastRotateDragDelta.y);
-						eventDragDelta[dragAxis] += deltaRotation;
-						break;
+				if(this.config.rotateAxisLock[dragAxis]) {
+					switch(dragAxis) {
+						case 'x': {
+							var deltaRotation = Math.atan2(rotateDragDelta.z, rotateDragDelta.y) - Math.atan2(lastRotateDragDelta.z, lastRotateDragDelta.y);
+							eventDragDelta[dragAxis] += deltaRotation;
+							break;
+						}
+						case 'y': {
+							var deltaRotation = Math.atan2(rotateDragDelta.x, rotateDragDelta.z) - Math.atan2(lastRotateDragDelta.x, lastRotateDragDelta.z);
+							eventDragDelta[dragAxis] += deltaRotation;
+							break;
+						}
+						case 'z': {
+							var deltaRotation = Math.atan2(rotateDragDelta.y, rotateDragDelta.x) - Math.atan2(lastRotateDragDelta.y, lastRotateDragDelta.x);
+							eventDragDelta[dragAxis] += deltaRotation;
+							break;
+						}
 					}
-					case 'y': {
-						var deltaRotation = Math.atan2(rotateDragDelta.x, rotateDragDelta.z) - Math.atan2(lastRotateDragDelta.x, lastRotateDragDelta.z);
-						eventDragDelta[dragAxis] += deltaRotation;
-						break;
-					}
-					case 'z': {
-						var deltaRotation = Math.atan2(rotateDragDelta.y, rotateDragDelta.x) - Math.atan2(lastRotateDragDelta.y, lastRotateDragDelta.x);
-						eventDragDelta[dragAxis] += deltaRotation;
-						break;
-					}
-				}
 
-				this.target.rotation[dragAxis] += eventDragDelta[dragAxis];
+					this.target.rotation[dragAxis] += eventDragDelta[dragAxis];
+				}
 			}
 
 			this.updateTransform();
@@ -1727,9 +1800,7 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 			this.controlTypeButtons = new THREE.Group();
 			this.controlTypeButtons.position.set(0.5, 1, 0);
 
-			var buttonGeometry = new THREE.BoxBufferGeometry(0.2, 0.2, 0.2);
-
-			var buttonPosition = Object.assign(new THREE.Mesh(buttonGeometry, Object.assign(this.colorMaterials['red'].clone(), { transparent: true, opacity: 0.2 })), { name: 'position' });
+			var buttonPosition = Object.assign(new THREE.Mesh(altspaceutil.behaviors.TransformControls.Geometries['button'], altspaceutil.behaviors.TransformControls.Materials['red-transclucent']), { name: 'position' });
 			var buttonPositionIcon = this.controls.position.clone();
 			buttonPositionIcon.position.set(-0.025, -0.025, -0.025);
 			buttonPositionIcon.scale.multiplyScalar(0.1);
@@ -1737,7 +1808,7 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 			buttonPosition.addEventListener('cursordown', onControlTypeButtonDown);
 			buttonPosition.addEventListener('cursorup', onControlTypeButtonUp);
 
-			var buttonRotate = Object.assign(new THREE.Mesh(buttonGeometry, Object.assign(this.colorMaterials['green'].clone(), { transparent: true, opacity: 0.2 })), { name: 'rotate' });
+			var buttonRotate = Object.assign(new THREE.Mesh(altspaceutil.behaviors.TransformControls.Geometries['button'], altspaceutil.behaviors.TransformControls.Materials['green-transclucent']), { name: 'rotate' });
 			var buttonRotateIcon = this.controls.rotate.clone();
 			buttonRotateIcon.scale.multiplyScalar(0.1);
 			buttonRotate.add(buttonRotateIcon);
@@ -1745,7 +1816,7 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 			buttonRotate.addEventListener('cursordown', onControlTypeButtonDown);
 			buttonRotate.addEventListener('cursorup', onControlTypeButtonUp);
 
-			var buttonScale = Object.assign(new THREE.Mesh(buttonGeometry, Object.assign(this.colorMaterials['blue'].clone(), { transparent: true, opacity: 0.2 })), { name: 'scale' });
+			var buttonScale = Object.assign(new THREE.Mesh(altspaceutil.behaviors.TransformControls.Geometries['button'], altspaceutil.behaviors.TransformControls.Materials['blue-transclucent']), { name: 'scale' });
 			var buttonScaleIcon = this.controls.scale.clone();
 			buttonScaleIcon.position.set(-0.025, -0.025, -0.025);
 			buttonScaleIcon.scale.multiplyScalar(0.1);
@@ -1760,14 +1831,13 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 		// Raycaster & Intersection Plane For Drag Hit Testing
 		this.raycaster = new THREE.Raycaster();
 
-		var intersectorGeometry = new THREE.PlaneGeometry(100000, 100000);
-		this.intersector = Object.assign(new THREE.Mesh(intersectorGeometry, new THREE.MeshBasicMaterial({ color: 0xFF00FF, side: THREE.DoubleSide, visible: false })), { visible: false });
+		this.intersector = Object.assign(new THREE.Mesh(altspaceutil.behaviors.TransformControls.Geometries['intersector'], altspaceutil.behaviors.TransformControls.Materials['hidden']), { visible: false });
 
 		this.originIntersectors = new THREE.Group();
 		this.originIntersectors.add(
-			Object.assign(new THREE.Mesh(intersectorGeometry, new THREE.MeshBasicMaterial({ color: 0xFF0000, side: THREE.DoubleSide, visible: false })), { name: 'x', visible: false }),
-			Object.assign(new THREE.Mesh(intersectorGeometry, new THREE.MeshBasicMaterial({ color: 0x00FF00, side: THREE.DoubleSide, visible: false })), { name: 'y', visible: false }),
-			Object.assign(new THREE.Mesh(intersectorGeometry, new THREE.MeshBasicMaterial({ color: 0x0000FF, side: THREE.DoubleSide, visible: false })), { name: 'z', visible: false })
+			Object.assign(new THREE.Mesh(altspaceutil.behaviors.TransformControls.Geometries['intersector'], altspaceutil.behaviors.TransformControls.Materials['hidden']), { name: 'x', visible: false }),
+			Object.assign(new THREE.Mesh(altspaceutil.behaviors.TransformControls.Geometries['intersector'], altspaceutil.behaviors.TransformControls.Materials['hidden']), { name: 'y', visible: false }),
+			Object.assign(new THREE.Mesh(altspaceutil.behaviors.TransformControls.Geometries['intersector'], altspaceutil.behaviors.TransformControls.Materials['hidden']), { name: 'z', visible: false })
 		);
 		this.originIntersectors.children[1].rotation.y = Math.PI / 2;
 		this.originIntersectors.children[2].rotation.x = Math.PI / 2;
@@ -1783,17 +1853,6 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 		this.scene.add(this.controlbase);
 		this.controlbase.scale.setScalar(this.config.scale);
 		if(this.controlTypeButtons) this.controlbase.add(this.controlTypeButtons);
-
-		// Debugging
-		//Object.assign(this.intersector.material, { visible: true, transparent: true, opacity: 0.1 });
-		//this.intersector.visible = true;
-
-		/*this.originIntersectors.traverse(function(child) {
-			if(child instanceof THREE.Mesh) {
-				Object.assign(child.material, { visible: true, transparent: true, opacity: 0.1 });
-				child.visible = true;
-			}
-		});*/
 
 		this.setActiveControl(this.selectedControlType);
 	}
@@ -1923,7 +1982,6 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 		this.controls = null;
 		this.selectedControlType = null;
 		this.selectedControl = null;
-		this.colorMaterials = null;
 		this.controlbase = null;
 		this.controlTypeButtons = null;
 		this.buttonDownControlType = null;
@@ -2020,9 +2078,14 @@ altspaceutil.behaviors.TransformControls = function(_config) {
  * @param {Boolean} [allow-negative-scale=false] Specifies whether the scale transform gizmo will allow the target's scale to be negative.
  * @param {Boolean} [sync-events=true] Specifies whether the sync ownership is gained when drag events are fired.  Requires {sync} and {sync-transform} 
  * components be present on the target object.
+ * @param {String} [position-axis-lock=xyz] Specifies which axes of the position gizmo can be displayed and manipulated.
+ * @param {String} [rotate-axis-lock=xyz] Specifies which axes of the rotate gizmo can be displayed and manipulated.
+ * @param {String} [scale-axis-lock=xyz] Specifies which axes of the scale gizmo can be displayed and manipulated.
  * @memberof module:altspaceutil/behaviors
  **/
 if(window.AFRAME) {
+	if(AFRAME.components['altspace-transform-controls']) delete AFRAME.components['altspace-transform-controls'];
+
 	AFRAME.registerComponent('altspace-transform-controls', {
 		schema: {
 			controlType: { type: 'string', default: 'none' },
@@ -2031,10 +2094,38 @@ if(window.AFRAME) {
 			target: { type: 'selector' },
 			scale: { type: 'number', default: 1 },
 			allowNegativeScale: { type: 'boolean', default: false },
-			syncEvents: { type: 'boolean', default: true }
+			syncEvents: { type: 'boolean', default: true },
+			positionAxisLock: {
+				default: 'xyz',
+				parse: function(value) {
+					return { x: value.indexOf('x') !== -1, y: value.indexOf('y') !== -1, z: value.indexOf('z') !== -1 };
+				}
+			},
+			rotateAxisLock: {
+				default: 'xyz',
+				parse: function(value) {
+					return { x: value.indexOf('x') !== -1, y: value.indexOf('y') !== -1, z: value.indexOf('z') !== -1 };
+				}
+			},
+			scaleAxisLock: {
+				default: 'xyz',
+				parse: function(value) {
+					return { x: value.indexOf('x') !== -1, y: value.indexOf('y') !== -1, z: value.indexOf('z') !== -1 };
+				}
+			},
 		},
 		init: function() {
-			this.behavior = new altspaceutil.behaviors.TransformControls({ controlType: this.data.controlType, showButtons: this.data.showButtons, followTarget: this.data.followTarget, target: this.data.target ? this.data.target.object3D : null, scale: this.data.scale, allowNegativeScale: this.data.allowNegativeScale });
+			this.behavior = new altspaceutil.behaviors.TransformControls({
+				controlType: this.data.controlType,
+				showButtons: this.data.showButtons,
+				followTarget: this.data.followTarget,
+				target: this.data.target ? this.data.target.object3D : null,
+				scale: this.data.scale,
+				allowNegativeScale: this.data.allowNegativeScale,
+				positionAxisLock: this.data.positionAxisLock,
+				rotateAxisLock: this.data.rotateAxisLock,
+				scaleAxisLock: this.data.scaleAxisLock
+			});
 			this.el.object3D.addBehavior(this.behavior);
 
 			// Handle Sync System Ownership When Gizmo Is Dragged
