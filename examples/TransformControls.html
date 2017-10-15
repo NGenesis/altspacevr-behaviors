@@ -53,6 +53,11 @@
 					transformParent.addBehavior(new altspaceutil.behaviors.TransformControls({ controlType: 'position', followTarget: false, target: transformCube }));
 					sim.scene.add(transformParent);
 					transformParent.position.set(8, 1, 0);
+
+					var transformCube = new THREE.Mesh(new THREE.BoxBufferGeometry(0.5, 0.5, 0.5), new THREE.MeshBasicMaterial({ color: 'purple', transparent: true, opacity: 0.5 }));
+					transformCube.addBehavior(new altspaceutil.behaviors.TransformControls({ controlType: 'none', showButtons: true, positionAxisLock: { x: false, y: true, z: false }, rotateAxisLock: { x: true, y: false, z: false }, scaleAxisLock: { x: true, y: true, z: false } }));
+					sim.scene.add(transformCube);
+					transformCube.position.set(10, 1, 0);
 				});
 			});
 		</script>
