@@ -1279,11 +1279,13 @@ altspaceutil.behaviors.PreloadNativeSounds = function(sounds) {
  * @param {Boolean} [config.scaleAxisLock.x=true] X axis of the scale gizmo.
  * @param {Boolean} [config.scaleAxisLock.y=true] Y axis of the scale gizmo.
  * @param {Boolean} [config.scaleAxisLock.z=true] Z axis of the scale gizmo.
+ * @param {Boolean} [config.disableColliders.z=true] Specifies whether colliders on the target object should be disabled.
+ * @param {Boolean} [config.disableChildColliders.z=true] Specifies whether colliders on the target's children should be disabled.
  * @memberof module:altspaceutil/behaviors
  **/
 altspaceutil.behaviors.TransformControls = function(_config) {
 	this.type = 'TransformControls';
-	this.config = Object.assign({ controlType: 'none', showButtons: false, followTarget: true, target: null, scale: 1, allowNegativeScale: false }, _config);
+	this.config = Object.assign({ controlType: 'none', showButtons: false, followTarget: true, target: null, scale: 1, allowNegativeScale: false, disableColliders: true, disableChildColliders: true }, _config);
 	this.config.positionAxisLock = Object.assign({ x: true, y: true, z: true }, this.config.positionAxisLock);
 	this.config.rotateAxisLock = Object.assign({ x: true, y: true, z: true }, this.config.rotateAxisLock);
 	this.config.scaleAxisLock = Object.assign({ x: true, y: true, z: true }, this.config.scaleAxisLock);
@@ -1952,12 +1954,16 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 		this.updateTransform();
 
 		// Remove Cursor Colliders
-		this.target.traverse((function(child) {
-			if(!child.userData.isTransformControl && (!child.userData.altspace || !child.userData.altspace.collider || child.userData.altspace.collider.enabled)) {
-				this.objectState[child.uuid] = Object.assign(this.objectState[child.uuid] || {}, { collider: { enabled: true } });
-				child.userData.altspace = { collider: { enabled: false } };
-			}
-		}).bind(this));
+		if(this.target && (this.config.disableColliders || this.config.disableChildColliders)) {
+			this.target.traverse((function(child) {
+				if((child === this.target && !this.config.disableColliders) || (child !== this.target && !this.config.disableChildColliders)) return;
+
+				if(!child.userData.isTransformControl && (!child.userData.altspace || !child.userData.altspace.collider || child.userData.altspace.collider.enabled)) {
+					this.objectState[child.uuid] = Object.assign(this.objectState[child.uuid] || {}, { collider: { enabled: true } });
+					child.userData.altspace = { collider: { enabled: false } };
+				}
+			}).bind(this));
+		}
 	}
 
 	this.dispose = function() {
@@ -1966,8 +1972,10 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 		if(this.controlTypeButtons && this.controlTypeButtons.parent) this.controlTypeButtons.parent.remove(this.controlTypeButtons);
 
 		// Restore Cursor Colliders
-		if(this.target) {
+		if(this.target && (this.config.disableColliders || this.config.disableChildColliders)) {
 			this.target.traverse((function(child) {
+				if((child === this.target && !this.config.disableColliders) || (child !== this.target && !this.config.disableChildColliders)) return;
+
 				if(!child.userData.isTransformControl && this.objectState[child.uuid]) {
 					child.userData.altspace = Object.assign(child.userData.altspace || {}, { collider: this.objectState[child.uuid].collider });
 					delete this.objectState[child.uuid];
@@ -2048,7 +2056,31 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 	* @memberof module:altspaceutil/behaviors.TransformControls
 	*/
 	this.setTarget = function(target) {
+		// Restore Cursor Colliders
+		if(this.target && (this.config.disableColliders || this.config.disableChildColliders)) {
+			this.target.traverse((function(child) {
+				if((child === this.target && !this.config.disableColliders) || (child !== this.target && !this.config.disableChildColliders)) return;
+
+				if(!child.userData.isTransformControl && this.objectState[child.uuid]) {
+					child.userData.altspace = Object.assign(child.userData.altspace || {}, { collider: this.objectState[child.uuid].collider });
+					delete this.objectState[child.uuid];
+				}
+			}).bind(this));
+		}
+
 		this.target = this.config.target = target;
+
+		// Remove Cursor Colliders
+		if(this.target && (this.config.disableColliders || this.config.disableChildColliders)) {
+			this.target.traverse((function(child) {
+				if((child === this.target && !this.config.disableColliders) || (child !== this.target && !this.config.disableChildColliders)) return;
+
+				if(!child.userData.isTransformControl && (!child.userData.altspace || !child.userData.altspace.collider || child.userData.altspace.collider.enabled)) {
+					this.objectState[child.uuid] = Object.assign(this.objectState[child.uuid] || {}, { collider: { enabled: true } });
+					child.userData.altspace = { collider: { enabled: false } };
+				}
+			}).bind(this));
+		}
 	}
 
 	/**

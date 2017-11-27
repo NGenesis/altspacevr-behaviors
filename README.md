@@ -4,7 +4,7 @@ Provides helper functions and behavior types for common functionality compatible
 ## Usage
 Include the utility library in your project:
 ```html
-<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.8.2/js/altspaceutil.min.js"></script>
+<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.8.3/js/altspaceutil.min.js"></script>
 ```
 
 ## Behaviors
