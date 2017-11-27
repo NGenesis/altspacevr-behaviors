@@ -23,8 +23,8 @@
  * @param {Boolean} [config.scaleAxisLock.x=true] X axis of the scale gizmo.
  * @param {Boolean} [config.scaleAxisLock.y=true] Y axis of the scale gizmo.
  * @param {Boolean} [config.scaleAxisLock.z=true] Z axis of the scale gizmo.
- * @param {Boolean} [config.disableColliders.z=true] Specifies whether colliders on the target object should be disabled.
- * @param {Boolean} [config.disableChildColliders.z=true] Specifies whether colliders on the target's children should be disabled.
+ * @param {Boolean} [config.disableColliders=true] Specifies whether colliders on the target object should be disabled.
+ * @param {Boolean} [config.disableChildColliders=true] Specifies whether colliders on the target's children should be disabled.
  * @memberof module:altspaceutil/behaviors
  **/
 altspaceutil.behaviors.TransformControls = function(_config) {
@@ -857,6 +857,8 @@ altspaceutil.behaviors.TransformControls = function(_config) {
  * @param {String} [position-axis-lock=xyz] Specifies which axes of the position gizmo can be displayed and manipulated.
  * @param {String} [rotate-axis-lock=xyz] Specifies which axes of the rotate gizmo can be displayed and manipulated.
  * @param {String} [scale-axis-lock=xyz] Specifies which axes of the scale gizmo can be displayed and manipulated.
+ * @param {Boolean} [disable-colliders=true] Specifies whether colliders on the target object should be disabled.
+ * @param {Boolean} [disable-child-colliders=true] Specifies whether colliders on the target's children should be disabled.
  * @memberof module:altspaceutil/behaviors
  **/
 if(window.AFRAME) {
@@ -889,6 +891,8 @@ if(window.AFRAME) {
 					return { x: value.indexOf('x') !== -1, y: value.indexOf('y') !== -1, z: value.indexOf('z') !== -1 };
 				}
 			},
+			disableColliders: { type: 'boolean', default: true },
+			disableChildColliders: { type: 'boolean', default: true }
 		},
 		init: function() {
 			this.behavior = new altspaceutil.behaviors.TransformControls({
@@ -900,7 +904,9 @@ if(window.AFRAME) {
 				allowNegativeScale: this.data.allowNegativeScale,
 				positionAxisLock: this.data.positionAxisLock,
 				rotateAxisLock: this.data.rotateAxisLock,
-				scaleAxisLock: this.data.scaleAxisLock
+				scaleAxisLock: this.data.scaleAxisLock,
+				disableColliders: this.data.disableColliders,
+				disableChildColliders: this.data.disableChildColliders
 			});
 			this.el.object3D.addBehavior(this.behavior);
 
