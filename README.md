@@ -4,7 +4,7 @@ Provides helper functions and behavior types for common functionality compatible
 ## Usage
 Include the utility library in your project:
 ```html
-<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.8.3/js/altspaceutil.min.js"></script>
+<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.8.4/js/altspaceutil.min.js"></script>
 ```
 
 ## Behaviors
@@ -20,5 +20,11 @@ Include the utility library in your project:
   * Subscribes to avatar and user preference update events for a given list of users.
 * altspaceutil.behaviors.PreloadNativeSounds ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/PreloadNativeSounds.html))
   * Preloads sound files used by n-sound to ensure the resources are cached for subsequent uses.
+* altspaceutil.behaviors.HoverMaterialOpacity
+  * Changes the opacity of an object's material when the cursor hovers over it, and restores the original opacity when the cursor is no longer hovering over the object.
+* altspaceutil.behaviors.HoverMaterialColor
+  * Changes the color of an object's material when the cursor hovers over it, and restores the original color when the cursor is no longer hovering over the object.
+* altspaceutil.behaviors.NativeTextMaterial
+  * Updates the color and opacity of a n-text native component using a material source.
 
 **Please be aware that these behaviors may become deprecated over time as AltspaceSDK changes and new functionality is introduced.**
