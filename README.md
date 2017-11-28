@@ -7,14 +7,36 @@ Include the utility library in your project:
 <script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.8.5/js/altspaceutil.min.js"></script>
 ```
 
+# Reference
+
+## Behaviors
+* [altspaceutil.behaviors.NativeComponent](#NativeComponent)
+* [altspaceutil.behaviors.NativeComponentSync](#NativeComponentSync)
+* [altspaceutil.behaviors.TransformControls](#TransformControls)
+* [altspaceutil.behaviors.OrbitControls](#OrbitControls)
+* [altspaceutil.behaviors.UserEvents](#UserEvents)
+* [altspaceutil.behaviors.PreloadNativeSounds](#PreloadNativeSounds)
+* [altspaceutil.behaviors.HoverMaterialOpacity](#HoverMaterialOpacity)
+* [altspaceutil.behaviors.NativeTextMaterial](#NativeTextMaterial)
+
+## Events
+* [transform-controls-dragmove](#transform-controls-dragmove)
+* [transform-controls-dragbegin](#transform-controls-dragbegin)
+* [transform-controls-dragend](#transform-controls-dragend)
+
+## A-Frame Components
+* [altspace-transform-controls](#altspace-transform-controls)
+* [n-text-material](#n-text-material)
+
 # Behaviors
-## altspaceutil.behaviors.NativeComponent ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/NativeComponent.html))
+
+## <a name="NativeComponent">altspaceutil.behaviors.NativeComponent</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/NativeComponent.html))
 Provides support for AltspaceVR native components to be attached to objects, providing sane configuration defaults where appropriate.
 
-## altspaceutil.behaviors.NativeComponentSync ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/NativeComponentSync.html))
+## <a name="NativeComponentSync">altspaceutil.behaviors.NativeComponentSync</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/NativeComponentSync.html))
 Provides support for AltspaceVR native component data to be synchronized over Firebase when used with SceneSync, Object3DSync and NativeComponent behaviors.
 
-## altspaceutil.behaviors.TransformControls ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/TransformControls.html))
+## <a name="TransformControls">altspaceutil.behaviors.TransformControls</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/TransformControls.html))
 Enables an object's position, rotation and scale to be manipulated in AltspaceVR using a draggable transform gizmo.
 
 ### Parameters
@@ -45,7 +67,7 @@ Enables an object's position, rotation and scale to be manipulated in AltspaceVR
 
 ### Events
 
-#### transform-controls-dragmove
+#### <a name="transform-controls-dragmove">transform-controls-dragmove</a>
 Fires an event when the transform gizmo is being dragged.
 
 | Name                    | Type              | Description |
@@ -57,7 +79,7 @@ Fires an event when the transform gizmo is being dragged.
 | transformAxis           | String            | The axis that the transform is being performed on.  Possible values are 'x', 'y', 'z' (for single axes) and 'xyz' (for all axes). |
 | transformDelta          | THREE.Vector3     | The transform delta that was applied to the target object. |
 
-#### transform-controls-dragbegin
+#### <a name="transform-controls-dragbegin">transform-controls-dragbegin</a>
 Fires an event when the transform gizmo starts being dragged.
 
 | Name                    | Type              | Description |
@@ -68,7 +90,7 @@ Fires an event when the transform gizmo starts being dragged.
 | transformType           | String            | The type of transform being performed.  Possible values are 'position', 'rotate' and 'scale'. |
 | transformAxis           | String            | The axis that the transform is being performed on.  Possible values are 'x', 'y', 'z' (for single axes) and 'xyz' (for all axes). |
 
-#### transform-controls-dragend
+#### <a name="transform-controls-dragend">transform-controls-dragend</a>
 Fires an event when the transform gizmo is no longer being dragged.
 
 | Name                    | Type              | Description |
@@ -79,13 +101,13 @@ Fires an event when the transform gizmo is no longer being dragged.
 | transformType           | String            | The type of transform being performed.  Possible values are 'position', 'rotate' and 'scale'. |
 | transformAxis           | String            | The axis that the transform is being performed on.  Possible values are 'x', 'y', 'z' (for single axes) and 'xyz' (for all axes). |
 
-## altspaceutil.behaviors.OrbitControls ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/OrbitControls.html))
+## <a name="OrbitControls">altspaceutil.behaviors.OrbitControls</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/OrbitControls.html))
 Provides a convenience wrapper for THREE.OrbitControls when working with [altspace.utilities.Simulation](https://altspacevr.github.io/AltspaceSDK/doc/js/module-altspace_utilities.Simulation.html).
 
-## altspaceutil.behaviors.UserEvents ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/UserEvents.html))
+## <a name="UserEvents">altspaceutil.behaviors.UserEvents</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/UserEvents.html))
 Subscribes to avatar and user preference update events for a given list of users.
 
-## altspaceutil.behaviors.PreloadNativeSounds ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/PreloadNativeSounds.html))
+## <a name="PreloadNativeSounds">altspaceutil.behaviors.PreloadNativeSounds</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/PreloadNativeSounds.html))
 Preloads sound files used by n-sound to ensure the resources are cached for subsequent uses.
 
 ### Parameters
@@ -94,7 +116,7 @@ Preloads sound files used by n-sound to ensure the resources are cached for subs
 | -------- | ----- | ------- | ----------- |
 | `sounds` | Array |         | Native sound resources to be preloaded. |
 
-## altspaceutil.behaviors.HoverMaterialOpacity
+## <a name="HoverMaterialOpacity">altspaceutil.behaviors.HoverMaterialOpacity</a>
 Changes the opacity of an object's material when the cursor hovers over it, and restores the original opacity when the cursor is no longer hovering over the object.
 
 ### Parameters
@@ -110,7 +132,7 @@ Changes the opacity of an object's material when the cursor hovers over it, and 
 | `eventListener`   | THREE.Object3D | null     | Specifies an optional object that will listen for cursor events.  By default the object that the behavior is attached to will be used as the event listener. |
 | `hoverChildren`   | Boolean        | true     | Specifies whether hovering over children of the event listener object should invoke the hover effect. |
 
-## altspaceutil.behaviors.HoverMaterialColor
+## <a name="HoverMaterialColor">altspaceutil.behaviors.HoverMaterialColor</a>
 Changes the color of an object's material when the cursor hovers over it, and restores the original color when the cursor is no longer hovering over the object.
 
 ### Parameters
@@ -126,7 +148,7 @@ Changes the color of an object's material when the cursor hovers over it, and re
 | `eventListener`   | THREE.Object3D | null                      | Specifies an optional object that will listen for cursor events.  By default the object that the behavior is attached to will be used as the event listener. |
 | `hoverChildren`   | Boolean        | true                      | Specifies whether hovering over children of the event listener object should invoke the hover effect. |
 
-## altspaceutil.behaviors.NativeTextMaterial ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/NativeTextMaterial.html))
+## <a name="NativeTextMaterial">altspaceutil.behaviors.NativeTextMaterial</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/NativeTextMaterial.html))
 Updates the color and opacity of a [n-text](https://altspacevr.github.io/AltspaceSDK/doc/aframe/module-altspace_components.n-text.html) native component using a material source.
 
 ### Parameters
@@ -139,7 +161,7 @@ Updates the color and opacity of a [n-text](https://altspacevr.github.io/Altspac
 | `opacity`  | Boolean        | true     | Specifies whether the n-text native component should use the opacity of the source material. |
 
 # A-Frame Components
-## altspace-transform-controls ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/aframe/altspace-transform-controls.html))
+## <a name="altspace-transform-controls">altspace-transform-controls</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/aframe/altspace-transform-controls.html))
 Enables an object's position, rotation and scale to be manipulated in AltspaceVR using a draggable transform gizmo.
 
 ### Properties
@@ -159,7 +181,7 @@ Enables an object's position, rotation and scale to be manipulated in AltspaceVR
 | `disable-colliders`       | Boolean  | true    | Specifies whether colliders on the target object should be disabled. |
 | `disable-child-colliders` | Boolean  | true    | Specifies whether colliders on the target's children should be disabled. |
 
-## n-text-material ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/aframe/n-text-material.html))
+## <a name="n-text-material">n-text-material</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/aframe/n-text-material.html))
 Updates the color and opacity of a [n-text](https://altspacevr.github.io/AltspaceSDK/doc/aframe/module-altspace_components.n-text.html) native component using a material source.
 
 ### Properties
@@ -169,3 +191,9 @@ Updates the color and opacity of a [n-text](https://altspacevr.github.io/Altspac
 | `material` | Selector |         | A reference to the object whose material properties will be applied to the n-text native component.  Defaults to material of the object the component is attached to. |
 | `color`    | Boolean  | true    | Specifies whether the n-text native component should use the color of the source material. |
 | `opacity`  | Boolean  | true    | Specifies whether the n-text native component should use the opacity of the source material. |
+
+# Resources
+[Three.js API for AltspaceVR](https://altspacevr.github.io/AltspaceSDK/doc/js/)
+[A-Frame API for AltspaceVR](https://altspacevr.github.io/AltspaceSDK/doc/aframe/)
+[AltspaceVR Native Resources](https://altspacevr.github.io/AltspaceSDK/doc/aframe/module-altspace_resources.html)
+[TextMesh Pro Documentation](http://digitalnativestudios.com/textmeshpro/docs/rich-text/)
