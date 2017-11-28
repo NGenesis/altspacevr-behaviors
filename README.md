@@ -16,6 +16,12 @@ Provides support for AltspaceVR native component data to be synchronized over Fi
 
 ### altspaceutil.behaviors.TransformControls ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/TransformControls.html))
 Enables an object's position, rotation and scale to be manipulated in AltspaceVR using a draggable transform gizmo.
+#### Parameters
+`config` - Optional parameters.
+
+| Name          | Type           | Default  | Description  |
+| ------------- | -------------- | -------- | ------------ |
+| `             |                |          |              |
 
 ### altspaceutil.behaviors.OrbitControls ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/OrbitControls.html))
 Provides a convenience wrapper for THREE.OrbitControls when working with [altspace.utilities.Simulation](https://altspacevr.github.io/AltspaceSDK/doc/js/module-altspace_utilities.Simulation.html).
