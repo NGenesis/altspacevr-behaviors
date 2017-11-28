@@ -34,7 +34,16 @@ Include the utility library in your project:
 Provides support for AltspaceVR native components to be attached to objects, providing sane configuration defaults where appropriate.
 
 ## <a name="NativeComponentSync">altspaceutil.behaviors.NativeComponentSync</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/NativeComponentSync.html))
-Provides support for AltspaceVR native component data to be synchronized over Firebase when used with SceneSync, Object3DSync and NativeComponent behaviors.
+Provides support for AltspaceVR native component data to be synchronized over Firebase.  The behavior must be used in conjunction with SceneSync, Object3DSync and a NativeComponent of the same type specified for NativeComponentSync.
+
+### Parameters
+`type` - Type of native component to be synchronized.  To retrieve the behavior using the `getBehaviorByType` method, prepend `sync-` to the name of the native component type (e.g. `sync-n-text` for an `n-text` native component).
+
+`config` - Optional parameters.
+
+| Name      | Type         | Default | Description |
+| --------- | ------------ | ------- | ----------- |
+| `syncRef` | Object3DSync | null    | A reference to the object syncing component.  Defaults to using the syncing component of the object the behavior is attached to. |
 
 ## <a name="TransformControls">altspaceutil.behaviors.TransformControls</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/TransformControls.html))
 Enables an object's position, rotation and scale to be manipulated in AltspaceVR using a draggable transform gizmo.

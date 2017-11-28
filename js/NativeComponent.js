@@ -654,6 +654,9 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
  * the same type specified for NativeComponentSync.
  *
  * @class NativeComponentSync
+ * @param {String} [type] Type of native component to be synchronized.  To retrieve the behavior using the getBehaviorByType method, prepend "sync-" to the name of the native component type (e.g. sync-n-text for an n-text native component).
+ * @param {Object} [config] Optional parameters.
+ * @param {Object3DSync} [config.syncRef=null] A reference to the object syncing component.  Defaults to using the syncing component of the object the behavior is attached to.
  * @memberof module:altspaceutil/behaviors
  **/
 altspaceutil.behaviors.NativeComponentSync = function(_type, _config) {
