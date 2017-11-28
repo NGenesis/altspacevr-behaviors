@@ -33,4 +33,4 @@ Include the utility library in your project:
 * n-text-material ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/aframe/n-text-material.html))
   * Updates the color and opacity of a [n-text](https://altspacevr.github.io/AltspaceSDK/doc/aframe/module-altspace_components.n-text.html) native component using a material source.
 
-**Please be aware that these behaviors may become deprecated over time as AltspaceSDK changes and new functionality is introduced.**
+**Please be aware that these behaviors and components may become deprecated over time as AltspaceSDK changes and new functionality is introduced.**
