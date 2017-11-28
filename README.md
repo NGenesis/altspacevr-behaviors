@@ -110,6 +110,23 @@ Updates the color and opacity of a [n-text](https://altspacevr.github.io/Altspac
 ### altspace-transform-controls ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/aframe/altspace-transform-controls.html))
 Enables an object's position, rotation and scale to be manipulated in AltspaceVR using a draggable transform gizmo.
 
+#### Properties
+
+| Name                      | Type     | Default | Description |
+| ------------------------- | -------- | ------- | ----------- |
+| `control-type`            | String   | none    | The default control type to be selected.  Supported control types are 'none', 'position', 'rotate' or 'scale'. |
+| `show-buttons`            | Boolean  | false   | Specifies whether buttons should be displayed to toggle between control types. |
+| `follow-target`           | Boolean  | true    | Specified whether the transform gizmo should follow the object that is being manipulated. |
+| `target`                  | Selector | null    | The target that the transform gizmo should manipulate when interacted with.  If omitted, the object that the behavior is associated with will be used as the target. |
+| `scale`                   | Number   | 1       | Adjusts the scale of the transform gizmo. |
+| `allow-negative-scale`    | Boolean  | false   | Specifies whether the scale transform gizmo will allow the target's scale to be negative. |
+| `sync-events`             | Boolean  | true    | Specifies whether the sync ownership is gained when drag events are fired.  Requires `sync` and `sync-transform` components be present on the target object. |
+| `position-axis-lock`      | String   | xyz     | Specifies which axes of the position gizmo can be displayed and manipulated. |
+| `rotate-axis-lock`        | String   | xyz     | Specifies which axes of the rotate gizmo can be displayed and manipulated. |
+| `scale-axis-lock`         | String   | xyz     | Specifies which axes of the scale gizmo can be displayed and manipulated. |
+| `disable-colliders`       | Boolean  | true    | Specifies whether colliders on the target object should be disabled. |
+| `disable-child-colliders` | Boolean  | true    | Specifies whether colliders on the target's children should be disabled. |
+
 ### n-text-material ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/aframe/n-text-material.html))
 Updates the color and opacity of a [n-text](https://altspacevr.github.io/AltspaceSDK/doc/aframe/module-altspace_components.n-text.html) native component using a material source.
 
