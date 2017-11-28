@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang=en>
+	<head>
+		<meta charset=utf-8>
+		<meta name="author" content="Genesis">
+		<title>NativeTextMaterial Example</title>
+		<script src="https://cdn.rawgit.com/mrdoob/three.js/r88/build/three.min.js"></script>
+		<script src="https://cdn.rawgit.com/AltspaceVR/AltspaceSDK/v2.6.2/dist/altspace.min.js"></script>
+		<script src="../js/altspaceutil.min.js"></script>
+	</head>
+	<body>
+		<script>
+			var sim = new altspace.utilities.Simulation();
+
+			altspace.getEnclosure().then(function(enclosure) {
+				enclosure.requestFullspace().then(function() {
+					var obj = new THREE.Mesh(new THREE.BoxBufferGeometry(2, 2, 2), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.3, color: 'yellow' }));
+					sim.scene.add(obj);
+
+					var ntext = new THREE.Object3D();
+					sim.scene.add(ntext);
+					ntext.addBehaviors(
+						new altspaceutil.behaviors.NativeComponent('n-text', { text: 'Color: Yellow\nOpacity: 0.3', fontSize: 5, width: 100, height: 5, verticalAlign: 'top' }),
+						new altspaceutil.behaviors.NativeTextMaterial({ material: obj.material, color: true, opacity: true }),
+						new altspaceutil.behaviors.NativeComponent('n-billboard')
+					);
+
+					var obj = new THREE.Mesh(new THREE.SphereBufferGeometry(1.3, 16, 16), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.3, color: 'red' }));
+					obj.position.set(0, 0, 5);
+					sim.scene.add(obj);
+					obj.addBehaviors(
+						new altspaceutil.behaviors.NativeComponent('n-text', { text: 'Color: Red\nOpacity: Not Inherited', fontSize: 5, width: 100, height: 5, verticalAlign: 'top' }),
+						new altspaceutil.behaviors.NativeTextMaterial({ opacity: false }),
+						new altspaceutil.behaviors.NativeComponent('n-billboard')
+					);
+				});
+			});
+		</script>
+	</body>
+</html>

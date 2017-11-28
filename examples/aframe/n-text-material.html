@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang=en>
+	<head>
+		<meta charset=utf-8>
+		<meta name="author" content="Genesis">
+		<title>n-text-material Example</title>
+		<script src="https://aframe.io/releases/0.3.0/aframe.min.js"></script>
+		<script src="https://cdn.rawgit.com/AltspaceVR/AltspaceSDK/v2.6.2/dist/altspace.min.js"></script>
+		<script src="../../js/altspaceutil.min.js"></script>
+	</head>
+	<body>
+		<a-scene altspace="fullspace:true">
+			<a-box id="material" color="yellow" width="2" depth="2" height="2" material="transparent: true; opacity: 0.3"></a-box>
+			<a-entity position="0 1 0" n-text="text: Color: Yellow\nOpacity: 0.3; fontSize: 5; width: 100; height: 5; verticalAlign: top" n-text-material="material: #material; color: true; opacity: true" n-billboard></a-entity>
+
+			<a-sphere color="red" radius="1.3" segments-width="16" segments-height="16" depth="1" height="1" position="0 0 5" n-text="text: Color: Red\nOpacity: Not Inherited; fontSize: 5; width: 100; height: 5; verticalAlign: top" n-text-material="opacity: false" material="transparent: true; opacity: 0.3"  n-billboard></a-box>
+		</a-scene>
+	</body>
+</html>
