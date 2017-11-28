@@ -2400,7 +2400,7 @@ altspaceutil.behaviors.NativeTextMaterial = function(config) {
  * The n-text-material component updates the color and opacity of a {n-text} native component using a material source.
  *
  * @class n-text-material
- * @param {THREE.Material} [material=null] A reference to the object whose material properties will be applied to the n-text native component.  Defaults to material of the object the component is attached to.
+ * @param {Selector} [material] A reference to the object whose material properties will be applied to the n-text native component.  Defaults to material of the object the component is attached to.
  * @param {Boolean} [color=true] Specifies whether the n-text native component should use the color of the source material.
  * @param {Boolean} [opacity=true] Specifies whether the n-text native component should use the opacity of the source material.
  * @memberof module:altspaceutil/behaviors
