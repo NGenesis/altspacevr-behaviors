@@ -7,7 +7,7 @@ Include the utility library in your project:
 <script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.8.5/js/altspaceutil.min.js"></script>
 ```
 
-# Reference
+# API Reference
 
 ## Behaviors
 * [altspaceutil.behaviors.NativeComponent](#NativeComponent)
@@ -193,7 +193,7 @@ Updates the color and opacity of a [n-text](https://altspacevr.github.io/Altspac
 | `opacity`  | Boolean  | true    | Specifies whether the n-text native component should use the opacity of the source material. |
 
 # Resources
-[Three.js API for AltspaceVR](https://altspacevr.github.io/AltspaceSDK/doc/js/)
-[A-Frame API for AltspaceVR](https://altspacevr.github.io/AltspaceSDK/doc/aframe/)
-[AltspaceVR Native Resources](https://altspacevr.github.io/AltspaceSDK/doc/aframe/module-altspace_resources.html)
-[TextMesh Pro Documentation](http://digitalnativestudios.com/textmeshpro/docs/rich-text/)
+* [Three.js API for AltspaceVR](https://altspacevr.github.io/AltspaceSDK/doc/js/)
+* [A-Frame API for AltspaceVR](https://altspacevr.github.io/AltspaceSDK/doc/aframe/)
+* [AltspaceVR Native Resources](https://altspacevr.github.io/AltspaceSDK/doc/aframe/module-altspace_resources.html)
+* [TextMesh Pro Documentation](http://digitalnativestudios.com/textmeshpro/docs/rich-text/)
