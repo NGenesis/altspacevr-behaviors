@@ -4,7 +4,7 @@ Provides helper functions and behavior types for common functionality compatible
 ## Usage
 Include the utility library in your project:
 ```html
-<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.8.4/js/altspaceutil.min.js"></script>
+<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.8.5/js/altspaceutil.min.js"></script>
 ```
 
 ## Behaviors
@@ -12,7 +12,7 @@ Include the utility library in your project:
   * Provides support for AltspaceVR native components to be attached to objects, providing sane configuration defaults where appropriate.
 * altspaceutil.behaviors.NativeComponentSync ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/NativeComponentSync.html))
   * Provides support for AltspaceVR native component data to be synchronized over Firebase when used with SceneSync, Object3DSync and NativeComponent behaviors.
-* altspaceutil.behaviors.TransformControls ([Example - three.js](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/TransformControls.html), [Example - A-Frame](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/aframe/TransformControls.html))
+* altspaceutil.behaviors.TransformControls ([Example - three.js](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/TransformControls.html))
   * Enables an object's position, rotation and scale to be manipulated in AltspaceVR using a draggable transform gizmo.
 * altspaceutil.behaviors.OrbitControls ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/OrbitControls.html))
   * Provides a convenience wrapper for THREE.OrbitControls when working with [altspace.utilities.Simulation](https://altspacevr.github.io/AltspaceSDK/doc/js/module-altspace_utilities.Simulation.html).
@@ -24,7 +24,13 @@ Include the utility library in your project:
   * Changes the opacity of an object's material when the cursor hovers over it, and restores the original opacity when the cursor is no longer hovering over the object.
 * altspaceutil.behaviors.HoverMaterialColor
   * Changes the color of an object's material when the cursor hovers over it, and restores the original color when the cursor is no longer hovering over the object.
-* altspaceutil.behaviors.NativeTextMaterial
+* altspaceutil.behaviors.NativeTextMaterial ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/NativeTextMaterial.html))
+  * Updates the color and opacity of a n-text native component using a material source.
+
+## A-Frame Components
+* altspace-transform-controls ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/aframe/altspace-transform-controls.html))
+  * Enables an object's position, rotation and scale to be manipulated in AltspaceVR using a draggable transform gizmo.
+* n-text-material ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/aframe/n-text-material.html))
   * Updates the color and opacity of a n-text native component using a material source.
 
 **Please be aware that these behaviors may become deprecated over time as AltspaceSDK changes and new functionality is introduced.**
