@@ -1221,6 +1221,7 @@ altspaceutil.behaviors.UserEvents = function(config) {
  * The behavior will remove itself automatically once the sound files have been preloaded.
  *
  * @class PreloadNativeSounds
+ * @param {Array} [sounds] Native sound resources to be preloaded.
  * @memberof module:altspaceutil/behaviors
  **/
 altspaceutil.behaviors.PreloadNativeSounds = function(sounds) {
@@ -2193,11 +2194,11 @@ if(window.AFRAME) {
  * @class HoverMaterialColor
  * @param {Object} [config] Optional parameters.
  * @param {THREE.Material} [config.material] A reference to the material whose color will be updated.  Defaults to material of the object the behavior is attached to.
- * @param {Number} [config.color=new THREE.Color('yellow')] The value that will be applied to the object's material color when the cursor hovers over it.
+ * @param {THREE.Color} [config.color=new THREE.Color('yellow')] The value that will be applied to the object's material color when the cursor hovers over it.
  * @param {Number} [config.beginDuration=75] Duration the hovered color adjustment effect is intended to take to complete, in milliseconds.
  * @param {Number} [config.endDuration=75] Duration the unhovered color adjustment effect is intended to take to complete, in milliseconds.
  * @param {Boolean} [config.revertOnDispose=true] Specifies whether the object's original material color should be restored when the behavior has been destroyed.
- * @param {Object} [config.eventListener=null] Specifies an optional object that will listen for cursor events.  By default the object that the behavior is attached to will be used as the event listener.
+ * @param {THREE.Object3D} [config.eventListener=null] Specifies an optional object that will listen for cursor events.  By default the object that the behavior is attached to will be used as the event listener.
  * @param {Boolean} [config.hoverChildren=true] Specifies whether hovering over children of the event listener object should invoke the hover effect.
  * @memberof module:altspace/utilities/behaviors
  */
@@ -2276,7 +2277,7 @@ altspaceutil.behaviors.HoverMaterialColor = function(config) {
  * @param {Number} [config.beginDuration=75] Duration the hovered opacity adjustment effect is intended to take to complete, in milliseconds.
  * @param {Number} [config.endDuration=75] Duration the unhovered opacity adjustment effect is intended to take to complete, in milliseconds.
  * @param {Boolean} [config.revertOnDispose=true] Specifies whether the object's original material opacity should be restored when the behavior has been destroyed.
- * @param {Object} [config.eventListener=null] Specifies an optional object that will listen for cursor events.  By default the object that the behavior is attached to will be used as the event listener.
+ * @param {THREE.Object3D} [config.eventListener=null] Specifies an optional object that will listen for cursor events.  By default the object that the behavior is attached to will be used as the event listener.
  * @param {Boolean} [config.hoverChildren=true] Specifies whether hovering over children of the event listener object should invoke the hover effect.
  * @memberof module:altspace/utilities/behaviors
  */

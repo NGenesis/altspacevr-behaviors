@@ -88,11 +88,43 @@ Subscribes to avatar and user preference update events for a given list of users
 ## altspaceutil.behaviors.PreloadNativeSounds ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/PreloadNativeSounds.html))
 Preloads sound files used by n-sound to ensure the resources are cached for subsequent uses.
 
+### Parameters
+
+| Name     | Type  | Default | Description |
+| -------- | ----- | ------- | ----------- |
+| `sounds` | Array |         | Native sound resources to be preloaded. |
+
 ## altspaceutil.behaviors.HoverMaterialOpacity
 Changes the opacity of an object's material when the cursor hovers over it, and restores the original opacity when the cursor is no longer hovering over the object.
 
+### Parameters
+`config` - Optional parameters.
+
+| Name              | Type           | Default  | Description |
+| ----------------- | -------------- | -------- | ----------- |
+| `material`        | THREE.Material | null     | A reference to the material whose opacity will be updated.  Defaults to material of the object the behavior is attached to. |
+| `opacity`         | Number         | 1        | The value that will be applied to the object's material opacity when the cursor hovers over it. |
+| `beginDuration`   | Number         | 75       | Duration the hovered opacity adjustment effect is intended to take to complete, in milliseconds. |
+| `endDuration`     | Number         | 75       | Duration the unhovered opacity adjustment effect is intended to take to complete, in milliseconds. |
+| `revertOnDispose` | Boolean        | true     | Specifies whether the object's original material opacity should be restored when the behavior has been destroyed. |
+| `eventListener`   | THREE.Object3D | null     | Specifies an optional object that will listen for cursor events.  By default the object that the behavior is attached to will be used as the event listener. |
+| `hoverChildren`   | Boolean        | true     | Specifies whether hovering over children of the event listener object should invoke the hover effect. |
+
 ## altspaceutil.behaviors.HoverMaterialColor
 Changes the color of an object's material when the cursor hovers over it, and restores the original color when the cursor is no longer hovering over the object.
+
+### Parameters
+`config` - Optional parameters.
+
+| Name              | Type           | Default                   | Description |
+| ----------------- | -------------- | ------------------------- | ----------- |
+| `material`        | THREE.Material | null                      | A reference to the material whose color will be updated.  Defaults to material of the object the behavior is attached to. |
+| `color  `         | THREE.Color    | new THREE.Color('yellow') | The value that will be applied to the object's material color when the cursor hovers over it. |
+| `beginDuration`   | Number         | 75                        | Duration the hovered color adjustment effect is intended to take to complete, in milliseconds. |
+| `endDuration`     | Number         | 75                        | Duration the unhovered color adjustment effect is intended to take to complete, in milliseconds. |
+| `revertOnDispose` | Boolean        | true                      | Specifies whether the object's original material color should be restored when the behavior has been destroyed. |
+| `eventListener`   | THREE.Object3D | null                      | Specifies an optional object that will listen for cursor events.  By default the object that the behavior is attached to will be used as the event listener. |
+| `hoverChildren`   | Boolean        | true                      | Specifies whether hovering over children of the event listener object should invoke the hover effect. |
 
 ## altspaceutil.behaviors.NativeTextMaterial ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/NativeTextMaterial.html))
 Updates the color and opacity of a [n-text](https://altspacevr.github.io/AltspaceSDK/doc/aframe/module-altspace_components.n-text.html) native component using a material source.
