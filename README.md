@@ -37,7 +37,7 @@ Include the utility library in your project:
 Provides support for AltspaceVR native components to be attached to objects, providing sane configuration defaults where appropriate.
 
 ## <a name="NativeComponentSync">altspaceutil.behaviors.NativeComponentSync</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/NativeComponentSync.html))
-Provides support for AltspaceVR native component data to be synchronized over Firebase.  The behavior must be used in conjunction with SceneSync, Object3DSync and a NativeComponent of the same type specified for NativeComponentSync.
+Provides support for AltspaceVR native component data to be synchronized over Firebase.  The behavior must be used in conjunction with [SceneSync](https://altspacevr.github.io/AltspaceSDK/doc/js/module-altspace_utilities_behaviors.SceneSync.html), [Object3DSync](https://altspacevr.github.io/AltspaceSDK/doc/js/module-altspace_utilities_behaviors.Object3DSync.html) and a [NativeComponent](#NativeComponent) of the same type specified for NativeComponentSync.
 
 ### Parameters
 `type` - Type of native component to be synchronized.  To retrieve the behavior using the `getBehaviorByType` method, prepend `sync-` to the name of the native component type (e.g. `sync-n-text` for an `n-text` native component).
@@ -56,7 +56,7 @@ Enables an object's position, rotation and scale to be manipulated in AltspaceVR
 
 | Name                    | Type                                                          | Default | Description |
 | ----------------------- | ------------------------------------------------------------- | ------- | ----------- |
-| `controlType`           | String                                                        | none    | The default control type to be selected.  Supported control types are 'none', 'position', 'rotate' or 'scale'. |
+| `controlType`           | String                                                        | none    | The default control type to be selected.  Supported control types are `none`, `position`, `rotate` or `scale`. |
 | `showButtons`           | Boolean                                                       | false   | Specifies whether buttons should be displayed to toggle between control types. |
 | `followTarget`          | Boolean                                                       | true    | Specified whether the transform gizmo should follow the object that is being manipulated. |
 | `target`                | [THREE.Object3D](https://threejs.org/docs/#api/core/Object3D) | null    | The target that the transform gizmo should manipulate when interacted with.  If omitted, the object that the behavior is associated with will be used as the target. |
@@ -87,8 +87,8 @@ Fires an event when the transform gizmo is being dragged.
 | `behavior`        | [TransformControls](#TransformControls)                       | The behavior that controls the transform gizmo. |
 | `parent`          | [THREE.Object3D](https://threejs.org/docs/#api/core/Object3D) | The object that the transform gizmo is parented to. |
 | `transformTarget` | [THREE.Object3D](https://threejs.org/docs/#api/core/Object3D) | The object that the transform gizmo will manipulate. |
-| `transformType`   | String                                                        | The type of transform being performed.  Possible values are 'position', 'rotate' and 'scale'. |
-| `transformAxis`   | String                                                        | The axis that the transform is being performed on.  Possible values are 'x', 'y', 'z' (for single axes) and 'xyz' (for all axes). |
+| `transformType`   | String                                                        | The type of transform being performed.  Possible values are `position`, `rotate` and `scale`. |
+| `transformAxis`   | String                                                        | The axis that the transform is being performed on.  Possible values are `x`, `y`, `z` (for single axes) and `xyz` (for all axes). |
 | `transformDelta`  | [THREE.Vector3](https://threejs.org/docs/#api/math/Vector3)   | The transform delta that was applied to the target object. |
 
 #### <a name="transform-controls-dragbegin">transform-controls-dragbegin</a>
@@ -99,8 +99,8 @@ Fires an event when the transform gizmo starts being dragged.
 | `behavior`        | [TransformControls](#TransformControls)                       | The behavior that controls the transform gizmo. |
 | `parent`          | [THREE.Object3D](https://threejs.org/docs/#api/core/Object3D) | The object that the transform gizmo is parented to. |
 | `transformTarget` | [THREE.Object3D](https://threejs.org/docs/#api/core/Object3D) | The object that the transform gizmo will manipulate. |
-| `transformType`   | String                                                        | The type of transform being performed.  Possible values are 'position', 'rotate' and 'scale'. |
-| `transformAxis`   | String                                                        | The axis that the transform is being performed on.  Possible values are 'x', 'y', 'z' (for single axes) and 'xyz' (for all axes). |
+| `transformType`   | String                                                        | The type of transform being performed.  Possible values are `position`, `rotate` and `scale`. |
+| `transformAxis`   | String                                                        | The axis that the transform is being performed on.  Possible values are `x`, `y`, `z` (for single axes) and `xyz` (for all axes). |
 
 #### <a name="transform-controls-dragend">transform-controls-dragend</a>
 Fires an event when the transform gizmo is no longer being dragged.
@@ -110,8 +110,8 @@ Fires an event when the transform gizmo is no longer being dragged.
 | `behavior`        | [TransformControls](#TransformControls)                       | The behavior that controls the transform gizmo. |
 | `parent`          | [THREE.Object3D](https://threejs.org/docs/#api/core/Object3D) | The object that the transform gizmo is parented to. |
 | `transformTarget` | [THREE.Object3D](https://threejs.org/docs/#api/core/Object3D) | The object that the transform gizmo will manipulate. |
-| `transformType`   | String                                                        | The type of transform being performed.  Possible values are 'position', 'rotate' and 'scale'. |
-| `transformAxis`   | String                                                        | The axis that the transform is being performed on.  Possible values are 'x', 'y', 'z' (for single axes) and 'xyz' (for all axes). |
+| `transformType`   | String                                                        | The type of transform being performed.  Possible values are `position`, `rotate` and `scale`. |
+| `transformAxis`   | String                                                        | The axis that the transform is being performed on.  Possible values are `x`, `y`, `z` (for single axes) and `xyz` (for all axes). |
 
 ## <a name="OrbitControls">altspaceutil.behaviors.OrbitControls</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/OrbitControls.html))
 Provides a convenience wrapper for [THREE.OrbitControls](https://threejs.org/docs/#examples/controls/OrbitControls) when working with [altspace.utilities.Simulation](https://altspacevr.github.io/AltspaceSDK/doc/js/module-altspace_utilities.Simulation.html).
@@ -260,7 +260,7 @@ Enables an object's position, rotation and scale to be manipulated in AltspaceVR
 
 | Name                      | Type     | Default | Description |
 | ------------------------- | -------- | ------- | ----------- |
-| `control-type`            | String   | none    | The default control type to be selected.  Supported control types are 'none', 'position', 'rotate' or 'scale'. |
+| `control-type`            | String   | none    | The default control type to be selected.  Supported control types are `none`, `position`, `rotate` or `scale`. |
 | `show-buttons`            | Boolean  | false   | Specifies whether buttons should be displayed to toggle between control types. |
 | `follow-target`           | Boolean  | true    | Specified whether the transform gizmo should follow the object that is being manipulated. |
 | `target`                  | Selector | null    | The target that the transform gizmo should manipulate when interacted with.  If omitted, the object that the behavior is associated with will be used as the target. |
