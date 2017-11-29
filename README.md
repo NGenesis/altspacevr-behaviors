@@ -68,73 +68,90 @@ Calls a function associated with the native component.
 ### Native Component Defaults
 #### n-object
 
-```data: {
+```javascript
+data: {
 	res: 'architecture/wall-4w-4h'
-}```
+}
+```
 
 #### n-spawner
 
-```data: {
+```javascript
+data: {
 	res: 'interactables/basketball'
-}```
+}
+```
 
 #### n-text
 
-```data: {
+```javascript
+data: {
 	text: '',
 	fontSize: 10,
 	width: 10,
 	height: 1,
 	horizontalAlign: 'middle',
 	verticalAlign: 'middle'
-}```
+}
+```
 
 #### n-sphere-collider
 
-```data: {
+```javascript
+data: {
 	isTrigger: false,
 	center: { 'x': 0, 'y': 0, 'z': 0 },
 	radius: 0,
 	type: 'environment'
-}```
+}
+```
 
 #### n-box-collider
 
-```data: {
+```javascript
+data: {
 	isTrigger: false,
 	center: { 'x': 0, 'y': 0, 'z': 0 },
 	size: { 'x': 0, 'y': 0, 'z': 0 },
 	type: 'environment'
-}```
+}
+```
 
 #### n-capsule-collider
 
-```data: {
+```javascript
+data: {
 	isTrigger: false,
 	center: { 'x': 0, 'y': 0, 'z': 0 },
 	radius: 0,
 	height: 0,
 	direction: 'y',
 	type: 'environment'
-}```
+}
+```
 
 #### n-mesh-collider
 
-```data: {
+```javascript
+data: {
 	isTrigger: false,
 	convex: true,
 	type: 'environment'
-}```
+}
+```
 
 #### n-container
 
-```data: {
+```javascript
+data: {
 	capacity: 4
-}```
+}
+```
 
 #### n-sound
 
-```data: {
+```javascript
+data: {
 	on: '',
 	res: '',
 	src: '',
@@ -146,16 +163,19 @@ Calls a function associated with the native component.
 	pitch: 1,
 	minDistance: 1,
 	maxDistance: 12
-}```
+}
+```
 
 #### n-skeleton-parent
 
-```data: {
+```javascript
+data: {
 	part: 'head',
 	side: 'center',
 	index: 0,
 	userId: null // defaults to current user when omitted
-}```
+}
+```
 
 #### n-cockpit-parent
 No properties to be configured.
@@ -165,24 +185,29 @@ No properties to be configured.
 
 #### n-layout-browser
 
-```data: {
+```javascript
+data: {
 	url: 'about:blank',
 	isEnclosure: false
-}```
+}
+```
 
 #### n-portal
 
-```data: {
+```javascript
+data: {
 	targetSpace: null, // defaults to current space when omited
 	targetEvent: null, // defaults to current space when omited
 	targetPosition: { x: 0, y: 0, z: 0 },
 	targetQuaternion: { x: 0, y: 0, z: 0, w: 1 }
-}```
+}
+```
 
 #### n-rigidbody
 *Experimental! This native component is not yet officially supported by the AltspaceSDK.*
 
-```data: {
+```javascript
+data: {
 	mass: 1,
 	drag: 0,
 	angularDrag: 0.05,
@@ -190,7 +215,8 @@ No properties to be configured.
 	isKinematic: false,
 	positionConstraints: [false, false, false],
 	rotationConstraints: [false, false, false],
-}```
+}
+```
 
 ## <a name="NativeComponentSync">altspaceutil.behaviors.NativeComponentSync</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/NativeComponentSync.html))
 Provides support for AltspaceVR native component data to be synchronized over Firebase.  The behavior must be used in conjunction with [SceneSync](https://altspacevr.github.io/AltspaceSDK/doc/js/module-altspace_utilities_behaviors.SceneSync.html), [Object3DSync](https://altspacevr.github.io/AltspaceSDK/doc/js/module-altspace_utilities_behaviors.Object3DSync.html) and a [NativeComponent](#NativeComponent) of the same type specified for NativeComponentSync.
