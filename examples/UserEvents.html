@@ -34,6 +34,7 @@
 			console.log(event.detail.avatarId);
 			console.log(event.detail.avatarClass);
 			console.log(event.detail.colors);
+			console.log(event.detail.rawColors);
 			console.log(event.detail.textures);
 
 			avatarDetails.getBehaviorByType('n-text').data.text = 'User ID: ' + event.detail.userId + '\nAvatar ID: ' + event.detail.avatarId + '\nAvatar Class: ' + event.detail.avatarClass + (event.detail.avatarClass === 'Rubenoid' ? ('\nHair ID: ' + event.detail.textures['hair'] + '\nSkin ID: ' + event.detail.textures['skin'] + '\nClothing ID: ' + event.detail.textures['clothing']) : '');

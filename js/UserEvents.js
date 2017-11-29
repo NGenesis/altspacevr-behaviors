@@ -287,6 +287,14 @@ altspaceutil.behaviors.UserEvents = function(config) {
 
 	this.getAvatarColor = function(color) {
 		function getColorFromRGB(r, g, b) {
+			// Normalize color values
+			var maxColor = Math.max(r, g, b);
+			if(maxColor > 255) {
+				r = Math.floor(r / maxColor * 255);
+				g = Math.floor(g / maxColor * 255);
+				b = Math.floor(b / maxColor * 255);
+			}
+
 			return new THREE.Color(r / 255, g / 255, b / 255);
 		}
 
