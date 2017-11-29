@@ -60,10 +60,10 @@ Provides support for AltspaceVR native components to be attached to objects, pro
 #### <a name="callComponent">callComponent</a>
 Calls a function associated with the native component.
 
-| Name           | Type         | Description |
-| -------------- | ------------ | ----------- |
-| `functionName` | String       | The function name to invoke on the native component. |
-| `functionArgs` | Arguments... | Arguments that will be passed to the function when invoked. |
+| Name           | Type   | Description |
+| -------------- | ------ | ----------- |
+| `functionName` | String | The function name to invoke on the native component. |
+| `functionArgs` | Object | Arguments that will be passed to the function when invoked. |
 
 ### <a name="native-component-properties">Native Component Properties</a>
 #### n-object
