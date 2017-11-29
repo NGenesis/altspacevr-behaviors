@@ -1002,6 +1002,7 @@ altspaceutil.behaviors.UserEvents = function(config) {
 				user.avatarId = jsonavatar.avatar_sid || null;
 
 				var oldAvatarColors = user.avatarColors;
+				var oldRawAvatarColors = user.rawAvatarColors;
 				var oldAvatarTextures = user.avatarTextures;
 				var avatarAppearanceChanged = (user.avatarId !== oldAvatarId);
 				var avatarClass;
@@ -1014,6 +1015,7 @@ altspaceutil.behaviors.UserEvents = function(config) {
 						var texturePrefix = (user.avatarId === 'rubenoid-male-01') ? 'rubenoid-male-texture-' : 'rubenoid-female-texture-';
 						user.avatarTextures = { 'hair': jsonavatar[texturePrefix + '1'][0], 'skin': jsonavatar[texturePrefix + '2'][0], 'clothing': jsonavatar[texturePrefix + '3'][0] };
 						user.avatarColors = {};
+						user.rawAvatarColors = {};
 						if(!avatarAppearanceChanged) avatarAppearanceChanged = (oldAvatarTextures['hair'] !== user.avatarTextures['hair'] || oldAvatarTextures['skin'] !== user.avatarTextures['skin'] || oldAvatarTextures['clothing'] !== user.avatarTextures['clothing']);
 						break;
 					}
@@ -1023,8 +1025,9 @@ altspaceutil.behaviors.UserEvents = function(config) {
 					case 'robothead-propellerhead-01': {
 						avatarClass = 'Robothead';
 						user.avatarColors = { 'highlight': this.getAvatarColor(jsonavatar['robothead-highlight-color']) };
+						user.rawAvatarColors = { 'highlight': jsonavatar['robothead-highlight-color'] };
 						user.avatarTextures = {};
-						if(!avatarAppearanceChanged) avatarAppearanceChanged = (!oldAvatarColors['highlight'] || !oldAvatarColors['highlight'].equals(user.avatarColors['highlight']));
+						if(!avatarAppearanceChanged) avatarAppearanceChanged = (!oldRawAvatarColors['highlight'] || !oldRawAvatarColors['highlight'].equals(user.rawAvatarColors['highlight']));
 						break;
 					}
 
@@ -1037,14 +1040,16 @@ altspaceutil.behaviors.UserEvents = function(config) {
 					case 'x-series-m02': {
 						avatarClass = 'Pod';
 						user.avatarColors = { 'primary': this.getAvatarColor(jsonavatar['primary-color']), 'highlight': this.getAvatarColor(jsonavatar['highlight-color']) };
+						user.rawAvatarColors = { 'primary': jsonavatar['primary-color'], 'highlight': jsonavatar['highlight-color'] };
 						user.avatarTextures = {};
-						if(!avatarAppearanceChanged) avatarAppearanceChanged = (!oldAvatarColors['primary'] || !oldAvatarColors['highlight'] || !oldAvatarColors['primary'].equals(user.avatarColors['primary']) || !oldAvatarColors['highlight'].equals(user.avatarColors['highlight']));
+						if(!avatarAppearanceChanged) avatarAppearanceChanged = (!oldRawAvatarColors['primary'] || !oldRawAvatarColors['highlight'] || !oldRawAvatarColors['primary'].equals(user.rawAvatarColors['primary']) || !oldRawAvatarColors['highlight'].equals(user.rawAvatarColors['highlight']));
 						break;
 					}
 
 					default: {
 						avatarClass = '';
 						user.avatarColors = {};
+						user.rawAvatarColors = {};
 						user.avatarTextures = {};
 						if(this.trace) console.log('Unknown avatar type: ' + user.avatarId);
 						break;
@@ -1085,6 +1090,8 @@ altspaceutil.behaviors.UserEvents = function(config) {
 					* 'Robothead' or 'Rubenoid', or empty when unclassified.
 					* @property {Object} colors {@link THREE.Color} preferences of the avatar.  This typically provides
 					* 'primary' and 'highlight' properties for Pod avatars, and 'highlight' for Robothead avatars.
+					* @property {Object} rawColors Raw color preferences of the avatar.  This typically provides
+					* 'primary' and 'highlight' properties for Pod avatars, and 'highlight' for Robothead avatars.
 					* @property {Object} textures Texture identifier preferences for the avatar.  This typically provides
 					* 'hair', 'skin' and 'clothing' properties for Rubenoid avatars.
 					* @property {THREE.Object3D} target - The object which emitted the event.
@@ -1097,6 +1104,7 @@ altspaceutil.behaviors.UserEvents = function(config) {
 							avatarId: user.avatarId,
 							avatarClass: avatarClass,
 							colors: user.avatarColors,
+							rawColors: user.rawAvatarColors,
 							textures: user.avatarTextures
 						},
 						bubbles: true,
@@ -1144,7 +1152,7 @@ altspaceutil.behaviors.UserEvents = function(config) {
 	}
 
 	/**
-	* Subscribe to receiving events for a given User ID
+	* Subscribe to receiving events for a given User ID.
 	*
 	* @method subscribeUser
 	* @param {String} userId - User ID to receive events for.
@@ -1156,7 +1164,7 @@ altspaceutil.behaviors.UserEvents = function(config) {
 	}
 
 	/**
-	* Unsubscribe from receiving events for a given User ID
+	* Unsubscribe from receiving events for a given User ID.
 	*
 	* @method unsubscribeUser
 	* @param {String} userId - User ID to stop receiving events for.
