@@ -16,6 +16,7 @@ Include the utility library in your project:
 * [altspaceutil.behaviors.OrbitControls](#OrbitControls)
 * [altspaceutil.behaviors.UserEvents](#UserEvents)
 * [altspaceutil.behaviors.PreloadNativeSounds](#PreloadNativeSounds)
+* [altspaceutil.behaviors.HoverMaterialColor](#HoverMaterialColor)
 * [altspaceutil.behaviors.HoverMaterialOpacity](#HoverMaterialOpacity)
 * [altspaceutil.behaviors.NativeTextMaterial](#NativeTextMaterial)
 
