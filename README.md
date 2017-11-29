@@ -39,7 +39,7 @@ Provides support for AltspaceVR native components to be attached to objects, pro
 ### Parameters
 `type` - Native component type.
 
-`data` - Native component properties.
+`data` - Native component properties.  See [here](#native-component-properties) for available properties and defaults.
 
 `config` - Optional parameters for specialized use cases.  Many of these properties are provided only to override the internal behavior of a component in specialized use cases.
 
@@ -65,7 +65,7 @@ Calls a function associated with the native component.
 | `functionName` | String       | The function name to invoke on the native component. |
 | `functionArgs` | Arguments... | Arguments that will be passed to the function when invoked. |
 
-### Native Component Defaults
+### <a name="native-component-properties">Native Component Properties</a>
 #### n-object
 
 ```javascript
