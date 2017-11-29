@@ -4,7 +4,7 @@ Provides helper functions, behaviors and A-Frame components for common functiona
 # Usage
 Include the utility library in your project:
 ```html
-<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.8.9/js/altspaceutil.min.js"></script>
+<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.9.0/js/altspaceutil.min.js"></script>
 ```
 
 # API Reference
@@ -381,7 +381,7 @@ Preloads sound files used by n-sound to ensure the resources are cached for subs
 | -------- | -------- | ------- | ----------- |
 | `sounds` | String[] |         | Native sound resources to be preloaded. |
 
-## <a name="HoverMaterialOpacity">altspaceutil.behaviors.HoverMaterialOpacity</a>
+## <a name="HoverMaterialOpacity">altspaceutil.behaviors.HoverMaterialOpacity</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/HoverMaterialOpacity.html))
 Changes the opacity of an object's material when the cursor hovers over it, and restores the original opacity when the cursor is no longer hovering over the object.
 
 ### Parameters
@@ -390,14 +390,14 @@ Changes the opacity of an object's material when the cursor hovers over it, and 
 | Name              | Type                                                                        | Default  | Description |
 | ----------------- | --------------------------------------------------------------------------- | -------- | ----------- |
 | `material`        | [THREE.Material](https://threejs.org/docs/#api/materials/MeshBasicMaterial) | null     | A reference to the material whose opacity will be updated.  Defaults to material of the object the behavior is attached to. |
-| `opacity`         | Number                                                                      | 1        | The value that will be applied to the object's material opacity when the cursor hovers over it. |
+| `opacity`         | Number                                                                      | 1        | The value that will be applied to the object's current material opacity when the cursor hovers over it. |
 | `beginDuration`   | Number                                                                      | 75       | Duration the hovered opacity adjustment effect is intended to take to complete, in milliseconds. |
 | `endDuration`     | Number                                                                      | 75       | Duration the unhovered opacity adjustment effect is intended to take to complete, in milliseconds. |
 | `revertOnDispose` | Boolean                                                                     | true     | Specifies whether the object's original material opacity should be restored when the behavior has been destroyed. |
 | `eventListener`   | [THREE.Object3D](https://threejs.org/docs/#api/core/Object3D)               | null     | Specifies an optional object that will listen for cursor events.  By default the object that the behavior is attached to will be used as the event listener. |
 | `hoverChildren`   | Boolean                                                                     | true     | Specifies whether hovering over children of the event listener object should invoke the hover effect. |
 
-## <a name="HoverMaterialColor">altspaceutil.behaviors.HoverMaterialColor</a>
+## <a name="HoverMaterialColor">altspaceutil.behaviors.HoverMaterialColor</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/HoverMaterialColor.html))
 Changes the color of an object's material when the cursor hovers over it, and restores the original color when the cursor is no longer hovering over the object.
 
 ### Parameters
@@ -406,7 +406,7 @@ Changes the color of an object's material when the cursor hovers over it, and re
 | Name              | Type                                                                        | Default                   | Description |
 | ----------------- | --------------------------------------------------------------------------- | ------------------------- | ----------- |
 | `material`        | [THREE.Material](https://threejs.org/docs/#api/materials/MeshBasicMaterial) | null                      | A reference to the material whose color will be updated.  Defaults to material of the object the behavior is attached to. |
-| `color  `         | [THREE.Color](https://threejs.org/docs/#api/math/Color)                     | new THREE.Color('yellow') | The value that will be applied to the object's material color when the cursor hovers over it. |
+| `color`           | [THREE.Color](https://threejs.org/docs/#api/math/Color)                     | new THREE.Color('yellow') | The value that will be applied to the object's material color when the cursor hovers over it. |
 | `beginDuration`   | Number                                                                      | 75                        | Duration the hovered color adjustment effect is intended to take to complete, in milliseconds. |
 | `endDuration`     | Number                                                                      | 75                        | Duration the unhovered color adjustment effect is intended to take to complete, in milliseconds. |
 | `revertOnDispose` | Boolean                                                                     | true                      | Specifies whether the object's original material color should be restored when the behavior has been destroyed. |

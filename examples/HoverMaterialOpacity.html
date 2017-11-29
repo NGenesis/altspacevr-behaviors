@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang=en>
+	<head>
+		<meta charset=utf-8>
+		<meta name="author" content="Genesis">
+		<title>HoverMaterialOpacity Example</title>
+		<script src="https://cdn.rawgit.com/mrdoob/three.js/r88/build/three.min.js"></script>
+		<script src="https://cdn.rawgit.com/AltspaceVR/AltspaceSDK/v2.6.2/dist/altspace.min.js"></script>
+		<script src="../js/altspaceutil.min.js"></script>
+	</head>
+	<body>
+		<script>
+			var sim = new altspace.utilities.Simulation();
+
+			altspace.getEnclosure().then(function(enclosure) {
+				enclosure.requestFullspace().then(function() {
+					// Hovering over red cube will decrease cube opacity to 5%.
+					var obj = new THREE.Mesh(new THREE.BoxBufferGeometry(2, 2, 2), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.5, color: 'red' }));
+					obj.addBehavior(new altspaceutil.behaviors.HoverMaterialOpacity({ beginDuration: 100, endDuration: 600, opacity: -0.45 }));
+					sim.scene.add(obj);
+
+					// Hovering over green cubes will increase opacity of the cubes below them.
+					var obj = new THREE.Mesh(new THREE.BoxBufferGeometry(2, 2, 2), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.5, color: 'green' }));
+					obj.position.set(0, 0, 5);
+					obj.addBehavior(new altspaceutil.behaviors.HoverMaterialOpacity({ opacity: 0.3, hoverChildren: true }));
+					sim.scene.add(obj);
+
+					for(var parent = obj, i = 0; i < 3; ++i) {
+						var child = new THREE.Mesh(new THREE.BoxBufferGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.3, color: 'green' }));
+						child.position.set(0, 2, 0);
+						child.addBehavior(new altspaceutil.behaviors.HoverMaterialOpacity({ opacity: 0.7, hoverChildren: true }));
+						parent.add(child);
+						parent = child;
+					}
+				});
+			});
+		</script>
+	</body>
+</html>
