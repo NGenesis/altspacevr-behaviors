@@ -4,7 +4,7 @@
  * The behavior will remove itself automatically once the sound files have been preloaded.
  *
  * @class PreloadNativeSounds
- * @param {Array} [sounds] Native sound resources to be preloaded.
+ * @param {String[]} [sounds] Native sound resources to be preloaded.
  * @memberof module:altspaceutil/behaviors
  **/
 altspaceutil.behaviors.PreloadNativeSounds = function(sounds) {

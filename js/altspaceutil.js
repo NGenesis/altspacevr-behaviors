@@ -816,6 +816,9 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
  * the same type specified for NativeComponentSync.
  *
  * @class NativeComponentSync
+ * @param {String} [type] Type of native component to be synchronized.  To retrieve the behavior using the getBehaviorByType method, prepend "sync-" to the name of the native component type (e.g. sync-n-text for an n-text native component).
+ * @param {Object} [config] Optional parameters.
+ * @param {Object3DSync} [config.syncRef=null] A reference to the object syncing component.  Defaults to using the syncing component of the object the behavior is attached to.
  * @memberof module:altspaceutil/behaviors
  **/
 altspaceutil.behaviors.NativeComponentSync = function(_type, _config) {
@@ -1221,7 +1224,7 @@ altspaceutil.behaviors.UserEvents = function(config) {
  * The behavior will remove itself automatically once the sound files have been preloaded.
  *
  * @class PreloadNativeSounds
- * @param {Array} [sounds] Native sound resources to be preloaded.
+ * @param {String[]} [sounds] Native sound resources to be preloaded.
  * @memberof module:altspaceutil/behaviors
  **/
 altspaceutil.behaviors.PreloadNativeSounds = function(sounds) {

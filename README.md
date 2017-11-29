@@ -114,16 +114,26 @@ Fires an event when the transform gizmo is no longer being dragged.
 Provides a convenience wrapper for THREE.OrbitControls when working with [altspace.utilities.Simulation](https://altspacevr.github.io/AltspaceSDK/doc/js/module-altspace_utilities.Simulation.html).
 
 ## <a name="UserEvents">altspaceutil.behaviors.UserEvents</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/UserEvents.html))
-Subscribes to avatar and user preference update events for a given list of users.
+Subscribes to avatar and user preference update events for a given list of users, and dispatches events which have been triggered by a given user changing their avatar and/or account preferences.
+
+### Parameters
+`config` - Optional parameters.
+
+| Name            | Type            | Default | Description |
+| --------------- | --------------- | ------- | ----------- |
+| `userIds`       | String[]        | null    | An array of User IDs for each user to dispatch events for.  When omitted, only events for the user currently logged in will be handled. |
+| `onRequestData` | onRequestData   | null    | A precondition callback returning a boolean that determines if a user should have their data requested.  User data is requested if the callback returns true, otherwise no action is taken. |
+| `refreshTime`   | Number          | 5000    | Duration to wait between user updates, in milliseconds. |
+| `trace`         | Boolean         | false   | Specifies whether debugging information should be displayed. |
 
 ## <a name="PreloadNativeSounds">altspaceutil.behaviors.PreloadNativeSounds</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/PreloadNativeSounds.html))
 Preloads sound files used by n-sound to ensure the resources are cached for subsequent uses.
 
 ### Parameters
 
-| Name     | Type  | Default | Description |
-| -------- | ----- | ------- | ----------- |
-| `sounds` | Array |         | Native sound resources to be preloaded. |
+| Name     | Type     | Default | Description |
+| -------- | -------- | ------- | ----------- |
+| `sounds` | String[] |         | Native sound resources to be preloaded. |
 
 ## <a name="HoverMaterialOpacity">altspaceutil.behaviors.HoverMaterialOpacity</a>
 Changes the opacity of an object's material when the cursor hovers over it, and restores the original opacity when the cursor is no longer hovering over the object.
