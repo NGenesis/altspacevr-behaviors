@@ -4,7 +4,7 @@ Provides helper functions, behaviors and A-Frame components for common functiona
 # Usage
 Include the utility library in your project:
 ```html
-<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.8.7/js/altspaceutil.min.js"></script>
+<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.8.8/js/altspaceutil.min.js"></script>
 ```
 
 # API Reference
@@ -35,6 +35,150 @@ Include the utility library in your project:
 
 ## <a name="NativeComponent">altspaceutil.behaviors.NativeComponent</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/NativeComponent.html))
 Provides support for AltspaceVR native components to be attached to objects, providing sane configuration defaults where appropriate.
+
+### Parameters
+`type` - Native component type.
+
+`data` - Native component properties.
+
+`config` - Optional parameters for specialized use cases.  Many of these properties are provided only to override the internal behavior of a component in specialized use cases.
+
+| Name                | Type                                                          | Default | Description |
+| ------------------- | ------------------------------------------------------------- | ------- | ----------- |
+| `targetEntity`      | [THREE.Object3D](https://threejs.org/docs/#api/core/Object3D) | null    | An object in the scene that a user will teleport to when entering a native portal. |
+| `useCollider`       | Boolean                                                       | false   | Specifies whether cursor collision should be disabled on the native component. |
+| `sharedComponent`   | Boolean                                                       | true    | Specifies whether the native component should share the same THREE.Mesh instance with other native components. |
+| `recursiveMesh`     | Boolean                                                       | false   | Specifies whether the native component is applied recursively to all THREE.Mesh children. |
+| `recursive`         | Boolean                                                       | false   | Specifies whether the native component is applied recursively to all children. |
+| `sendUpdates`       | Boolean                                                       | true    | Specifies whether the native component should send updates to the native Altspace client. |
+| `updateOnStaleData` | Boolean                                                       | true    | Specifies whether the native component should send updates to the native Altspace client when a property has changed. |
+| `inheritParentData` | Boolean                                                       | false   | Specifies whether the native component should inherit its property state from a parent component. |
+| `meshComponent`     | Boolean                                                       | false   | Specifies whether the native component is treated as a mesh-specific component.  This is used as a performance optimization to defer initialization of mesh-specific components (e.g. native parents and colliders) attached to placeholder objects, until another component is added that gives them functionality (e.g. text, spawner). |
+
+### Methods
+
+#### <a name="callComponent">callComponent</a>
+Calls a function associated with the native component.
+
+| Name           | Type         | Description |
+| -------------- | ------------ | ----------- |
+| `functionName` | String       | The function name to invoke on the native component. |
+| `functionArgs` | Arguments... | Arguments that will be passed to the function when invoked. |
+
+### Native Component Defaults
+#### n-object
+```data: {
+	res: 'architecture/wall-4w-4h'
+}```
+
+#### n-spawner
+```data: {
+	res: 'interactables/basketball'
+}```
+
+#### n-text
+```data: {
+	text: '',
+	fontSize: 10,
+	width: 10,
+	height: 1,
+	horizontalAlign: 'middle',
+	verticalAlign: 'middle'
+}```
+
+#### n-sphere-collider
+```data: {
+	isTrigger: false,
+	center: { 'x': 0, 'y': 0, 'z': 0 },
+	radius: 0,
+	type: 'environment'
+}```
+
+#### n-box-collider
+data: {
+	isTrigger: false,
+	center: { 'x': 0, 'y': 0, 'z': 0 },
+	size: { 'x': 0, 'y': 0, 'z': 0 },
+	type: 'environment'
+}
+
+#### n-capsule-collider
+```data: {
+	isTrigger: false,
+	center: { 'x': 0, 'y': 0, 'z': 0 },
+	radius: 0,
+	height: 0,
+	direction: 'y',
+	type: 'environment'
+}```
+
+#### n-mesh-collider
+```data: {
+	isTrigger: false,
+	convex: true,
+	type: 'environment'
+}```
+
+#### n-container
+```data: {
+	capacity: 4
+}```
+
+#### n-sound
+```data: {
+	on: '',
+	res: '',
+	src: '',
+	loop: false,
+	volume: 1,
+	autoplay: false,
+	oneshot: false,
+	spatialBlend: 1,
+	pitch: 1,
+	minDistance: 1,
+	maxDistance: 12
+}```
+
+#### n-skeleton-parent
+```data: {
+	part: 'head',
+	side: 'center',
+	index: 0,
+	userId: null // defaults to current user when omitted
+}```
+
+#### n-cockpit-parent
+No properties to be configured.
+
+#### n-billboard
+No properties to be configured.
+
+#### n-layout-browser
+```data: {
+	url: 'about:blank',
+	isEnclosure: false
+}```
+
+#### n-portal
+```data: {
+	targetSpace: null, // defaults to current space when omited
+	targetEvent: null, // defaults to current space when omited
+	targetPosition: { x: 0, y: 0, z: 0 },
+	targetQuaternion: { x: 0, y: 0, z: 0, w: 1 }
+}```
+
+#### n-rigidbody
+*Experimental! This native component is not yet officially supported by the AltspaceSDK.
+
+```data: {
+	mass: 1,
+	drag: 0,
+	angularDrag: 0.05,
+	useGravity: true,
+	isKinematic: false,
+	positionConstraints: [false, false, false],
+	rotationConstraints: [false, false, false],
+}```
 
 ## <a name="NativeComponentSync">altspaceutil.behaviors.NativeComponentSync</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/NativeComponentSync.html))
 Provides support for AltspaceVR native component data to be synchronized over Firebase.  The behavior must be used in conjunction with [SceneSync](https://altspacevr.github.io/AltspaceSDK/doc/js/module-altspace_utilities_behaviors.SceneSync.html), [Object3DSync](https://altspacevr.github.io/AltspaceSDK/doc/js/module-altspace_utilities_behaviors.Object3DSync.html) and a [NativeComponent](#NativeComponent) of the same type specified for NativeComponentSync.
@@ -173,7 +317,7 @@ Fires an event when the user changes avatar preferences.
 | Name          | Type                                                          | Description |
 | ------------- | ------------------------------------------------------------- | ----------- |
 | `userId`      | String                                                        | User ID of the user. |
-| `avatarId`    | [AvatarId](#AvatarId)                                         | Avatar type identifier that was selected by the user. |
+| `avatarId`    | String                                                        | Avatar type identifier that was selected by the user. |
 | `avatarClass` | String                                                        | Avatar type classification. Typically one of `Pod`, `Robothead` or `Rubenoid`, or empty when unclassified. |
 | `colors`      | Object                                                        | [THREE.Color](https://threejs.org/docs/#api/math/Color) preferences of the avatar.  This typically provides `primary` and `highlight` properties for Pod avatars, and `highlight` for Robothead avatars. |
 | `rawColors`   | Object                                                        | Raw color preferences of the avatar.  This typically provides `primary` and `highlight` properties for Pod avatars, and `highlight` for Robothead avatars. |
@@ -189,15 +333,6 @@ Fires an event when the user's connection status changes.
 | `displayName` | String                                                        | Display name of the user. |
 | `online`      | Boolean                                                       | Specifies whether user is currently logged in. |
 | `target`      | [THREE.Object3D](https://threejs.org/docs/#api/core/Object3D) | The object which emitted the event. |
-
-### Types
-
-#### <a name="AvatarId">AvatarId</a>
-An identifier that represents the user's avatar type preference.
-
-| Type   |
-| ------ |
-| String |
 
 ## <a name="PreloadNativeSounds">altspaceutil.behaviors.PreloadNativeSounds</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/PreloadNativeSounds.html))
 Preloads sound files used by n-sound to ensure the resources are cached for subsequent uses.

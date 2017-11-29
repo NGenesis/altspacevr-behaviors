@@ -94,7 +94,6 @@ altspaceutil.behaviors.UserEvents = function(config) {
 				var oldAvatarId = user.avatarId;
 				user.avatarId = jsonavatar.avatar_sid || null;
 
-				var oldAvatarColors = user.avatarColors;
 				var oldRawAvatarColors = user.rawAvatarColors;
 				var oldAvatarTextures = user.avatarTextures;
 				var avatarAppearanceChanged = (user.avatarId !== oldAvatarId);
@@ -120,7 +119,7 @@ altspaceutil.behaviors.UserEvents = function(config) {
 						user.avatarColors = { 'highlight': this.getAvatarColor(jsonavatar['robothead-highlight-color']) };
 						user.rawAvatarColors = { 'highlight': jsonavatar['robothead-highlight-color'] };
 						user.avatarTextures = {};
-						if(!avatarAppearanceChanged) avatarAppearanceChanged = (!oldRawAvatarColors['highlight'] || !oldRawAvatarColors['highlight'].equals(user.rawAvatarColors['highlight']));
+						if(!avatarAppearanceChanged) avatarAppearanceChanged = (!oldRawAvatarColors['highlight'] || JSON.stringify(oldRawAvatarColors['highlight']) !== JSON.stringify(user.rawAvatarColors['highlight']));
 						break;
 					}
 
@@ -135,7 +134,7 @@ altspaceutil.behaviors.UserEvents = function(config) {
 						user.avatarColors = { 'primary': this.getAvatarColor(jsonavatar['primary-color']), 'highlight': this.getAvatarColor(jsonavatar['highlight-color']) };
 						user.rawAvatarColors = { 'primary': jsonavatar['primary-color'], 'highlight': jsonavatar['highlight-color'] };
 						user.avatarTextures = {};
-						if(!avatarAppearanceChanged) avatarAppearanceChanged = (!oldRawAvatarColors['primary'] || !oldRawAvatarColors['highlight'] || !oldRawAvatarColors['primary'].equals(user.rawAvatarColors['primary']) || !oldRawAvatarColors['highlight'].equals(user.rawAvatarColors['highlight']));
+						if(!avatarAppearanceChanged) avatarAppearanceChanged = (!oldRawAvatarColors['primary'] || !oldRawAvatarColors['highlight'] || JSON.stringify(oldRawAvatarColors['primary']) !== JSON.stringify(user.rawAvatarColors['primary']) || JSON.stringify(oldRawAvatarColors['highlight']) !== JSON.stringify(user.rawAvatarColors['highlight']));
 						break;
 					}
 

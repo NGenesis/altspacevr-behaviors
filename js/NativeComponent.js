@@ -451,6 +451,24 @@ function initCollisionEventHandler() {
 	}
 }
 
+/**
+ * Provides support for AltspaceVR native components to be attached to objects, providing sane configuration defaults where appropriate.
+ * 
+ * @class NativeComponent
+ * @param {String} [type] Native component type.
+ * @param {Object} [data] Native component properties.
+ * @param {Object} [config] Optional parameters.  Many of these properties are provided only to override the internal behavior of a component in specialized use cases.
+ * @param {THREE.Object3D} [config.targetEntity=null] An object in the scene that a user will teleport to when entering a native portal.
+ * @param {Boolean} [config.useCollider=false] Specifies whether cursor collision should be disabled on the native component.
+ * @param {Boolean} [config.sharedComponent=true] Specifies whether the native component should share the same THREE.Mesh instance with other native components.
+ * @param {Boolean} [config.recursiveMesh=false] Specifies whether the native component is applied recursively to all THREE.Mesh children.
+ * @param {Boolean} [config.recursive=false] Specifies whether the native component is applied recursively to all children.
+ * @param {Boolean} [config.sendUpdates=true] Specifies whether the native component should send updates to the native Altspace client.
+ * @param {Boolean} [config.updateOnStaleData=true] Specifies whether the native component should send updates to the native Altspace client when a property has changed.
+ * @param {Boolean} [config.inheritParentData=false] Specifies whether the native component should inherit its property state from a parent component.
+ * @param {Boolean} [config.meshComponent=false] Specifies whether the native component is treated as a mesh-specific component.  This is used as a performance optimization to defer initialization of mesh-specific components (e.g. native parents and colliders) attached to placeholder objects, until another component is added that gives them functionality (e.g. text, spawner).
+ * @memberof module:altspace/utilities/behaviors
+ */
 altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 	this.type = _type || 'NativeComponent';
 
@@ -584,6 +602,14 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 		}
 	}
 
+	/**
+	* Calls a function associated with the native component.
+	*
+	* @method callComponent
+	* @param {String} functionName - The function name to invoke on the native component.
+	* @param {Arguments...} functionArgs - Arguments that will be passed to the function when invoked.
+	* @memberof module:altspaceutil/behaviors.NativeComponent
+	*/
 	this.callComponent = function(functionName, functionArgs) {
 		if(this.initialized) altspace.callNativeComponent(this.component, this.type, functionName, functionArgs);
 		if(this.defaults && this.defaults.callComponent) this.defaults.callComponent.bind(this)(functionName, functionArgs);
