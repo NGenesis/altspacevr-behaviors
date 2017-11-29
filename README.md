@@ -67,16 +67,19 @@ Calls a function associated with the native component.
 
 ### Native Component Defaults
 #### n-object
+
 ```data: {
 	res: 'architecture/wall-4w-4h'
 }```
 
 #### n-spawner
+
 ```data: {
 	res: 'interactables/basketball'
 }```
 
 #### n-text
+
 ```data: {
 	text: '',
 	fontSize: 10,
@@ -87,6 +90,7 @@ Calls a function associated with the native component.
 }```
 
 #### n-sphere-collider
+
 ```data: {
 	isTrigger: false,
 	center: { 'x': 0, 'y': 0, 'z': 0 },
@@ -95,14 +99,16 @@ Calls a function associated with the native component.
 }```
 
 #### n-box-collider
-data: {
+
+```data: {
 	isTrigger: false,
 	center: { 'x': 0, 'y': 0, 'z': 0 },
 	size: { 'x': 0, 'y': 0, 'z': 0 },
 	type: 'environment'
-}
+}```
 
 #### n-capsule-collider
+
 ```data: {
 	isTrigger: false,
 	center: { 'x': 0, 'y': 0, 'z': 0 },
@@ -113,6 +119,7 @@ data: {
 }```
 
 #### n-mesh-collider
+
 ```data: {
 	isTrigger: false,
 	convex: true,
@@ -120,11 +127,13 @@ data: {
 }```
 
 #### n-container
+
 ```data: {
 	capacity: 4
 }```
 
 #### n-sound
+
 ```data: {
 	on: '',
 	res: '',
@@ -140,6 +149,7 @@ data: {
 }```
 
 #### n-skeleton-parent
+
 ```data: {
 	part: 'head',
 	side: 'center',
@@ -154,12 +164,14 @@ No properties to be configured.
 No properties to be configured.
 
 #### n-layout-browser
+
 ```data: {
 	url: 'about:blank',
 	isEnclosure: false
 }```
 
 #### n-portal
+
 ```data: {
 	targetSpace: null, // defaults to current space when omited
 	targetEvent: null, // defaults to current space when omited
@@ -168,7 +180,7 @@ No properties to be configured.
 }```
 
 #### n-rigidbody
-*Experimental! This native component is not yet officially supported by the AltspaceSDK.
+*Experimental! This native component is not yet officially supported by the AltspaceSDK.*
 
 ```data: {
 	mass: 1,
