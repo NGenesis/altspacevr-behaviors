@@ -47,8 +47,8 @@ Provides support for AltspaceVR native components to be attached to objects, pro
 | ------------------- | ------------------------------------------------------------- | ------- | ----------- |
 | `targetEntity`      | [THREE.Object3D](https://threejs.org/docs/#api/core/Object3D) | null    | An object in the scene that a user will teleport to when entering a native portal. |
 | `useCollider`       | Boolean                                                       | false   | Specifies whether cursor collision should be disabled on the native component. |
-| `sharedComponent`   | Boolean                                                       | true    | Specifies whether the native component should share the same THREE.Mesh instance with other native components. |
-| `recursiveMesh`     | Boolean                                                       | false   | Specifies whether the native component is applied recursively to all THREE.Mesh children. |
+| `sharedComponent`   | Boolean                                                       | true    | Specifies whether the native component should share the same [THREE.Mesh](https://threejs.org/docs/#api/objects/Mesh) instance with other native components. |
+| `recursiveMesh`     | Boolean                                                       | false   | Specifies whether the native component is applied recursively to all [THREE.Mesh](https://threejs.org/docs/#api/objects/Mesh) children. |
 | `recursive`         | Boolean                                                       | false   | Specifies whether the native component is applied recursively to all children. |
 | `sendUpdates`       | Boolean                                                       | true    | Specifies whether the native component should send updates to the native Altspace client. |
 | `updateOnStaleData` | Boolean                                                       | true    | Specifies whether the native component should send updates to the native Altspace client when a property has changed. |
