@@ -46,7 +46,7 @@ Create an absolute URL from the specified relative URL, using the current host a
 | ----- | ------ | ----------- |
 | `url` | String | A relative URL.  Providing an absolute URL will return itself unchanged. |
 
-### Return Type
+### Returns
 | Type   | Description |
 | ------ | ----------- |
 | String | An absolute URL of the given relative URL. |
@@ -59,7 +59,7 @@ Create a base path from the specified file URL.
 | ----- | ------ | ----------- |
 | `url` | String | A URL to a file. |
 
-### Return Type
+### Returns
 | Type   | Description |
 | ------ | ----------- |
 | String | A URL to the file's base path. |
