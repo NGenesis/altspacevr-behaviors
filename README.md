@@ -9,6 +9,10 @@ Include the utility library in your project:
 
 # API Reference
 
+## Functions
+* [altspaceutil.getAbsoluteURL](#getAbsoluteURL)
+* [altspaceutil.getBasePath](#getBasePath)
+
 ## Behaviors
 * [altspaceutil.behaviors.NativeComponent](#NativeComponent)
 * [altspaceutil.behaviors.NativeComponentSync](#NativeComponentSync)
@@ -31,6 +35,34 @@ Include the utility library in your project:
 ## A-Frame Components
 * [altspace-transform-controls](#altspace-transform-controls)
 * [n-text-material](#n-text-material)
+
+# Functions
+
+## <a name="getAbsoluteURL">altspaceutil.getAbsoluteURL</a>
+Create an absolute URL from the specified relative URL, using the current host as the URL base.
+
+### Parameters
+| Name  | Type   | Description |
+| ----- | ------ | ----------- |
+| `url` | String | A relative URL.  Providing an absolute URL will return itself unchanged. |
+
+### Return Type
+| Type   | Description |
+| ------ | ----------- |
+| String | An absolute URL of the given relative URL. |
+
+## <a name="getBasePath">altspaceutil.getBasePath</a>
+Create a base path from the specified file URL.
+
+### Parameters
+| Name  | Type   | Description |
+| ----- | ------ | ----------- |
+| `url` | String | A URL to a file. |
+
+### Return Type
+| Type   | Description |
+| ------ | ----------- |
+| String | A URL to the file's base path. |
 
 # Behaviors
 
