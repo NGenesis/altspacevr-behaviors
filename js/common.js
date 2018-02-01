@@ -20,7 +20,7 @@ altspaceutil.getObject3DById = function(meshId) {
 	return (altspace.inClient && altspace._internal) ? altspace._internal.getObject3DById(meshId) : null;
 }
 
-altspaceutil.getThreeJSScene = function(meshId) {
+altspaceutil.getThreeJSScene = function() {
 	return (altspace.inClient && altspace._internal) ? altspace._internal.getThreeJSScene() : null;
 }
 
