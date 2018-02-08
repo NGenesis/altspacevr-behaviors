@@ -236,6 +236,15 @@ data: {
 }
 ```
 
+#### n-gltf
+
+```javascript
+data: {
+        sceneIndex: 0,
+        url: ''
+}
+```
+
 #### n-rigidbody
 *Experimental! This native component is not yet officially supported by the AltspaceSDK.*
 
