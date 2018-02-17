@@ -20,7 +20,7 @@ altspaceutil.getObject3DById = function(meshId) {
 	return (altspace.inClient && altspace._internal) ? altspace._internal.getObject3DById(meshId) : null;
 }
 
-altspaceutil.getThreeJSScene = function(meshId) {
+altspaceutil.getThreeJSScene = function() {
 	return (altspace.inClient && altspace._internal) ? altspace._internal.getThreeJSScene() : null;
 }
 
@@ -773,7 +773,7 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 	* @memberof module:altspaceutil/behaviors.NativeComponent
 	*/
 	this.callComponent = function(functionName, functionArgs) {
-		if(this.initialized) altspace.callNativeComponent(this.component, this.type, functionName, functionArgs);
+		if(this.initialized) altspace.callNativeComponentAction(this.component, this.type, functionName, functionArgs);
 		if(this.defaults && this.defaults.callComponent) this.defaults.callComponent.bind(this)(functionName, functionArgs);
 
 		if(this.config.recursive || this.config.recursiveMesh && !this.parent) {
