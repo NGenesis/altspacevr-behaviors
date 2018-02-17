@@ -611,7 +611,7 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 	* @memberof module:altspaceutil/behaviors.NativeComponent
 	*/
 	this.callComponent = function(functionName, functionArgs) {
-		if(this.initialized) altspace.callNativeComponent(this.component, this.type, functionName, functionArgs);
+		if(this.initialized) altspace.callNativeComponentAction(this.component, this.type, functionName, functionArgs);
 		if(this.defaults && this.defaults.callComponent) this.defaults.callComponent.bind(this)(functionName, functionArgs);
 
 		if(this.config.recursive || this.config.recursiveMesh && !this.parent) {
