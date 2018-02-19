@@ -315,6 +315,7 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 		},
 		update: function() {
 			this.data.url = altspaceutil.getAbsoluteURL(this.data.url);
+			if(this.initialized) altspace.updateNativeComponent(this.component, this.type, this.data);
 		}
 	},
 
@@ -389,11 +390,12 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 		},
 		update: function() {
 			this.data.url = altspaceutil.getAbsoluteURL(this.data.url);
+			if(this.initialized) altspace.updateNativeComponent(this.component, this.type, this.data);
 		},
 		callComponentFunc: function(functionName, functionArgs) {
 			return altspace.callNativeComponentFunc(this.component, this.type, functionName, functionArgs).then(function(data) {
-				if(functionName === 'GetBoundingBox') return Promise.resolve(new THREE.Box3(new THREE.Vector3().subVectors(data.center, data.extents), new THREE.Vector3().addVectors(data.center, data.extents)));
-				return Promise.resolve(data);
+				if(functionName === 'GetBoundingBox') return new THREE.Box3(new THREE.Vector3().subVectors(data.center, data.extents), new THREE.Vector3().addVectors(data.center, data.extents));
+				return data;
 			});
 		}
 	},

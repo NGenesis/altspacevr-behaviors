@@ -203,8 +203,19 @@
 				sim.scene.add(ngltf);
 				ngltf.addBehaviors(
 					new altspaceutil.behaviors.NativeComponent('n-gltf', { url: 'https://rawgit.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb' }),
-					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-gltf', height: 1, fontSize: 2, verticalAlign: 'top' })
+					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-gltf', height: 6, fontSize: 4, verticalAlign: 'top' })
 				);
+				ngltf.addEventListener('n-gltf-loaded', function(event) {
+					if(ngltf.userData.loaded) return;
+					ngltf.userData.loaded = true;
+					ngltf.getBehaviorByType('n-text').data.text = 'n-gltf\nStatus: ' + 'Loaded';
+					ngltf.getBehaviorByType('n-gltf').callComponentFunc('GetBoundingBox').then(function(boundingbox) {
+						var size = boundingbox.getSize();
+						var box = new THREE.Mesh(new THREE.BoxBufferGeometry(size.x, size.y, size.z), new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.3 }));
+						boundingbox.getCenter(box.position);
+						ngltf.add(box);
+					});
+				});
 
 				// n-portal (Space)
 				var nportal = new THREE.Object3D();
