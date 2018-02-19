@@ -157,7 +157,7 @@
 					nsoundplaybutton.position.set(0, 0.5, 0);
 					nsoundplaybutton.addBehavior(new altspaceutil.behaviors.NativeComponent('n-text', { text: 'Play', height: 0.7, fontSize: 1, verticalAlign: 'top' }, { useCollider: true }));
 					nsoundplaybutton.addEventListener('cursorup', function(event) {
-						nsoundcomponent.callComponent('play');
+						nsoundcomponent.callComponentAction('play');
 					});
 					nsound.add(nsoundplaybutton);
 
@@ -165,8 +165,8 @@
 					nsoundstopbutton.position.set(0.45, 0.5, 0);
 					nsoundstopbutton.addBehavior(new altspaceutil.behaviors.NativeComponent('n-text', { text: 'Stop', height: 0.7, fontSize: 1, verticalAlign: 'top' }, { useCollider: true }));
 					nsoundstopbutton.addEventListener('cursorup', function(event) {
-						nsoundcomponent.callComponent('pause');
-						nsoundcomponent.callComponent('seek', { time: 0 });
+						nsoundcomponent.callComponentAction('pause');
+						nsoundcomponent.callComponentAction('seek', { time: 0 });
 					});
 					nsound.add(nsoundstopbutton);
 
