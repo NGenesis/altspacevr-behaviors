@@ -90,13 +90,24 @@ Provides support for AltspaceVR native components to be attached to objects, pro
 
 ### Methods
 
-#### <a name="callComponent">callComponent</a>
-Calls a function associated with the native component.
+#### <a name="callComponentAction">callComponentAction</a>
+Invokes an action associated with the native component.
 
 | Name           | Type   | Description |
 | -------------- | ------ | ----------- |
 | `functionName` | String | The function name to invoke on the native component. |
 | `functionArgs` | Object | Arguments that will be passed to the function when invoked. |
+
+#### <a name="callComponentFunc">callComponentFunc</a>
+Calls a function associated with the native component, and returns a promise of the value that will be returned by the native component function.
+
+| Name           | Type   | Description |
+| -------------- | ------ | ----------- |
+| `functionName` | String | The action name to invoke on the native component. |
+| `functionArgs` | Object | Arguments that will be passed to the function when invoked. |
+
+#### <a name="callComponent">callComponent</a>
+*Deprecated. See [#callComponentAction](callComponentAction)*
 
 ### <a name="native-component-properties">Native Component Properties</a>
 #### n-object

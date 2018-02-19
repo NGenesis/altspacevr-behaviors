@@ -20,7 +20,7 @@ altspaceutil.getObject3DById = function(meshId) {
 	return (altspace.inClient && altspace._internal) ? altspace._internal.getObject3DById(meshId) : null;
 }
 
-altspaceutil.getThreeJSScene = function(meshId) {
+altspaceutil.getThreeJSScene = function() {
 	return (altspace.inClient && altspace._internal) ? altspace._internal.getThreeJSScene() : null;
 }
 
@@ -400,24 +400,26 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 				this.placeholder.addEventListener('sound-played', forwardPlaceholderEvent);
 			}
 		},
-		callComponent: function(functionName, functionArgs) {
-			if(this.component) {
-				if(functionName === 'play') {
-					this.component.dispatchEvent({
-						type: 'sound-played',
-						bubbles: true,
-						target: this.component
-					});
-				} else if(functionName === 'pause') {
-					this.component.dispatchEvent({
-						type: 'sound-paused',
-						bubbles: true,
-						target: this.component
-					});
-				}
+		callComponentAction: function(functionName, functionArgs) {
+			if(functionName === 'play') {
+				this.component.dispatchEvent({
+					type: 'sound-played',
+					bubbles: true,
+					target: this.component
+				});
+			} else if(functionName === 'pause') {
+				this.component.dispatchEvent({
+					type: 'sound-paused',
+					bubbles: true,
+					target: this.component
+				});
 			}
+
+			altspace.callNativeComponentAction(this.component, this.type, functionName, functionArgs);
 		},
 		update: function() {
+			this.data.src = altspaceutil.getAbsoluteURL(this.data.src);
+
 			if(this.initialized) altspace.updateNativeComponent(this.component, this.type, this.data);
 
 			if(this.playHandlerType) {
@@ -426,7 +428,7 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			}
 
 			if(this.data.on && this.data.on !== '') {
-				if(this.playHandler === undefined) this.playHandler = this.callComponent.bind(this, 'play');
+				if(this.playHandler === undefined) this.playHandler = this.callComponentAction.bind(this, 'play');
 				this.playHandlerType = this.data.on;
 				this.component.addEventListener(this.playHandlerType, this.playHandler);
 			}
@@ -472,6 +474,9 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			this.data.url = altspaceutil.getAbsoluteURL(this.data.url);
 			this.scene.userData.altspace = this.scene.userData.altspace || {};
 			this.scene.userData.altspace.initialized = true;
+		},
+		update: function() {
+			this.data.url = altspaceutil.getAbsoluteURL(this.data.url);
 		}
 	},
 
@@ -501,6 +506,57 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 		},
 		initComponent: function() {
 			this.data.url = altspaceutil.getAbsoluteURL(this.data.url);
+
+			if(altspace.inClient) {
+				// Override A-Frame Callback For NativeGLTFLoadedEvent To Suppress Errors That Occur When Object Doesn't Exist
+				if(!altspaceutil.overrideNativeGLTFLoadedEvent) {
+					altspaceutil.overrideNativeGLTFLoadedEvent = true;
+
+					altspaceutil.removeAllNativeEventListeners('NativeGLTFLoadedEvent');
+					altspaceutil.addNativeEventListener('NativeGLTFLoadedEvent', function(meshId) {
+						altspace._internal.forwardEventToChildIFrames('NativeGLTFLoadedEvent', arguments);
+
+						var object3D = altspace._internal.getObject3DById(meshId);
+						if(object3D && object3D.el) targetEl.emit('n-gltf-loaded', null, true);
+					});
+				}
+
+				// Handle GLTF Loaded
+				this.nativeEvents['NativeGLTFLoadedEvent'] = altspaceutil.addNativeEventListener('NativeGLTFLoadedEvent', (function(meshId) {
+					var object3d = altspaceutil.getObject3DById(meshId);
+					if(object3d && object3d === this.component) {
+						/**
+						* Fires an event once the n-gltf has finished loading.
+						*
+						* @event n-gltf-loaded
+						* @property {THREE.Object3D} target - The object which emitted the event.
+						* @memberof module:altspace/utilities/behaviors.NativeComponent
+						*/
+						object3d.dispatchEvent({
+							type: 'n-gltf-loaded',
+							bubbles: true,
+							target: object3d
+						});
+					}
+				}).bind(this));
+			}
+
+			// Forward Events From Placeholder To Behavior Owner
+			if(this.placeholder) {
+				var forwardPlaceholderEvent = (function(event) {
+					this.object3d.dispatchEvent(event);
+				}).bind(this);
+				this.placeholder.addEventListener('n-gltf-loaded', forwardPlaceholderEvent);
+			}
+		},
+		update: function() {
+			this.data.url = altspaceutil.getAbsoluteURL(this.data.url);
+		},
+		callComponentFunc: function(functionName, functionArgs) {
+			return altspace.callNativeComponentFunc(this.component, this.type, functionName, functionArgs).then(function(data) {
+				if(functionName === 'GetBoundingBox') return Promise.resolve(new THREE.Box3(new THREE.Vector3().subVectors(data.center, data.extents), new THREE.Vector3().addVectors(data.center, data.extents)));
+				return Promise.resolve(data);
+			});
 		}
 	},
 
@@ -765,7 +821,7 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 	}
 
 	/**
-	* Calls a function associated with the native component.
+	* Invokes an action associated with the native component.  Deprecated. See callComponentAction.
 	*
 	* @method callComponent
 	* @param {String} functionName - The function name to invoke on the native component.
@@ -773,17 +829,37 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 	* @memberof module:altspaceutil/behaviors.NativeComponent
 	*/
 	this.callComponent = function(functionName, functionArgs) {
-		if(this.initialized) altspace.callNativeComponent(this.component, this.type, functionName, functionArgs);
-		if(this.defaults && this.defaults.callComponent) this.defaults.callComponent.bind(this)(functionName, functionArgs);
+		this.callComponentAction(functionName, functionArgs);
+	}
 
-		if(this.config.recursive || this.config.recursiveMesh && !this.parent) {
-			this.object3d.traverse((function(child) {
-				if(child !== this.object3d && child !== this.placeholder && (this.config.recursive || (this.config.recursiveMesh && child instanceof THREE.Mesh))) {
-					var childComponent = child.getBehaviorByType(this.type);
-					if(childComponent && childComponent.parent === this) child.callComponent(functionName, functionArgs);
-				}
-			}).bind(this));
-		}
+	/**
+	* Invokes an action associated with the native component.
+	*
+	* @method callComponentAction
+	* @param {String} functionName - The function name to invoke on the native component.
+	* @param {Arguments...} functionArgs - Arguments that will be passed to the function when invoked.
+	* @memberof module:altspaceutil/behaviors.NativeComponent
+	*/
+	this.callComponentAction = function(functionName, functionArgs) {
+		if(!this.initialized || !this.component) return;
+
+		if(this.defaults && this.defaults.callComponentAction) this.defaults.callComponentAction.bind(this)(functionName, functionArgs);
+		else altspace.callNativeComponentAction(this.component, this.type, functionName, functionArgs);
+	}
+
+	/**
+	* Calls a function associated with the native component, and returns a promise of the value that will be returned by the native component function.
+	*
+	* @method callComponentFunc
+	* @param {String} functionName - The function name to invoke on the native component.
+	* @param {Arguments...} functionArgs - Arguments that will be passed to the function when invoked.
+	* @memberof module:altspaceutil/behaviors.NativeComponent
+	*/
+	this.callComponentFunc = function(functionName, functionArgs) {
+		if(!this.initialized || !this.component) return Promise.reject();
+
+		if(this.defaults && this.defaults.callComponentFunc) return this.defaults.callComponentFunc.bind(this)(functionName, functionArgs);
+		return altspace.callNativeComponentFunc(this.component, this.type, functionName, functionArgs);
 	}
 
 	this.dispose = function() {
