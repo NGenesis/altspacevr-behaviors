@@ -107,7 +107,7 @@ Calls a function associated with the native component, and returns a promise of 
 | `functionArgs` | Object | Arguments that will be passed to the function when invoked. |
 
 #### <a name="callComponent">callComponent</a>
-*Deprecated. See [#callComponentAction](callComponentAction)*
+*Deprecated. See [callComponentAction](#callComponentAction)*
 
 ### <a name="native-component-properties">Native Component Properties</a>
 #### n-object
