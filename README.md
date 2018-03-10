@@ -4,7 +4,7 @@ Provides helper functions, behaviors and A-Frame components for common functiona
 # Usage
 Include the utility library in your project:
 ```html
-<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.9.4/js/altspaceutil.min.js"></script>
+<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.9.5/js/altspaceutil.min.js"></script>
 ```
 
 # API Reference
@@ -95,8 +95,8 @@ Invokes an action associated with the native component, and does not provide a r
 
 | Name           | Type   | Description |
 | -------------- | ------ | ----------- |
-| `actionName` | String | The action name to invoke on the native component. |
-| `actionArgs` | Object | Arguments that will be passed along with the action when invoked. |
+| `actionName`   | String | The action name to invoke on the native component. |
+| `actionArgs`   | Object | Arguments that will be passed along with the action when invoked. |
 
 #### <a name="callComponentFunc">callComponentFunc</a>
 Calls a function associated with the native component, and returns a promise of the value that will be returned by the native component function.
@@ -108,6 +108,29 @@ Calls a function associated with the native component, and returns a promise of 
 
 #### <a name="callComponent">callComponent</a>
 *This function has been **Deprecated**. See [callComponentAction](#callComponentAction).*
+
+#### <a name="getAttribute">getAttribute</a>
+Retrieves an attribute associated with a native component.  See [here](#native-component-attributes) for available attributes.
+
+| Name            | Type   | Description |
+| --------------- | ------ | ----------- |
+| `attributeName` | String | An attribute name associated with the native component. |
+
+### <a name="native-component-attributes">Native Component Attributes</a>
+#### n-sound
+| Name           | Type    | Description |
+| -------------- | ------- | ----------- |
+| `loaded`       | Boolean | Indicates that the component has been loaded by the AltspaceVR client. |
+
+#### n-gltf
+| Name           | Type    | Description |
+| -------------- | ------- | ----------- |
+| `loaded`       | Boolean | Indicates that the component has been loaded by the AltspaceVR client. |
+
+#### n-container
+| Name           | Type    | Description |
+| -------------- | ------- | ----------- |
+| `count`        | Number  | The number of objects in the n-container. |
 
 ### <a name="native-component-properties">Native Component Properties</a>
 #### n-object

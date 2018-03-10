@@ -248,22 +248,23 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 		config: {
 			meshComponent: true
 		},
+		attributes: {
+			/**
+			* The number of objects in the n-container.
+			* @instance
+			* @member {Number} count
+			* @readonly
+			* @memberof module:altspace/utilities/behaviors.NativeComponent.attributes
+			*/
+			count: 0
+		},
 		initComponent: function() {
-			this.count = 0;
-
 			if(altspace.inClient) {
 				// Handle Container Count Changes
 				this.nativeEvents['NativeContainerCountChanged'] = altspaceutil.addNativeEventListener('NativeContainerCountChanged', (function(meshId, count, oldCount) {
 					var object3d = altspaceutil.getObject3DById(meshId);
 					if(object3d && object3d === this.component) {
-						/**
-						* The number of objects in the n-container.
-						* @instance
-						* @member {Number} count
-						* @readonly
-						* @memberof module:altspace/utilities/behaviors.NativeComponent
-						*/
-						this.count = count;
+						this.attributes.count = count;
 
 						/**
 						* Fires an event every time an object enters or leaves the bounds of the n-container.
@@ -353,6 +354,16 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			minDistance: 1,
 			maxDistance: 12
 		},
+		attributes: {
+			/**
+			* Indicates that the component has been loaded by the AltspaceVR client.
+			* @instance
+			* @member {Boolean} loaded
+			* @readonly
+			* @memberof module:altspace/utilities/behaviors.NativeComponent.attributes
+			*/
+			loaded: false
+		},
 		initComponent: function() {
 			this.data.src = altspaceutil.getAbsoluteURL(this.data.src);
 
@@ -374,6 +385,7 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 				this.nativeEvents['NativeSoundLoadedEvent'] = altspaceutil.addNativeEventListener('NativeSoundLoadedEvent', (function(meshId) {
 					var object3d = altspaceutil.getObject3DById(meshId);
 					if(object3d && object3d === this.component) {
+						this.attributes.loaded = true;
 						/**
 						* Fires an event once the n-sound has finished loading.
 						*
@@ -419,6 +431,7 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 		},
 		update: function() {
 			this.data.src = altspaceutil.getAbsoluteURL(this.data.src);
+			this.attributes.loaded = false;
 
 			if(this.initialized) altspace.updateNativeComponent(this.component, this.type, this.data);
 
@@ -505,6 +518,16 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			url: '',
 			sceneIndex: 0
 		},
+		attributes: {
+			/**
+			* Indicates that the component has been loaded by the AltspaceVR client.
+			* @instance
+			* @member {Boolean} loaded
+			* @readonly
+			* @memberof module:altspace/utilities/behaviors.NativeComponent.attributes
+			*/
+			loaded: false
+		},
 		initComponent: function() {
 			this.data.url = altspaceutil.getAbsoluteURL(this.data.url);
 
@@ -526,6 +549,7 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 				this.nativeEvents['NativeGLTFLoadedEvent'] = altspaceutil.addNativeEventListener('NativeGLTFLoadedEvent', (function(meshId) {
 					var object3d = altspaceutil.getObject3DById(meshId);
 					if(object3d && object3d === this.component) {
+						this.attributes.loaded = true;
 						/**
 						* Fires an event once the n-gltf has finished loading.
 						*
@@ -552,6 +576,7 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 		},
 		update: function() {
 			this.data.url = altspaceutil.getAbsoluteURL(this.data.url);
+			this.attributes.loaded = false;
 			if(this.initialized) altspace.updateNativeComponent(this.component, this.type, this.data);
 		},
 		callComponentFunc: function(functionName, functionArgs) {
@@ -696,6 +721,7 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 	this.defaults = altspaceutil.behaviors.NativeComponentDefaults[this.type];
 	this.config = Object.assign({ sendUpdates: true, recursiveMesh: false, recursive: false, useCollider: false, updateOnStaleData: true, sharedComponent: true, inheritParentData: false, meshComponent: false }, (this.defaults && this.defaults.config) ? JSON.parse(JSON.stringify(this.defaults.config)) : {}, _config);
 	this.data = Object.assign((this.defaults && this.defaults.data) ? JSON.parse(JSON.stringify(this.defaults.data)) : {}, _data);
+	this.attributes = (this.defaults && this.defaults.attributes) ? JSON.parse(JSON.stringify(this.defaults.attributes)) : {};
 
 	this.awake = function(o, s) {
 		this.scene = s;
@@ -826,8 +852,8 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 	* Invokes an action associated with the native component.  Deprecated. See callComponentAction.
 	*
 	* @method callComponent
-	* @param {String} functionName - The function name to invoke on the native component.
-	* @param {Arguments...} functionArgs - Arguments that will be passed to the function when invoked.
+	* @param {String} [functionName] - The function name to invoke on the native component.
+	* @param {Arguments...} [functionArgs] - Arguments that will be passed to the function when invoked.
 	* @memberof module:altspaceutil/behaviors.NativeComponent
 	*/
 	this.callComponent = function(functionName, functionArgs) {
@@ -838,8 +864,8 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 	* Invokes an action associated with the native component.
 	*
 	* @method callComponentAction
-	* @param {String} functionName - The function name to invoke on the native component.
-	* @param {Arguments...} functionArgs - Arguments that will be passed to the function when invoked.
+	* @param {String} [functionName] - The function name to invoke on the native component.
+	* @param {Arguments...} [functionArgs] - Arguments that will be passed to the function when invoked.
 	* @memberof module:altspaceutil/behaviors.NativeComponent
 	*/
 	this.callComponentAction = function(functionName, functionArgs) {
@@ -853,8 +879,8 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 	* Calls a function associated with the native component, and returns a promise of the value that will be returned by the native component function.
 	*
 	* @method callComponentFunc
-	* @param {String} functionName - The function name to invoke on the native component.
-	* @param {Arguments...} functionArgs - Arguments that will be passed to the function when invoked.
+	* @param {String} [functionName] - The function name to invoke on the native component.
+	* @param {Arguments...} [functionArgs] - Arguments that will be passed to the function when invoked.
 	* @memberof module:altspaceutil/behaviors.NativeComponent
 	*/
 	this.callComponentFunc = function(functionName, functionArgs) {
@@ -904,6 +930,18 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 		this.sharedData = null;
 		this.oldData = null;
 		this.parent = null;
+	}
+
+	/**
+	* Retrieves an attribute associated with a native component.
+	*
+	* @method getAttribute
+	* @param {String} [attributeName] - An attribute name associated with the native component.
+	* @returns {Object} The value of the given attribute.
+	* @memberof module:altspaceutil/behaviors.NativeComponent
+	*/
+	this.getAttribute = function(attributeName) {
+		return this.attributes[attributeName];
 	}
 
 	this.clone = function() {

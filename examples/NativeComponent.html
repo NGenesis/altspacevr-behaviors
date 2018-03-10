@@ -5,7 +5,7 @@
 		<meta name="author" content="Genesis">
 		<title>NativeComponent Behavior Example</title>
 		<script src="https://cdn.rawgit.com/mrdoob/three.js/r90/build/three.min.js"></script>
-		<script src="https://cdn.rawgit.com/AltspaceVR/AltspaceSDK/v2.8.1/dist/altspace.min.js"></script>
+		<script src="https://cdn.rawgit.com/AltspaceVR/AltspaceSDK/v2.8.2/dist/altspace.min.js"></script>
 		<script src="../js/altspaceutil.min.js"></script>
 	</head>
 	<body>
@@ -103,13 +103,13 @@
 				ncontainer.position.set(0, 1, 5);
 				sim.scene.add(ncontainer);
 				ncontainer.addEventListener('container-count-changed', function(event) {
-					event.target.getBehaviorByType('n-text').data.text = 'n-container\nCount: ' + event.target.getBehaviorByType('n-container').count;
+					event.target.getBehaviorByType('n-text').data.text = 'n-container\nCount: ' + event.target.getBehaviorByType('n-container').getAttribute('count');
 				});
 				ncontainer.addEventListener('container-empty', function(event) {
-					event.target.getBehaviorByType('n-text').data.text = 'n-container\nCount: ' + event.target.getBehaviorByType('n-container').count + ', State: Empty';
+					event.target.getBehaviorByType('n-text').data.text = 'n-container\nCount: ' + event.target.getBehaviorByType('n-container').getAttribute('count') + ', State: Empty';
 				});
 				ncontainer.addEventListener('container-full', function(event) {
-					event.target.getBehaviorByType('n-text').data.text = 'n-container\nCount: ' + event.target.getBehaviorByType('n-container').count + ', State: Full';
+					event.target.getBehaviorByType('n-text').data.text = 'n-container\nCount: ' + event.target.getBehaviorByType('n-container').getAttribute('count') + ', State: Full';
 				});
 				ncontainer.addEventListener('triggerenter', function(event) {
 					event.target.material.color.set(0xffeeff);
@@ -140,9 +140,9 @@
 				);
 				nsound.addEventListener('n-sound-loaded', function(event) {
 					if(nsound.userData.loaded) return;
-					nsound.userData.loaded = true;
 
 					var nsoundcomponent = nsound.getBehaviorByType('n-sound');
+					nsound.userData.loaded = nsoundcomponent.getAttribute('loaded');
 
 					var nsoundmutebutton = new THREE.Mesh(new THREE.BoxBufferGeometry(0.4, 0.4, 0.4), new THREE.MeshBasicMaterial({ color: 0x0000ff }));
 					nsoundmutebutton.position.set(-0.45, 0.5, 0);
@@ -207,9 +207,12 @@
 				);
 				ngltf.addEventListener('n-gltf-loaded', function(event) {
 					if(ngltf.userData.loaded) return;
-					ngltf.userData.loaded = true;
+
+					var ngltfcomponent = ngltf.getBehaviorByType('n-gltf');
+					ngltf.userData.loaded = ngltfcomponent.getAttribute('loaded');
+
 					ngltf.getBehaviorByType('n-text').data.text = 'n-gltf\nStatus: ' + 'Loaded';
-					ngltf.getBehaviorByType('n-gltf').callComponentFunc('GetBoundingBox').then(function(boundingbox) {
+					ngltfcomponent.callComponentFunc('GetBoundingBox').then(function(boundingbox) {
 						var size = boundingbox.getSize();
 						var box = new THREE.Mesh(new THREE.BoxBufferGeometry(size.x, size.y, size.z), new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.3 }));
 						boundingbox.getCenter(box.position);
