@@ -117,6 +117,8 @@ Retrieves an attribute associated with a native component.  See [here](#native-c
 | `attributeName` | String | An attribute name associated with the native component. |
 
 ### <a name="native-component-attributes">Native Component Attributes</a>
+Attributes associated with a native component can be retrieved using the [getAttribute](#getAttribute) method.
+
 #### n-sound
 | Name           | Type    | Description |
 | -------------- | ------- | ----------- |
