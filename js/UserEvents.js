@@ -51,7 +51,7 @@ altspaceutil.behaviors.UserEvents = function(config) {
 		if(this.userIds.length <= 0) {
 			var self = this;
 			altspace.getUser().then(function(user) {
-				self.userIds.push(user.userId);
+				self.userIds.push(user.legacyUserId ? user.legacyUserId : user.userId);
 				self.requestUserData();
 			});
 		}
