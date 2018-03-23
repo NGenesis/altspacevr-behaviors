@@ -213,7 +213,7 @@
 
 					ngltf.getBehaviorByType('n-text').data.text = 'n-gltf\nStatus: ' + 'Loaded';
 					ngltfcomponent.callComponentFunc('GetBoundingBox').then(function(boundingbox) {
-						var size = boundingbox.getSize();
+						var size = boundingbox.getSize(new THREE.Vector3());
 						var box = new THREE.Mesh(new THREE.BoxBufferGeometry(size.x, size.y, size.z), new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.3 }));
 						boundingbox.getCenter(box.position);
 						ngltf.add(box);

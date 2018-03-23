@@ -691,7 +691,7 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 	this.updateTransform = function() {
 		// Transform Control Follows Object
 		this.scene.updateMatrixWorld();
-		this.controlbase.position.copy((this.config.followTarget ? this.target : this.object3d).getWorldPosition());
+		this.controlbase.position.copy((this.config.followTarget ? this.target : this.object3d).getWorldPosition(new THREE.Vector3()));
 	}
 
 	this.update = function() {
