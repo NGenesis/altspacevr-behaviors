@@ -17,7 +17,7 @@
 				enclosure.requestFullspace().then(function() {
 					altspace.getUser().then(function(user) {
 						altspace.utilities.sync.connect({ appId: 'NativeComponentSync', authorId: 'Genesis' }).then(function(connection) {
-							userId = user.userId;
+							userId = user.legacyUserId ? user.legacyUserId : user.userId;
 							sim.scene.addBehavior(new altspace.utilities.behaviors.SceneSync(connection.instance, { instantiators: { 'createHandObject': createHandObject }, ready: onSyncReady }));
 						});
 					});
