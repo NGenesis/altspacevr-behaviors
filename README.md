@@ -4,7 +4,7 @@ Provides helper functions, behaviors and A-Frame components for common functiona
 # Usage
 Include the utility library in your project:
 ```html
-<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.9.6/js/altspaceutil.min.js"></script>
+<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.9.7/js/altspaceutil.min.js"></script>
 ```
 
 # API Reference
@@ -31,6 +31,7 @@ Include the utility library in your project:
 * [userchange](#userchange)
 * [avatarchange](#avatarchange)
 * [avatarstatus](#avatarstatus)
+* [n-sound-preloaded](#n-sound-preloaded)
 
 ## A-Frame Components
 * [altspace-transform-controls](#altspace-transform-controls)
@@ -451,13 +452,28 @@ Fires an event when the user's connection status changes.
 | `target`      | [THREE.Object3D](https://threejs.org/docs/#api/core/Object3D) | The object which emitted the event. |
 
 ## <a name="PreloadNativeSounds">altspaceutil.behaviors.PreloadNativeSounds</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/PreloadNativeSounds.html))
-Preloads sound files used by n-sound to ensure the resources are cached for subsequent uses.
+Preloads the specified sound files used by n-sound to ensure the resources are cached for subsequent uses. The behavior will remove itself automatically once the sound files have been preloaded or the specified timeout threshold has been reached.
 
 ### Parameters
+`sounds` - Native sound resources to be preloaded.  Can either be an array of sound file paths or an array of [NativeComponent](#NativeComponent) n-sound data objects (e.g. `{ src: 'file.wav', volume: 1.5 }`).
 
-| Name     | Type     | Default | Description |
-| -------- | -------- | ------- | ----------- |
-| `sounds` | String[] |         | Native sound resources to be preloaded. |
+`config` - Optional parameters.
+
+| Name      | Type    | Default | Description |
+| --------- | ------- | ------- | ----------- |
+| `dispose` | Boolean | true    | Specifies whether the preloaded native sound objects will be destroyed after the preload has completed.  By default, preloaded sound objects will be destroyed after being cached. |
+| `timeout` | Number  | 10000   | Time in milliseconds to wait before ending the preload.  A [n-sound-preloaded](#n-sound-preloaded) event will be fired with a timeout property set to true when the timeout threshold has been reached. Specifying a zero or negative value will disable the timeout. |
+
+### Events
+
+#### <a name="n-sound-preloaded">n-sound-preloaded</a>
+Fires an event once all sounds have been preloaded, or the specified timeout threshold has been reached.
+
+| Name          | Type                                                            | Description |
+| ------------- | --------------------------------------------------------------- | ----------- |
+| `behavior`    | [PreloadNativeSounds](#PreloadNativeSounds)                     | The behavior that preloaded the sounds. |
+| `sounds`      | [THREE.Object3D](https://threejs.org/docs/#api/core/Object3D)[] | The sound objects that were preloaded. Sound objects are children of the object the behavior is associated with. |
+| `timeout`     | Boolean                                                         | Indicates whether the timeout threshold has been reached before all sounds were preloaded. |
 
 ## <a name="HoverMaterialOpacity">altspaceutil.behaviors.HoverMaterialOpacity</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/HoverMaterialOpacity.html))
 Changes the opacity of an object's material when the cursor hovers over it, and restores the original opacity when the cursor is no longer hovering over the object.
