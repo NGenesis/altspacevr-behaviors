@@ -504,8 +504,8 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 		update: function() {
 			if(this.config.targetEntity) {
 				this.scene.updateMatrixWorld(true);
-				this.data.targetPosition = this.config.targetEntity.getWorldPosition();
-				var quaternion = this.config.targetEntity.getWorldQuaternion();
+				this.data.targetPosition = this.config.targetEntity.getWorldPosition(new THREE.Vector3());
+				var quaternion = this.config.targetEntity.getWorldQuaternion(new THREE.Quaternion());
 				this.data.targetQuaternion = { x: quaternion.x, y: quaternion.y, z: quaternion.z, w: quaternion.w };
 			}
 
@@ -2165,7 +2165,7 @@ altspaceutil.behaviors.TransformControls = function(_config) {
 	this.updateTransform = function() {
 		// Transform Control Follows Object
 		this.scene.updateMatrixWorld();
-		this.controlbase.position.copy((this.config.followTarget ? this.target : this.object3d).getWorldPosition());
+		this.controlbase.position.copy((this.config.followTarget ? this.target : this.object3d).getWorldPosition(new THREE.Vector3()));
 	}
 
 	this.update = function() {
