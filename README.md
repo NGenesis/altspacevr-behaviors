@@ -4,7 +4,7 @@ Provides helper functions, behaviors and A-Frame components for common functiona
 # Usage
 Include the utility library in your project:
 ```html
-<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.9.7/js/altspaceutil.min.js"></script>
+<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.9.8/js/altspaceutil.min.js"></script>
 ```
 
 # API Reference
@@ -12,6 +12,9 @@ Include the utility library in your project:
 ## Functions
 * [altspaceutil.getAbsoluteURL](#getAbsoluteURL)
 * [altspaceutil.getBasePath](#getBasePath)
+* [altspaceutil.isMobileApp](#isMobileApp)
+* [altspaceutil.expandSerializationBuffer](#expandSerializationBuffer)
+* [altspaceutil.profileSerializationBuffer](#profileSerializationBuffer)
 
 ## Behaviors
 * [altspaceutil.behaviors.NativeComponent](#NativeComponent)
@@ -23,6 +26,7 @@ Include the utility library in your project:
 * [altspaceutil.behaviors.HoverMaterialOpacity](#HoverMaterialOpacity)
 * [altspaceutil.behaviors.HoverMaterialColor](#HoverMaterialColor)
 * [altspaceutil.behaviors.NativeTextMaterial](#NativeTextMaterial)
+* [altspaceutil.behaviors.TWEEN](#TWEEN)
 
 ## Events
 * [transform-controls-dragmove](#transform-controls-dragmove)
@@ -64,6 +68,30 @@ Create a base path from the specified file URL.
 | Type   | Description |
 | ------ | ----------- |
 | String | A URL to the file's base path. |
+
+## <a name="isMobileApp">altspaceutil.isMobileApp</a>
+Indicates whether the app is being loaded on a mobile version of the Altspace client.  This is typically determined by the user agent exposed to the app.
+
+### Returns
+| Type    | Description |
+| ------- | ----------- |
+| Boolean | Whether the app is running on a mobile client.  Returns `true` for mobile clients, `false` otherwise. |
+
+## <a name="expandSerializationBuffer">altspaceutil.expandSerializationBuffer</a>
+Expands the Altspace client's serialization buffer to improve loading performance.
+
+### Parameters
+| Name   | Type   | Description |
+| ------ | ------ | ----------- |
+| `size` | Number | The size to expand the serialization buffer by, in bytes. |
+
+## <a name="profileSerializationBuffer">altspaceutil.profileSerializationBuffer</a>
+Enables or disables the profiler for the Altspace client's serialization buffer to determine whether the buffer needs to be expanded.  Profiler messages will be displayed in the console when enabled.
+
+### Parameters
+| Name      | Type    | Description |
+| --------- | ------- | ----------- |
+| `enabled` | Boolean | Specifies whether the serialization buffer is to be enabled. |
 
 # Behaviors
 
@@ -518,6 +546,14 @@ Updates the color and opacity of a [n-text](https://altspacevr.github.io/Altspac
 | `material` | [THREE.Material](https://threejs.org/docs/#api/materials/MeshBasicMaterial) | null     | A reference to the material whose properties will be applied to the n-text native component.  Defaults to material of the object the behavior is attached to. |
 | `color`    | Boolean                                                                     | true     | Specifies whether the n-text native component should use the color of the source material. |
 | `opacity`  | Boolean                                                                     | true     | Specifies whether the n-text native component should use the opacity of the source material. |
+
+## <a name="TWEEN">altspaceutil.behaviors.TWEEN</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/TWEEN.html))
+Provides a convenience wrapper for [tween.js](https://github.com/tweenjs/tween.js/) to manage and update `TWEEN` and `TWEEN.Group` objects.  Refer to the [tween.js user guide](https://github.com/tweenjs/tween.js/blob/master/docs/user_guide.md) for further information.
+
+### Parameters
+| Name         | Type        | Default  | Description |
+| ------------ | ----------- | -------- | ----------- |
+| `tweengroup` | TWEEN.Group | TWEEN    | A tween group to be managed by the behavior.  When ommitted, the global `TWEEN` object will be managed by the behavior. |
 
 # A-Frame Components
 ## <a name="altspace-transform-controls">altspace-transform-controls</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/aframe/altspace-transform-controls.html))

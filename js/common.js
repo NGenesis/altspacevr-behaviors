@@ -25,6 +25,40 @@ altspaceutil.getThreeJSScene = function() {
 }
 
 /**
+* Expands the Altspace client's serialization buffer to improve loading performance.
+* @function expandSerializationBuffer
+* @param {Number} [size] The size to expand the serialization buffer by, in bytes.
+* @memberof module:altspaceutil
+*/
+altspaceutil.expandSerializationBuffer = function(size) {
+	if(altspace.inClient && altspace._internal && altspace._internal.ScratchThriftBuffer && size > 0) {
+		altspace._internal.ScratchThriftBuffer.grow(size);
+	}
+}
+
+/**
+* Enables or disables the profiler for the Altspace client's serialization buffer to determine whether the buffer needs to be expanded.  Profiler messages will be displayed in the console when enabled.
+* @function profileSerializationBuffer
+* @param {Boolean} [enabled] Specifies whether the serialization buffer is to be enabled.
+* @memberof module:altspaceutil
+*/
+altspaceutil.profileSerializationBuffer = function(enabled) {
+	if(altspace.inClient && altspace._internal && altspace._internal.ScratchThriftBuffer) {
+		altspace._internal.ScratchThriftBuffer.profile = (enabled === undefined) ? true : enabled;
+	}
+}
+
+/**
+* Indicates whether the app is being loaded on a mobile version of the Altspace client.  This is typically determined by the user agent exposed to the app.
+* @function isMobileApp
+* @returns {Boolean} Whether the app is running on a mobile client.  Returns true for mobile clients, false otherwise.
+* @memberof module:altspaceutil
+*/
+altspaceutil.isMobileApp = function(url) {
+	return /mobile/i.test(navigator.userAgent);
+}
+
+/**
 * Create an absolute URL from the specified relative URL, using the current host as the URL base.
 * @function getAbsoluteURL
 * @param {String} [url] A relative URL.  Providing an absolute URL will return itself unchanged.
@@ -44,8 +78,6 @@ altspaceutil.getAbsoluteURL = function(url) {
 
 	return url;
 }
-
-// Produce a base path from the specified file URL.
 
 /**
 * Create a base path from the specified file URL.
