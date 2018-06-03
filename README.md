@@ -4,7 +4,7 @@ Provides helper functions, behaviors and A-Frame components for common functiona
 # Usage
 Include the utility library in your project:
 ```html
-<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.9.8/js/altspaceutil.min.js"></script>
+<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.9.9/js/altspaceutil.min.js"></script>
 ```
 
 # API Reference
@@ -32,8 +32,8 @@ Include the utility library in your project:
 * [transform-controls-dragmove](#transform-controls-dragmove)
 * [transform-controls-dragbegin](#transform-controls-dragbegin)
 * [transform-controls-dragend](#transform-controls-dragend)
-* [userchange](#userchange)
 * [avatarchange](#avatarchange)
+* [userchange](#userchange)
 * [avatarstatus](#avatarstatus)
 * [n-sound-preloaded](#n-sound-preloaded)
 
@@ -413,7 +413,7 @@ Subscribes to avatar and user preference update events for a given list of users
 
 | Name            | Type                            | Default | Description |
 | --------------- | ------------------------------- | ------- | ----------- |
-| `userIds`       | String[]                        | null    | An array of User IDs for each user to dispatch events for.  When omitted, only events for the user currently logged in will be handled. |
+| `userIds`       | String[]                        | null    | An array of (legacy) User IDs for each user to dispatch events for.  When omitted, only avatar change events for the user currently logged in will be handled. |
 | `onRequestData` | [onRequestData](#onRequestData) | null    | A precondition callback returning a boolean that determines if a user should have their data requested.  User data is requested if the callback returns true, otherwise no action is taken. |
 | `refreshTime`   | Number                          | 5000    | Duration to wait between user updates, in milliseconds. |
 | `trace`         | Boolean                         | false   | Specifies whether debugging information should be displayed. |
@@ -446,16 +446,6 @@ Unsubscribe from receiving events for a given User ID.
 
 ### Events
 
-#### <a name="userchange">userchange</a>
-Fires an event when the user changes account preferences.
-
-| Name          | Type                                                          | Description |
-| ------------- | ------------------------------------------------------------- | ----------- |
-| `userId`      | String                                                        | User ID of the user. |
-| `username`    | String                                                        | Username of the user. |
-| `displayName` | String                                                        | Display name of the user. |
-| `target`      | [THREE.Object3D](https://threejs.org/docs/#api/core/Object3D) | The object which emitted the event. |
-
 #### <a name="avatarchange">avatarchange</a>
 Fires an event when the user changes avatar preferences.
 
@@ -467,6 +457,16 @@ Fires an event when the user changes avatar preferences.
 | `colors`      | Object                                                        | [THREE.Color](https://threejs.org/docs/#api/math/Color) preferences of the avatar.  This typically provides `primary` and `highlight` properties for Pod avatars, and `highlight` for Robothead avatars. |
 | `rawColors`   | Object                                                        | Raw color preferences of the avatar.  This typically provides `primary` and `highlight` properties for Pod avatars, and `highlight` for Robothead avatars. |
 | `textures`    | Object                                                        | Texture identifier preferences for the avatar.  This typically provides `hair`, `skin` and `clothing` properties for Rubenoid avatars. |
+| `target`      | [THREE.Object3D](https://threejs.org/docs/#api/core/Object3D) | The object which emitted the event. |
+
+#### <a name="userchange">userchange</a>
+Fires an event when the user changes account preferences.
+
+| Name          | Type                                                          | Description |
+| ------------- | ------------------------------------------------------------- | ----------- |
+| `userId`      | String                                                        | User ID of the user. |
+| `username`    | String                                                        | Username of the user. |
+| `displayName` | String                                                        | Display name of the user. |
 | `target`      | [THREE.Object3D](https://threejs.org/docs/#api/core/Object3D) | The object which emitted the event. |
 
 #### <a name="avatarstatus">avatarstatus</a>

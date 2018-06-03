@@ -316,6 +316,13 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 		}
 	},
 
+	'n-animator': {
+		config: {
+			sendUpdates: false,
+			meshComponent: true
+		}
+	},
+
 	'n-layout-browser': {
 		data: {
 			url: 'about:blank',

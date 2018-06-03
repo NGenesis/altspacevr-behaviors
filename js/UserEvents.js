@@ -19,29 +19,15 @@
  * @memberof module:altspaceutil/behaviors
  **/
 altspaceutil.behaviors.UserEvents = function(config) {
-	this.config = config || {};
+	this.config = Object.assign({ subscribeSelfServerEvents: false, onRequestData: null, refreshTime: 5000, trace: false, userIds: [] }, config);
 	this.type = 'UserEvents';
-
-	/**
-	* A precondition callback returning a boolean that determines if a user should have their data requested.
-	* User data is requested if the callback returns true, otherwise no action is taken.
-	* @callback onRequestData
-	* @param {String} userId User ID of a user who will have their data requested.
-	* @param {THREE.Object3D} object The object that will emit the request.
-	* @memberof module:altspaceutil/behaviors.UserEvents
-	*/
-	this.onRequestData = this.config.onRequestData || null;
-
-	this.refreshTime = this.config.refreshTime || 5000;
-	this.trace = this.config.trace || false;
-	this.userIds = this.config.userIds || [];
 
 	this.awake = function(o) {
 		this.object3d = o;
 		this.time = 0;
 		this.loading = false;
 		this.users = {};
-		this.userIds = this.userIds.constructor === Array ? this.userIds : [this.userIds];
+		this.userIds = this.config.userIds.constructor === Array ? this.config.userIds : [this.config.userIds];
 
 		altspaceutil.manageBehavior(this, this.object3d);
 
@@ -51,12 +37,142 @@ altspaceutil.behaviors.UserEvents = function(config) {
 		if(this.userIds.length <= 0) {
 			var self = this;
 			altspace.getUser().then(function(user) {
-				self.userIds.push(user.legacyUserId ? user.legacyUserId : user.userId);
-				self.requestUserData();
+				self.selfUserId = user.legacyUserId ? user.legacyUserId : user.userId;
+				self.updateUserAvatarInfo(user.avatarInfo);
+				user.addEventListener('avatarchange', self.onUpdateUserAvatarInfo.bind(self));
+
+				if(self.config.subscribeSelfServerEvents) {
+					self.userIds.push(user.legacyUserId ? user.legacyUserId : user.userId);
+					self.requestUserData();
+				}
 			});
-		}
-		else {
+		} else {
 			this.requestUserData();
+		}
+	}
+
+	this.onUpdateUserAvatarInfo = function(event) {
+		this.updateUserAvatarInfo(event.data);
+	}
+
+	this.updateUserAvatarInfo = function(avatarInfo) {
+		function convertRawAvatarColor(color) {
+			if(color) {
+				var rgb = color.match(/^rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i);
+				if(rgb) return [rgb[1], rgb[2], rgb[3]];
+			}
+			return color;
+		}
+
+		var primaryColor = convertRawAvatarColor(avatarInfo.primaryColor);
+		var highlightColor = convertRawAvatarColor(avatarInfo.highlightColor);
+
+		var userId = this.selfUserId;
+		var user = this.users[userId] || { userId: userId };
+		this.users[userId] = user;
+
+		var oldAvatarId = user.avatarId;
+		user.avatarId = avatarInfo.sid || null;
+
+		var oldRawAvatarColors = user.rawAvatarColors;
+		var oldAvatarTextures = user.avatarTextures;
+		var avatarAppearanceChanged = (user.avatarId !== oldAvatarId);
+		var avatarClass;
+
+		user.avatarColors = {};
+		user.rawAvatarColors = {};
+		user.avatarTextures = {};
+
+		switch(user.avatarId) {
+			// Rubenoid Avatars
+			case 'rubenoid-male-01':
+			case 'rubenoid-female-01': {
+				avatarClass = 'Rubenoid';
+
+				if(avatarInfo.textures[0]) user.avatarTextures['hair'] = avatarInfo.textures[0];
+				if(avatarInfo.textures[1]) user.avatarTextures['skin'] = avatarInfo.textures[1];
+				if(avatarInfo.textures[2]) user.avatarTextures['clothing'] = avatarInfo.textures[2];
+
+				if(!avatarAppearanceChanged) avatarAppearanceChanged = (oldAvatarTextures['hair'] !== user.avatarTextures['hair'] || oldAvatarTextures['skin'] !== user.avatarTextures['skin'] || oldAvatarTextures['clothing'] !== user.avatarTextures['clothing']);
+				break;
+			}
+
+			// Robothead Avatars
+			case 'robothead-roundguy-01':
+			case 'robothead-propellerhead-01': {
+				avatarClass = 'Robothead';
+
+				if(highlightColor) {
+					user.avatarColors['highlight'] = this.getAvatarColor(highlightColor);
+					user.rawAvatarColors['highlight'] = highlightColor;
+				}
+
+				if(!avatarAppearanceChanged) avatarAppearanceChanged = (!oldRawAvatarColors['highlight'] || JSON.stringify(oldRawAvatarColors['highlight']) !== JSON.stringify(user.rawAvatarColors['highlight']));
+				break;
+			}
+
+			// Pod Avatars
+			case 'a-series-m01':
+			case 'pod-classic':
+			case 's-series-f01':
+			case 's-series-m01':
+			case 'x-series-m01':
+			case 'x-series-m02': {
+				avatarClass = 'Pod';
+
+				if(primaryColor) {
+					user.avatarColors['primary'] = this.getAvatarColor(primaryColor);
+					user.rawAvatarColors['primary'] = primaryColor;
+				}
+
+				if(highlightColor) {
+					user.avatarColors['highlight'] = this.getAvatarColor(highlightColor);
+					user.rawAvatarColors['highlight'] = highlightColor;
+				}
+
+				if(!avatarAppearanceChanged) avatarAppearanceChanged = (!oldRawAvatarColors['primary'] || !oldRawAvatarColors['highlight'] || JSON.stringify(oldRawAvatarColors['primary']) !== JSON.stringify(user.rawAvatarColors['primary']) || JSON.stringify(oldRawAvatarColors['highlight']) !== JSON.stringify(user.rawAvatarColors['highlight']));
+				break;
+			}
+
+			default: {
+				avatarClass = '';
+				if(this.config.trace) console.log('Unknown avatar type: ' + user.avatarId);
+				break;
+			}
+		}
+
+		if(avatarAppearanceChanged) {
+			/**
+			* Fires an event when the user changes avatar preferences.
+			*
+			* @event avatarchange
+			* @property {String} userId User ID of the user.
+			* @property {AvatarId} avatarId Avatar type identifier that was selected by the user.
+			* @property {String} avatarClass Avatar type classification. Typically one of 'Pod',
+			* 'Robothead' or 'Rubenoid', or empty when unclassified.
+			* @property {Object} colors {@link THREE.Color} preferences of the avatar.  This typically provides
+			* 'primary' and 'highlight' properties for Pod avatars, and 'highlight' for Robothead avatars.
+			* @property {Object} rawColors Raw color preferences of the avatar.  This typically provides
+			* 'primary' and 'highlight' properties for Pod avatars, and 'highlight' for Robothead avatars.
+			* @property {Object} textures Texture identifier preferences for the avatar.  This typically provides
+			* 'hair', 'skin' and 'clothing' properties for Rubenoid avatars.
+			* @property {THREE.Object3D} target - The object which emitted the event.
+			* @memberof module:altspaceutil/behaviors.UserEvents
+			*/
+			var self = this;
+			this.object3d.dispatchEvent({
+				type: 'avatarchange',
+				detail: {
+					userId: user.userId,
+					avatarId: user.avatarId,
+					avatarClass: avatarClass,
+					colors: user.avatarColors,
+					rawColors: user.rawAvatarColors,
+					textures: user.avatarTextures
+				},
+				bubbles: true,
+				target: self.object3d
+			});
 		}
 	}
 
@@ -99,15 +215,21 @@ altspaceutil.behaviors.UserEvents = function(config) {
 				var avatarAppearanceChanged = (user.avatarId !== oldAvatarId);
 				var avatarClass;
 
+				user.avatarColors = {};
+				user.rawAvatarColors = {};
+				user.avatarTextures = {};
+
 				switch(user.avatarId) {
 					// Rubenoid Avatars
 					case 'rubenoid-male-01':
 					case 'rubenoid-female-01': {
 						avatarClass = 'Rubenoid';
+
 						var texturePrefix = (user.avatarId === 'rubenoid-male-01') ? 'rubenoid-male-texture-' : 'rubenoid-female-texture-';
-						user.avatarTextures = { 'hair': jsonavatar[texturePrefix + '1'][0], 'skin': jsonavatar[texturePrefix + '2'][0], 'clothing': jsonavatar[texturePrefix + '3'][0] };
-						user.avatarColors = {};
-						user.rawAvatarColors = {};
+						if(jsonavatar[texturePrefix + '1'][0]) user.avatarTextures['hair'] = jsonavatar[texturePrefix + '1'][0];
+						if(jsonavatar[texturePrefix + '2'][0]) user.avatarTextures['skin'] = jsonavatar[texturePrefix + '2'][0];
+						if(jsonavatar[texturePrefix + '3'][0]) user.avatarTextures['clothing'] = jsonavatar[texturePrefix + '3'][0];
+
 						if(!avatarAppearanceChanged) avatarAppearanceChanged = (oldAvatarTextures['hair'] !== user.avatarTextures['hair'] || oldAvatarTextures['skin'] !== user.avatarTextures['skin'] || oldAvatarTextures['clothing'] !== user.avatarTextures['clothing']);
 						break;
 					}
@@ -116,9 +238,12 @@ altspaceutil.behaviors.UserEvents = function(config) {
 					case 'robothead-roundguy-01':
 					case 'robothead-propellerhead-01': {
 						avatarClass = 'Robothead';
-						user.avatarColors = { 'highlight': this.getAvatarColor(jsonavatar['robothead-highlight-color']) };
-						user.rawAvatarColors = { 'highlight': jsonavatar['robothead-highlight-color'] };
-						user.avatarTextures = {};
+
+						if(jsonavatar['robothead-highlight-color']) {
+							user.avatarColors['highlight'] = this.getAvatarColor(jsonavatar['robothead-highlight-color']);
+							user.rawAvatarColors['highlight'] = jsonavatar['robothead-highlight-color'];
+						}
+
 						if(!avatarAppearanceChanged) avatarAppearanceChanged = (!oldRawAvatarColors['highlight'] || JSON.stringify(oldRawAvatarColors['highlight']) !== JSON.stringify(user.rawAvatarColors['highlight']));
 						break;
 					}
@@ -131,19 +256,24 @@ altspaceutil.behaviors.UserEvents = function(config) {
 					case 'x-series-m01':
 					case 'x-series-m02': {
 						avatarClass = 'Pod';
-						user.avatarColors = { 'primary': this.getAvatarColor(jsonavatar['primary-color']), 'highlight': this.getAvatarColor(jsonavatar['highlight-color']) };
-						user.rawAvatarColors = { 'primary': jsonavatar['primary-color'], 'highlight': jsonavatar['highlight-color'] };
-						user.avatarTextures = {};
+
+						if(jsonavatar['primary-color']) {
+							user.avatarColors['primary'] = this.getAvatarColor(jsonavatar['primary-color']);
+							user.rawAvatarColors['primary'] = jsonavatar['primary-color'];
+						}
+
+						if(jsonavatar['highlight-color']) {
+							user.avatarColors['highlight'] = this.getAvatarColor(jsonavatar['highlight-color']);
+							user.rawAvatarColors['highlight'] = jsonavatar['highlight-color'];
+						}
+
 						if(!avatarAppearanceChanged) avatarAppearanceChanged = (!oldRawAvatarColors['primary'] || !oldRawAvatarColors['highlight'] || JSON.stringify(oldRawAvatarColors['primary']) !== JSON.stringify(user.rawAvatarColors['primary']) || JSON.stringify(oldRawAvatarColors['highlight']) !== JSON.stringify(user.rawAvatarColors['highlight']));
 						break;
 					}
 
 					default: {
 						avatarClass = '';
-						user.avatarColors = {};
-						user.rawAvatarColors = {};
-						user.avatarTextures = {};
-						if(this.trace) console.log('Unknown avatar type: ' + user.avatarId);
+						if(this.config.trace) console.log('Unknown avatar type: ' + user.avatarId);
 						break;
 					}
 				}
@@ -234,7 +364,7 @@ altspaceutil.behaviors.UserEvents = function(config) {
 
 	this.onError = function(xhr) {
 		if(this.loading) {
-			if(this.trace) {
+			if(this.config.trace) {
 				var url = xhr.target.responseURL || '';
 				console.log('Error loading avatar data ' + url);
 			}
@@ -272,7 +402,15 @@ altspaceutil.behaviors.UserEvents = function(config) {
 
 		var requestUserIds = [];
 		for(var userId of this.userIds) {
-			if(!this.onRequestData || this.onRequestData(userId, this.object3d)) requestUserIds.push(userId);
+			/**
+			* A precondition callback returning a boolean that determines if a user should have their data requested.
+			* User data is requested if the callback returns true, otherwise no action is taken.
+			* @callback onRequestData
+			* @param {String} userId User ID of a user who will have their data requested.
+			* @param {THREE.Object3D} object The object that will emit the request.
+			* @memberof module:altspaceutil/behaviors.UserEvents
+			*/
+			if(!this.config.onRequestData || this.config.onRequestData.call(this, userId, this.object3d)) requestUserIds.push(userId);
 		}
 
 		if(requestUserIds.length > 0) {
@@ -280,7 +418,7 @@ altspaceutil.behaviors.UserEvents = function(config) {
 			// https://account.altvr.com/api/v1/users/<userid1>,<userid2>,...
 			this.dataRequest.load('https://account.altvr.com/api/v1/users/' + requestUserIds.join(), this.onLoaded.bind(this), undefined, this.onError.bind(this));
 
-			this.time = this.refreshTime;
+			this.time = this.config.refreshTime;
 			this.loading = true;
 		}
 	}
@@ -310,7 +448,18 @@ altspaceutil.behaviors.UserEvents = function(config) {
 			return new THREE.Color(colorRGB[color].r, colorRGB[color].g, colorRGB[color].b);
 		}
 
-		if(typeof(color[0]) === 'string') return getColorFromName(color[0]);
+		if(typeof(color) === 'string') {
+			var rgb = color.match(/^rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i);
+			if(rgb) return getColorFromRGB(rgb[1], rgb[2], rgb[3]);
+
+			return getColorFromName(color);
+		} else if(typeof(color[0]) === 'string') {
+			var rgb = color[0].match(/^rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i);
+			if(rgb) return getColorFromRGB(rgb[1], rgb[2], rgb[3]);
+
+			return getColorFromName(color[0]);
+		}
+
 		return getColorFromRGB(color[0], color[1], color[2]);
 	}
 
