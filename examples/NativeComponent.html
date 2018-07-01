@@ -4,7 +4,7 @@
 		<meta charset=utf-8>
 		<meta name="author" content="Genesis">
 		<title>NativeComponent Behavior Example</title>
-		<script src="https://cdn.rawgit.com/mrdoob/three.js/r93/build/three.min.js"></script>
+		<script src="https://cdn.rawgit.com/mrdoob/three.js/r94/build/three.min.js"></script>
 		<script src="https://cdn.rawgit.com/AltspaceVR/AltspaceSDK/v2.9.0/dist/altspace.min.js"></script>
 		<script src="../js/altspaceutil.min.js"></script>
 	</head>
@@ -12,254 +12,252 @@
 		<script>
 		var sim = new altspace.utilities.Simulation();
 
-		altspace.getEnclosure().then(function(enclosure) {
-			enclosure.requestFullspace().then(function() {
-				// n-layout-browser (3D Enclosure)
-				var nlayoutbrowser = new THREE.Mesh(new THREE.BoxBufferGeometry(5, 5, 5), Object.assign(new THREE.MeshBasicMaterial(), { visible: false }));
-				nlayoutbrowser.position.set(15, 2.5, -15);
-				nlayoutbrowser.scale.set(5, 5, 5);
-				sim.scene.add(nlayoutbrowser);
-				nlayoutbrowser.addBehaviors(
-					new altspaceutil.behaviors.NativeComponent('n-layout-browser', { url: 'UserEvents.html', isEnclosure: true }),
-					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-layout-browser\n3D Enclosure', height: 6, fontSize: 4, verticalAlign: 'top' })
-				);
+		altspaceutil.getFullspaceEnclosure().then(function(enclosure) {
+			// n-layout-browser (3D Enclosure)
+			var nlayoutbrowser = new THREE.Mesh(new THREE.BoxBufferGeometry(5, 5, 5), Object.assign(new THREE.MeshBasicMaterial(), { visible: false }));
+			nlayoutbrowser.position.set(15, 2.5, -15);
+			nlayoutbrowser.scale.set(5, 5, 5);
+			sim.scene.add(nlayoutbrowser);
+			nlayoutbrowser.addBehaviors(
+				new altspaceutil.behaviors.NativeComponent('n-layout-browser', { url: 'UserEvents.html', isEnclosure: true }),
+				new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-layout-browser\n3D Enclosure', height: 6, fontSize: 4, verticalAlign: 'top' })
+			);
 
-				// n-layout-browser (2D Enclosure)
-				var nlayoutbrowser = new THREE.Mesh(new THREE.BoxBufferGeometry(5, 5, 5), Object.assign(new THREE.MeshBasicMaterial({ color: 0xccdd33, transparent: true, opacity: 0.2 }), { visible: false }));
-				nlayoutbrowser.position.set(-15, 2.5, -15);
-				nlayoutbrowser.scale.set(5, 5, 5);
-				sim.scene.add(nlayoutbrowser);
-				nlayoutbrowser.addBehaviors(
-					new altspaceutil.behaviors.NativeComponent('n-layout-browser', { url: 'https://google.com' }),
-					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-layout-browser\n2D Enclosure', height: 6, fontSize: 4, verticalAlign: 'top' })
-				);
+			// n-layout-browser (2D Enclosure)
+			var nlayoutbrowser = new THREE.Mesh(new THREE.BoxBufferGeometry(5, 5, 5), Object.assign(new THREE.MeshBasicMaterial({ color: 0xccdd33, transparent: true, opacity: 0.2 }), { visible: false }));
+			nlayoutbrowser.position.set(-15, 2.5, -15);
+			nlayoutbrowser.scale.set(5, 5, 5);
+			sim.scene.add(nlayoutbrowser);
+			nlayoutbrowser.addBehaviors(
+				new altspaceutil.behaviors.NativeComponent('n-layout-browser', { url: 'https://google.com' }),
+				new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-layout-browser\n2D Enclosure', height: 6, fontSize: 4, verticalAlign: 'top' })
+			);
 
-				// n-sphere-collider
-				var nspherecollider = new THREE.Mesh(new THREE.SphereBufferGeometry(1, 8, 8), new THREE.MeshBasicMaterial({ color: 0x00ff00 }));
-				nspherecollider.position.set(-10, 1, 0);
-				sim.scene.add(nspherecollider);
-				nspherecollider.addBehaviors(new altspaceutil.behaviors.NativeComponent('n-sphere-collider', { radius: 1 }), new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-sphere-collider', height: 4, fontSize: 4, verticalAlign: 'top' }));
+			// n-sphere-collider
+			var nspherecollider = new THREE.Mesh(new THREE.SphereBufferGeometry(1, 8, 8), new THREE.MeshBasicMaterial({ color: 0x00ff00 }));
+			nspherecollider.position.set(-10, 1, 0);
+			sim.scene.add(nspherecollider);
+			nspherecollider.addBehaviors(new altspaceutil.behaviors.NativeComponent('n-sphere-collider', { radius: 1 }), new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-sphere-collider', height: 4, fontSize: 4, verticalAlign: 'top' }));
 
-				// n-box-collider
-				var nboxcollider = new THREE.Mesh(new THREE.BoxBufferGeometry(2, 2, 2), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
-				nboxcollider.position.set(-5, 1, 0);
-				sim.scene.add(nboxcollider);
-				nboxcollider.addBehaviors(
-					new altspaceutil.behaviors.NativeComponent('n-box-collider', { size: { x: 2, y: 2, z: 2 } }),
-					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-box-collider', height: 4, fontSize: 4, verticalAlign: 'top' })
-				);
+			// n-box-collider
+			var nboxcollider = new THREE.Mesh(new THREE.BoxBufferGeometry(2, 2, 2), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+			nboxcollider.position.set(-5, 1, 0);
+			sim.scene.add(nboxcollider);
+			nboxcollider.addBehaviors(
+				new altspaceutil.behaviors.NativeComponent('n-box-collider', { size: { x: 2, y: 2, z: 2 } }),
+				new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-box-collider', height: 4, fontSize: 4, verticalAlign: 'top' })
+			);
 
-				// n-capsule-collider
-				function makeCapsuleGeometry(radius, height, radiusSegments) {
-					var base = new THREE.CylinderGeometry(radius, radius, height, radiusSegments);
-					var end = new THREE.SphereGeometry(radius, radiusSegments, radiusSegments, 0.92);
-					var matrix = new THREE.Matrix4();
-					matrix.makeTranslation(0, height / 2, 0);
-					end.applyMatrix(matrix);
-					base.merge(end);
-					matrix.makeTranslation(0, -height, 0);
-					end.applyMatrix(matrix);
-					base.merge(end);
-					return new THREE.BufferGeometry().fromGeometry(base);
-				}
-				var ncapsulecollider = new THREE.Mesh(makeCapsuleGeometry(0.8, 0.8, 10), new THREE.MeshBasicMaterial({ color: 0xaaaa00 }));
-				ncapsulecollider.position.set(0, 1.25, 0);
-				sim.scene.add(ncapsulecollider);
-				ncapsulecollider.addBehaviors(
-					new altspaceutil.behaviors.NativeComponent('n-capsule-collider', { radius: 0.8, height: 2.5, direction: 'y' }),
-					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-capsule-collider', height: 3.5, fontSize: 4, verticalAlign: 'top' })
-				);
+			// n-capsule-collider
+			function makeCapsuleGeometry(radius, height, radiusSegments) {
+				var base = new THREE.CylinderGeometry(radius, radius, height, radiusSegments);
+				var end = new THREE.SphereGeometry(radius, radiusSegments, radiusSegments, 0.92);
+				var matrix = new THREE.Matrix4();
+				matrix.makeTranslation(0, height / 2, 0);
+				end.applyMatrix(matrix);
+				base.merge(end);
+				matrix.makeTranslation(0, -height, 0);
+				end.applyMatrix(matrix);
+				base.merge(end);
+				return new THREE.BufferGeometry().fromGeometry(base);
+			}
+			var ncapsulecollider = new THREE.Mesh(makeCapsuleGeometry(0.8, 0.8, 10), new THREE.MeshBasicMaterial({ color: 0xaaaa00 }));
+			ncapsulecollider.position.set(0, 1.25, 0);
+			sim.scene.add(ncapsulecollider);
+			ncapsulecollider.addBehaviors(
+				new altspaceutil.behaviors.NativeComponent('n-capsule-collider', { radius: 0.8, height: 2.5, direction: 'y' }),
+				new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-capsule-collider', height: 3.5, fontSize: 4, verticalAlign: 'top' })
+			);
 
-				// n-mesh-collider
-				var nmeshcollider = new THREE.Mesh(new THREE.TorusKnotBufferGeometry(2, 0.2, 64, 16), new THREE.MeshBasicMaterial({ color: 0x00aaaa }));
-				nmeshcollider.position.set(5, 1, 0);
-				sim.scene.add(nmeshcollider);
-				nmeshcollider.addBehaviors(
-					new altspaceutil.behaviors.NativeComponent('n-mesh-collider', { convex: false, type: 'environment' }),
-					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-mesh-collider', height: 4, fontSize: 4, verticalAlign: 'top' })
-				);
+			// n-mesh-collider
+			var nmeshcollider = new THREE.Mesh(new THREE.TorusKnotBufferGeometry(2, 0.2, 64, 16), new THREE.MeshBasicMaterial({ color: 0x00aaaa }));
+			nmeshcollider.position.set(5, 1, 0);
+			sim.scene.add(nmeshcollider);
+			nmeshcollider.addBehaviors(
+				new altspaceutil.behaviors.NativeComponent('n-mesh-collider', { convex: false, type: 'environment' }),
+				new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-mesh-collider', height: 4, fontSize: 4, verticalAlign: 'top' })
+			);
 
-				// n-spawner
-				var nspawner = new THREE.Object3D();
-				nspawner.position.set(-10, 1, 5);
-				sim.scene.add(nspawner);
-				nspawner.addBehaviors(
-					new altspaceutil.behaviors.NativeComponent('n-spawner', { res: 'interactables/basketball' }),
-					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-spawner', height: 4, fontSize: 4, verticalAlign: 'top' })
-				);
+			// n-spawner
+			var nspawner = new THREE.Object3D();
+			nspawner.position.set(-10, 1, 5);
+			sim.scene.add(nspawner);
+			nspawner.addBehaviors(
+				new altspaceutil.behaviors.NativeComponent('n-spawner', { res: 'interactables/basketball' }),
+				new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-spawner', height: 4, fontSize: 4, verticalAlign: 'top' })
+			);
 
-				// n-object
-				var nobject = new THREE.Object3D();
-				nobject.position.set(-5, 1, 5);
-				sim.scene.add(nobject);
-				nobject.addBehaviors(
-					new altspaceutil.behaviors.NativeComponent('n-object', { res: 'objects/target-archery' }),
-					new altspaceutil.behaviors.NativeComponent('n-object', { res: 'effects/fireworks' }),
-					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-object', height: 4, fontSize: 4, verticalAlign: 'top' })
-				);
+			// n-object
+			var nobject = new THREE.Object3D();
+			nobject.position.set(-5, 1, 5);
+			sim.scene.add(nobject);
+			nobject.addBehaviors(
+				new altspaceutil.behaviors.NativeComponent('n-object', { res: 'objects/target-archery' }),
+				new altspaceutil.behaviors.NativeComponent('n-object', { res: 'effects/fireworks' }),
+				new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-object', height: 4, fontSize: 4, verticalAlign: 'top' })
+			);
 
-				// n-container
-				var ncontainer = new THREE.Mesh(new THREE.BoxBufferGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 0xffbbee, transparent: true, opacity: 0.3 }));
-				ncontainer.position.set(0, 1, 5);
-				sim.scene.add(ncontainer);
-				ncontainer.addEventListener('container-count-changed', function(event) {
-					event.target.getBehaviorByType('n-text').data.text = 'n-container\nCount: ' + event.target.getBehaviorByType('n-container').getAttribute('count');
-				});
-				ncontainer.addEventListener('container-empty', function(event) {
-					event.target.getBehaviorByType('n-text').data.text = 'n-container\nCount: ' + event.target.getBehaviorByType('n-container').getAttribute('count') + ', State: Empty';
-				});
-				ncontainer.addEventListener('container-full', function(event) {
-					event.target.getBehaviorByType('n-text').data.text = 'n-container\nCount: ' + event.target.getBehaviorByType('n-container').getAttribute('count') + ', State: Full';
-				});
-				ncontainer.addEventListener('triggerenter', function(event) {
-					event.target.material.color.set(0xffeeff);
-				});
-				ncontainer.addEventListener('triggerexit', function(event) {
-					event.target.material.color.set(0xffbbee);
-				});
-				ncontainer.addBehaviors(
-					new altspaceutil.behaviors.NativeComponent('n-box-collider', { isTrigger: true, size: { x: 2, y: 2, z: 2 } }),
-					new altspaceutil.behaviors.NativeComponent('n-container', { capacity: 2 }),
-					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-container', height: 4, fontSize: 4, verticalAlign: 'top' })
-				);
-
-				// n-sound
-				var nsound = new THREE.Object3D();
-				nsound.position.set(5, 1, 5);
-				sim.scene.add(nsound);
-				nsound.addBehaviors(
-					new altspaceutil.behaviors.NativeComponent('n-sound', {
-						src: /Mobile/i.test(navigator.userAgent) ? 'test.mp3' : 'test.ogg', // MP3 Supported For Mobile Devices, OGG Supported For Everything Else
-						autoplay: false,
-						loop: true,
-						volume: 0.5,
-						minDistance: 1,
-						maxDistance: 12,
-					}),
-					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-sound', height: 4, fontSize: 4, verticalAlign: 'top' })
-				);
-				nsound.addEventListener('n-sound-loaded', function(event) {
-					if(nsound.userData.loaded) return;
-
-					var nsoundcomponent = nsound.getBehaviorByType('n-sound');
-					nsound.userData.loaded = nsoundcomponent.getAttribute('loaded');
-
-					var nsoundmutebutton = new THREE.Mesh(new THREE.BoxBufferGeometry(0.4, 0.4, 0.4), new THREE.MeshBasicMaterial({ color: 0x0000ff }));
-					nsoundmutebutton.position.set(-0.45, 0.5, 0);
-					nsoundmutebutton.addBehavior(new altspaceutil.behaviors.NativeComponent('n-text', { text: 'Mute', height: 0.7, fontSize: 1, verticalAlign: 'top' }, { useCollider: true }));
-					nsoundmutebutton.addEventListener('cursorup', function(event) {
-						nsoundcomponent.data.volume = nsoundcomponent.data.volume > 0 ? 0 : 0.5;
-						nsoundmutebutton.material.color.set(nsoundcomponent.data.volume > 0 ? 0x0000ff : 0xff0000);
-					});
-					nsound.add(nsoundmutebutton);
-
-					var nsoundplaybutton = new THREE.Mesh(new THREE.BoxBufferGeometry(0.4, 0.4, 0.4), new THREE.MeshBasicMaterial({ color: 0x0000ff }));
-					nsoundplaybutton.position.set(0, 0.5, 0);
-					nsoundplaybutton.addBehavior(new altspaceutil.behaviors.NativeComponent('n-text', { text: 'Play', height: 0.7, fontSize: 1, verticalAlign: 'top' }, { useCollider: true }));
-					nsoundplaybutton.addEventListener('cursorup', function(event) {
-						nsoundcomponent.callComponentAction('play');
-					});
-					nsound.add(nsoundplaybutton);
-
-					var nsoundstopbutton = new THREE.Mesh(new THREE.BoxBufferGeometry(0.4, 0.4, 0.4), new THREE.MeshBasicMaterial({ color: 0x0000ff }));
-					nsoundstopbutton.position.set(0.45, 0.5, 0);
-					nsoundstopbutton.addBehavior(new altspaceutil.behaviors.NativeComponent('n-text', { text: 'Stop', height: 0.7, fontSize: 1, verticalAlign: 'top' }, { useCollider: true }));
-					nsoundstopbutton.addEventListener('cursorup', function(event) {
-						nsoundcomponent.callComponentAction('pause');
-						nsoundcomponent.callComponentAction('seek', { time: 0 });
-					});
-					nsound.add(nsoundstopbutton);
-
-					nsound.getBehaviorByType('n-text').data.text = 'n-sound\nStatus: ' + 'Loaded';
-				});
-				nsound.addEventListener('sound-paused', function(event) {
-					nsound.getBehaviorByType('n-text').data.text = 'n-sound\nStatus: Stopped';
-				});
-				nsound.addEventListener('sound-played', function(event) {
-					nsound.getBehaviorByType('n-text').data.text = 'n-sound\nStatus: Playing';
-				});
-
-				// n-cockpit-parent
-				var ncockpitparent = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.3, side: THREE.DoubleSide }));
-				ncockpitparent.position.set(-2.5, 0, -4);
-				sim.scene.add(ncockpitparent);
-				ncockpitparent.addBehaviors(
-					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-cockpit-parent', height: 2, fontSize: 2, verticalAlign: 'top' }),
-					new altspaceutil.behaviors.NativeComponent('n-cockpit-parent')
-				);
-
-				// n-skeleton-parent
-				var nskeletonparent = new THREE.Mesh(new THREE.BoxBufferGeometry(0.2, 0.2, 0.2), new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.3 }));
-				nskeletonparent.position.set(0, 0.3, 0);
-				sim.scene.add(nskeletonparent);
-				nskeletonparent.addBehaviors(
-					new altspaceutil.behaviors.NativeComponent('n-skeleton-parent', { part: 'head', side: 'center' }),
-					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-skeleton-parent', height: 1, fontSize: 2, verticalAlign: 'top' })
-				);
-
-				// n-gltf
-				var ngltf = new THREE.Object3D();
-				ngltf.position.set(10, 0, 10);
-				sim.scene.add(ngltf);
-				ngltf.addBehaviors(
-					new altspaceutil.behaviors.NativeComponent('n-gltf', { url: 'https://rawgit.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb' }),
-					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-gltf', height: 6, fontSize: 4, verticalAlign: 'top' })
-				);
-				ngltf.addEventListener('n-gltf-loaded', function(event) {
-					if(ngltf.userData.loaded) return;
-
-					var ngltfcomponent = ngltf.getBehaviorByType('n-gltf');
-					ngltf.userData.loaded = ngltfcomponent.getAttribute('loaded');
-
-					ngltf.getBehaviorByType('n-text').data.text = 'n-gltf\nStatus: ' + 'Loaded';
-					ngltfcomponent.callComponentFunc('GetBoundingBox').then(function(boundingbox) {
-						var size = boundingbox.getSize(new THREE.Vector3());
-						var box = new THREE.Mesh(new THREE.BoxBufferGeometry(size.x, size.y, size.z), new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.3 }));
-						boundingbox.getCenter(box.position);
-						ngltf.add(box);
-					});
-				});
-
-				// n-portal (Space)
-				var nportal = new THREE.Object3D();
-				nportal.position.set(5, 0, 10);
-				sim.scene.add(nportal);
-				nportal.addBehaviors(
-					new altspaceutil.behaviors.NativeComponent('n-portal', { targetSpace: 'campfire-lobby' }),
-					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-portal\nThe Campfire', height: 6, fontSize: 3, verticalAlign: 'top' })
-				);
-
-				// n-portal (Position)
-				var nportal = new THREE.Object3D();
-				nportal.position.set(0, 0, 10);
-				sim.scene.add(nportal);
-				nportal.addBehaviors(
-					new altspaceutil.behaviors.NativeComponent('n-portal', {}, { targetEntity: nspawner }),
-					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-portal\nCurrent Space', height: 6, fontSize: 3, verticalAlign: 'top' })
-				);
-
-				// n-text / n-billboard
-				var ntext = new THREE.Object3D();
-				ntext.position.set(-5, 2.5, 10);
-				sim.scene.add(ntext);
-				ntext.addBehaviors(
-					new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-text / n-billboard', fontSize: 3, width: 100 }),
-					new altspaceutil.behaviors.NativeComponent('n-billboard'),
-					new (function NativeTextUpdate() {
-						this.type = 'NativeTextUpdate';
-
-						this.awake = function(o) {
-							// Retrieve Component From Object
-							this.nTextComponent = o.getBehaviorByType('n-text');
-						}
-
-						this.update = function() {
-							// Update Component Property
-							this.nTextComponent.data.text = 'n-text / n-billboard\n' + new Date().toLocaleString();
-						}
-					})
-				);
+			// n-container
+			var ncontainer = new THREE.Mesh(new THREE.BoxBufferGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 0xffbbee, transparent: true, opacity: 0.3 }));
+			ncontainer.position.set(0, 1, 5);
+			sim.scene.add(ncontainer);
+			ncontainer.addEventListener('container-count-changed', function(event) {
+				event.target.getBehaviorByType('n-text').data.text = 'n-container\nCount: ' + event.target.getBehaviorByType('n-container').getAttribute('count');
 			});
+			ncontainer.addEventListener('container-empty', function(event) {
+				event.target.getBehaviorByType('n-text').data.text = 'n-container\nCount: ' + event.target.getBehaviorByType('n-container').getAttribute('count') + ', State: Empty';
+			});
+			ncontainer.addEventListener('container-full', function(event) {
+				event.target.getBehaviorByType('n-text').data.text = 'n-container\nCount: ' + event.target.getBehaviorByType('n-container').getAttribute('count') + ', State: Full';
+			});
+			ncontainer.addEventListener('triggerenter', function(event) {
+				event.target.material.color.set(0xffeeff);
+			});
+			ncontainer.addEventListener('triggerexit', function(event) {
+				event.target.material.color.set(0xffbbee);
+			});
+			ncontainer.addBehaviors(
+				new altspaceutil.behaviors.NativeComponent('n-box-collider', { isTrigger: true, size: { x: 2, y: 2, z: 2 } }),
+				new altspaceutil.behaviors.NativeComponent('n-container', { capacity: 2 }),
+				new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-container', height: 4, fontSize: 4, verticalAlign: 'top' })
+			);
+
+			// n-sound
+			var nsound = new THREE.Object3D();
+			nsound.position.set(5, 1, 5);
+			sim.scene.add(nsound);
+			nsound.addBehaviors(
+				new altspaceutil.behaviors.NativeComponent('n-sound', {
+					src: /Mobile/i.test(navigator.userAgent) ? 'test.mp3' : 'test.ogg', // MP3 Supported For Mobile Devices, OGG Supported For Everything Else
+					autoplay: false,
+					loop: true,
+					volume: 0.5,
+					minDistance: 1,
+					maxDistance: 12,
+				}),
+				new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-sound', height: 4, fontSize: 4, verticalAlign: 'top' })
+			);
+			nsound.addEventListener('n-sound-loaded', function(event) {
+				if(nsound.userData.loaded) return;
+
+				var nsoundcomponent = nsound.getBehaviorByType('n-sound');
+				nsound.userData.loaded = nsoundcomponent.getAttribute('loaded');
+
+				var nsoundmutebutton = new THREE.Mesh(new THREE.BoxBufferGeometry(0.4, 0.4, 0.4), new THREE.MeshBasicMaterial({ color: 0x0000ff }));
+				nsoundmutebutton.position.set(-0.45, 0.5, 0);
+				nsoundmutebutton.addBehavior(new altspaceutil.behaviors.NativeComponent('n-text', { text: 'Mute', height: 0.7, fontSize: 1, verticalAlign: 'top' }, { useCollider: true }));
+				nsoundmutebutton.addEventListener('cursorup', function(event) {
+					nsoundcomponent.data.volume = nsoundcomponent.data.volume > 0 ? 0 : 0.5;
+					nsoundmutebutton.material.color.set(nsoundcomponent.data.volume > 0 ? 0x0000ff : 0xff0000);
+				});
+				nsound.add(nsoundmutebutton);
+
+				var nsoundplaybutton = new THREE.Mesh(new THREE.BoxBufferGeometry(0.4, 0.4, 0.4), new THREE.MeshBasicMaterial({ color: 0x0000ff }));
+				nsoundplaybutton.position.set(0, 0.5, 0);
+				nsoundplaybutton.addBehavior(new altspaceutil.behaviors.NativeComponent('n-text', { text: 'Play', height: 0.7, fontSize: 1, verticalAlign: 'top' }, { useCollider: true }));
+				nsoundplaybutton.addEventListener('cursorup', function(event) {
+					nsoundcomponent.callComponentAction('play');
+				});
+				nsound.add(nsoundplaybutton);
+
+				var nsoundstopbutton = new THREE.Mesh(new THREE.BoxBufferGeometry(0.4, 0.4, 0.4), new THREE.MeshBasicMaterial({ color: 0x0000ff }));
+				nsoundstopbutton.position.set(0.45, 0.5, 0);
+				nsoundstopbutton.addBehavior(new altspaceutil.behaviors.NativeComponent('n-text', { text: 'Stop', height: 0.7, fontSize: 1, verticalAlign: 'top' }, { useCollider: true }));
+				nsoundstopbutton.addEventListener('cursorup', function(event) {
+					nsoundcomponent.callComponentAction('pause');
+					nsoundcomponent.callComponentAction('seek', { time: 0 });
+				});
+				nsound.add(nsoundstopbutton);
+
+				nsound.getBehaviorByType('n-text').data.text = 'n-sound\nStatus: ' + 'Loaded';
+			});
+			nsound.addEventListener('sound-paused', function(event) {
+				nsound.getBehaviorByType('n-text').data.text = 'n-sound\nStatus: Stopped';
+			});
+			nsound.addEventListener('sound-played', function(event) {
+				nsound.getBehaviorByType('n-text').data.text = 'n-sound\nStatus: Playing';
+			});
+
+			// n-cockpit-parent
+			var ncockpitparent = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.3, side: THREE.DoubleSide }));
+			ncockpitparent.position.set(-2.5, 0, -4);
+			sim.scene.add(ncockpitparent);
+			ncockpitparent.addBehaviors(
+				new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-cockpit-parent', height: 2, fontSize: 2, verticalAlign: 'top' }),
+				new altspaceutil.behaviors.NativeComponent('n-cockpit-parent')
+			);
+
+			// n-skeleton-parent
+			var nskeletonparent = new THREE.Mesh(new THREE.BoxBufferGeometry(0.2, 0.2, 0.2), new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.3 }));
+			nskeletonparent.position.set(0, 0.3, 0);
+			sim.scene.add(nskeletonparent);
+			nskeletonparent.addBehaviors(
+				new altspaceutil.behaviors.NativeComponent('n-skeleton-parent', { part: 'head', side: 'center' }),
+				new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-skeleton-parent', height: 1, fontSize: 2, verticalAlign: 'top' })
+			);
+
+			// n-gltf
+			var ngltf = new THREE.Object3D();
+			ngltf.position.set(10, 0, 10);
+			sim.scene.add(ngltf);
+			ngltf.addBehaviors(
+				new altspaceutil.behaviors.NativeComponent('n-gltf', { url: 'https://rawgit.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb' }),
+				new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-gltf', height: 6, fontSize: 4, verticalAlign: 'top' })
+			);
+			ngltf.addEventListener('n-gltf-loaded', function(event) {
+				if(ngltf.userData.loaded) return;
+
+				var ngltfcomponent = ngltf.getBehaviorByType('n-gltf');
+				ngltf.userData.loaded = ngltfcomponent.getAttribute('loaded');
+
+				ngltf.getBehaviorByType('n-text').data.text = 'n-gltf\nStatus: ' + 'Loaded';
+				ngltfcomponent.callComponentFunc('GetBoundingBox').then(function(boundingbox) {
+					var size = boundingbox.getSize(new THREE.Vector3());
+					var box = new THREE.Mesh(new THREE.BoxBufferGeometry(size.x, size.y, size.z), new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.3 }));
+					boundingbox.getCenter(box.position);
+					ngltf.add(box);
+				});
+			});
+
+			// n-portal (Space)
+			var nportal = new THREE.Object3D();
+			nportal.position.set(5, 0, 10);
+			sim.scene.add(nportal);
+			nportal.addBehaviors(
+				new altspaceutil.behaviors.NativeComponent('n-portal', { targetSpace: 'campfire-lobby' }),
+				new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-portal\nThe Campfire', height: 6, fontSize: 3, verticalAlign: 'top' })
+			);
+
+			// n-portal (Position)
+			var nportal = new THREE.Object3D();
+			nportal.position.set(0, 0, 10);
+			sim.scene.add(nportal);
+			nportal.addBehaviors(
+				new altspaceutil.behaviors.NativeComponent('n-portal', {}, { targetEntity: nspawner }),
+				new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-portal\nCurrent Space', height: 6, fontSize: 3, verticalAlign: 'top' })
+			);
+
+			// n-text / n-billboard
+			var ntext = new THREE.Object3D();
+			ntext.position.set(-5, 2.5, 10);
+			sim.scene.add(ntext);
+			ntext.addBehaviors(
+				new altspaceutil.behaviors.NativeComponent('n-text', { text: 'n-text / n-billboard', fontSize: 3, width: 100 }),
+				new altspaceutil.behaviors.NativeComponent('n-billboard'),
+				new (function NativeTextUpdate() {
+					this.type = 'NativeTextUpdate';
+
+					this.awake = function(o) {
+						// Retrieve Component From Object
+						this.nTextComponent = o.getBehaviorByType('n-text');
+					}
+
+					this.update = function() {
+						// Update Component Property
+						this.nTextComponent.data.text = 'n-text / n-billboard\n' + new Date().toLocaleString();
+					}
+				})
+			);
 		});
 		</script>
 	</body>
