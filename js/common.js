@@ -59,6 +59,31 @@ altspaceutil.isMobileApp = function(url) {
 }
 
 /**
+* Gets the fullspace enclosure for the app.
+* @function getFullspaceEnclosure
+* @returns {Promise} A promise that resolves to a fullspace Enclosure.
+* @memberof module:altspaceutil
+*/
+altspaceutil.getFullspaceEnclosure = function() {
+	return new Promise(function(resolve, reject) {
+		altspace.getEnclosure().then(function(enclosure) {
+			enclosure.requestFullspace().then(function() {
+				enclosure.addEventListener('fullspacechange', function() {
+					if(!enclosure.fullspace) enclosure.requestFullspace().catch(function() {
+						reject('enclosure.requestFullspace() after fullspacechange event failed');
+					});
+				});
+				resolve(enclosure);
+			}).catch(function() {
+				reject('enclosure.requestFullspace() failed');
+			});
+		}).catch(function() {
+			reject('altspace.getEnclosure() failed');
+		});
+	});
+}
+
+/**
 * Create an absolute URL from the specified relative URL, using the current host as the URL base.
 * @function getAbsoluteURL
 * @param {String} [url] A relative URL.  Providing an absolute URL will return itself unchanged.

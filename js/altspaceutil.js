@@ -59,6 +59,31 @@ altspaceutil.isMobileApp = function(url) {
 }
 
 /**
+* Gets the fullspace enclosure for the app.
+* @function getFullspaceEnclosure
+* @returns {Promise} A promise that resolves to a fullspace Enclosure.
+* @memberof module:altspaceutil
+*/
+altspaceutil.getFullspaceEnclosure = function() {
+	return new Promise(function(resolve, reject) {
+		altspace.getEnclosure().then(function(enclosure) {
+			enclosure.requestFullspace().then(function() {
+				enclosure.addEventListener('fullspacechange', function() {
+					if(!enclosure.fullspace) enclosure.requestFullspace().catch(function() {
+						reject('enclosure.requestFullspace() after fullspacechange event failed');
+					});
+				});
+				resolve(enclosure);
+			}).catch(function() {
+				reject('enclosure.requestFullspace() failed');
+			});
+		}).catch(function() {
+			reject('altspace.getEnclosure() failed');
+		});
+	});
+}
+
+/**
 * Create an absolute URL from the specified relative URL, using the current host as the URL base.
 * @function getAbsoluteURL
 * @param {String} [url] A relative URL.  Providing an absolute URL will return itself unchanged.
@@ -2825,15 +2850,22 @@ altspaceutil.behaviors.NativeTextMaterial = function(config) {
 	}
 
 	this.getMaterialTags = function() {
-		var hexOpacity = (+Math.floor(this.hasOpacity && this.material.transparent ? this.material.opacity * 255 : 255)).toString(16).toUpperCase();
-		if(hexOpacity.length < 2) hexOpacity = '0' + hexOpacity;
-
 		var tags = '<link id="n-text-material">';
-		if(this.hasColor) tags += '<color=#' + this.material.color.getHexString() + hexOpacity + '>';
-		else if(this.hasOpacity) tags += '<alpha=#' + hexOpacity + '>';
+		if(this.hasColor) tags += '<color=#' + this.getColorHexString() + this.getOpacityHexString() + '>';
+		else if(this.hasOpacity) tags += '<alpha=#' + this.getOpacityHexString() + '>';
 		tags += '</link>';
 
 		return tags;
+	}
+
+	this.getColorHexString = function() {
+		return this.material.color.getHexString();
+	}
+
+	this.getOpacityHexString = function() {
+		var hexOpacity = (+Math.floor(this.hasOpacity && this.material.transparent ? this.material.opacity * 255 : 255)).toString(16).toUpperCase();
+		if(hexOpacity.length < 2) hexOpacity = '0' + hexOpacity;
+		return hexOpacity;
 	}
 }
 
@@ -2873,15 +2905,20 @@ if(window.AFRAME) {
 			if(tagBegin >= 0 && tagEnd >= 0) this.component.text = this.component.text.slice(0, tagBegin) + this.component.text.slice(tagEnd + 7);
 		},
 		getMaterialTags: function() {
-			var hexOpacity = (+Math.floor(this.data.opacity && this.material.transparent ? this.material.opacity * 255 : 255)).toString(16).toUpperCase();
-			if(hexOpacity.length < 2) hexOpacity = '0' + hexOpacity;
-
 			var tags = '<link id="n-text-material">';
-			if(this.data.color) tags += '<color=#' + this.material.color.getHexString() + hexOpacity + '>';
-			else if(this.data.opacity) tags += '<alpha=#' + hexOpacity + '>';
+			if(this.data.color) tags += '<color=#' + this.getColorHexString() + this.getOpacityHexString() + '>';
+			else if(this.data.opacity) tags += '<alpha=#' + this.getOpacityHexString() + '>';
 			tags += '</link>';
 
 			return tags;
+		},
+		getColorHexString: function() {
+			return this.material.color.getHexString();
+		},
+		getOpacityHexString: function() {
+			var hexOpacity = (+Math.floor(this.data.opacity && this.material.transparent ? this.material.opacity * 255 : 255)).toString(16).toUpperCase();
+			if(hexOpacity.length < 2) hexOpacity = '0' + hexOpacity;
+			return hexOpacity;
 		}
 	});
 }

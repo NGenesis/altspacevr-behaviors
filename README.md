@@ -4,12 +4,13 @@ Provides helper functions, behaviors and A-Frame components for common functiona
 # Usage
 Include the utility library in your project:
 ```html
-<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v0.9.9/js/altspaceutil.min.js"></script>
+<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v1.0.0/js/altspaceutil.min.js"></script>
 ```
 
 # API Reference
 
 ## Functions
+* [altspaceutil.getFullspaceEnclosure](#getFullspaceEnclosure)
 * [altspaceutil.getAbsoluteURL](#getAbsoluteURL)
 * [altspaceutil.getBasePath](#getBasePath)
 * [altspaceutil.isMobileApp](#isMobileApp)
@@ -42,6 +43,14 @@ Include the utility library in your project:
 * [n-text-material](#n-text-material)
 
 # Functions
+
+## <a name="getFullspaceEnclosure">altspaceutil.getFullspaceEnclosure</a>
+Gets the fullspace enclosure for the app.
+
+### Returns
+| Type    | Description |
+| ------- | ----------- |
+| Promise | A promise that resolves to a fullspace [Enclosure](https://altspacevr.github.io/AltspaceSDK/doc/js/module-altspace-Enclosure.html). |
 
 ## <a name="getAbsoluteURL">altspaceutil.getAbsoluteURL</a>
 Create an absolute URL from the specified relative URL, using the current host as the URL base.

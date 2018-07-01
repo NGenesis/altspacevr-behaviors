@@ -37,15 +37,22 @@ altspaceutil.behaviors.NativeTextMaterial = function(config) {
 	}
 
 	this.getMaterialTags = function() {
-		var hexOpacity = (+Math.floor(this.hasOpacity && this.material.transparent ? this.material.opacity * 255 : 255)).toString(16).toUpperCase();
-		if(hexOpacity.length < 2) hexOpacity = '0' + hexOpacity;
-
 		var tags = '<link id="n-text-material">';
-		if(this.hasColor) tags += '<color=#' + this.material.color.getHexString() + hexOpacity + '>';
-		else if(this.hasOpacity) tags += '<alpha=#' + hexOpacity + '>';
+		if(this.hasColor) tags += '<color=#' + this.getColorHexString() + this.getOpacityHexString() + '>';
+		else if(this.hasOpacity) tags += '<alpha=#' + this.getOpacityHexString() + '>';
 		tags += '</link>';
 
 		return tags;
+	}
+
+	this.getColorHexString = function() {
+		return this.material.color.getHexString();
+	}
+
+	this.getOpacityHexString = function() {
+		var hexOpacity = (+Math.floor(this.hasOpacity && this.material.transparent ? this.material.opacity * 255 : 255)).toString(16).toUpperCase();
+		if(hexOpacity.length < 2) hexOpacity = '0' + hexOpacity;
+		return hexOpacity;
 	}
 }
 
@@ -85,15 +92,20 @@ if(window.AFRAME) {
 			if(tagBegin >= 0 && tagEnd >= 0) this.component.text = this.component.text.slice(0, tagBegin) + this.component.text.slice(tagEnd + 7);
 		},
 		getMaterialTags: function() {
-			var hexOpacity = (+Math.floor(this.data.opacity && this.material.transparent ? this.material.opacity * 255 : 255)).toString(16).toUpperCase();
-			if(hexOpacity.length < 2) hexOpacity = '0' + hexOpacity;
-
 			var tags = '<link id="n-text-material">';
-			if(this.data.color) tags += '<color=#' + this.material.color.getHexString() + hexOpacity + '>';
-			else if(this.data.opacity) tags += '<alpha=#' + hexOpacity + '>';
+			if(this.data.color) tags += '<color=#' + this.getColorHexString() + this.getOpacityHexString() + '>';
+			else if(this.data.opacity) tags += '<alpha=#' + this.getOpacityHexString() + '>';
 			tags += '</link>';
 
 			return tags;
+		},
+		getColorHexString: function() {
+			return this.material.color.getHexString();
+		},
+		getOpacityHexString: function() {
+			var hexOpacity = (+Math.floor(this.data.opacity && this.material.transparent ? this.material.opacity * 255 : 255)).toString(16).toUpperCase();
+			if(hexOpacity.length < 2) hexOpacity = '0' + hexOpacity;
+			return hexOpacity;
 		}
 	});
 }
