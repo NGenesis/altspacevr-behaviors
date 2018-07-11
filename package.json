@@ -1,0 +1,36 @@
+{
+  "name": "altspaceutil",
+  "version": "1.0.0",
+  "main": "js/altspaceutil.js",
+  "dependencies": {
+    "three": ">=0.84.0",
+    "altspace": ">=2.9.0"
+  },
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NGenesis/altspacevr-behaviors.git"
+  },
+  "keywords": [
+    "altspace",
+    "altspacevr",
+    "altspacesdk",
+    "altspaceutil",
+    "vr",
+    "webvr",
+    "behavior",
+    "aframe"
+  ],
+  "author": "Genesis",
+  "description": "Provides helper functions, behaviors and A-Frame components for common functionality compatible with AltspaceSDK.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/NGenesis/altspacevr-behaviors/issues"
+  },
+  "homepage": "https://github.com/NGenesis/altspacevr-behaviors#readme"
+}
