@@ -91,17 +91,7 @@ altspaceutil.getFullspaceEnclosure = function() {
 * @memberof module:altspaceutil
 */
 altspaceutil.getAbsoluteURL = function(url) {
-	if(url && !url.startsWith('http')) {
-		if(url.startsWith('/')) {
-			url = location.origin + url;
-		} else {
-			var currPath = location.pathname;
-			if(!currPath.endsWith('/')) currPath = location.pathname.split('/').slice(0, -1).join('/') + '/';
-			url = location.origin + currPath + url;
-		}
-	}
-
-	return url;
+	return new URL(url, window.location).toString();
 }
 
 /**
@@ -113,6 +103,62 @@ altspaceutil.getAbsoluteURL = function(url) {
 */
 altspaceutil.getBasePath = function(url) {
 	return url.split('/').slice(0, -1).join('/') + '/';
+}
+
+/**
+* Loads a three.js texture from the specified texture file URL, optimizing for faster loading times in the Altspace client where appropriate.
+* @function loadTexture
+* @param {String} [url] A URL to a texture file.
+* @param {Object} [config] Optional parameters to be passed to the texture loader (e.g. crossOrigin, withCredentials, path).
+* @returns {THREE.Texture} The loaded texture.
+* @memberof module:altspaceutil
+*/
+altspaceutil.loadTexture = function(url, config) {
+	if(altspace.inClient) return new THREE.Texture({ src: altspaceutil.getAbsoluteURL(url) });
+
+	config = Object.assign({ crossOrigin: 'anonymous' }, config);
+
+	var loader = new THREE.TextureLoader();
+	if(config.crossOrigin !== 'anonymous') loader.setCrossOrigin(config.crossOrigin);
+	if(config.withCredentials !== undefined) loader.setWithCredentials(config.withCredentials);
+	if(config.path !== undefined) loader.setPath(config.path);
+	return loader.load(url);
+}
+
+/**
+* Sets the Altspace cursor collider property for the specified object.
+* @function setCursorCollider
+* @param {THREE.Object3D} [object3d] An object to set the cursor collider property for.
+* @param {Boolean} [isCursorCollider] Specifies if the object is a cursor collider.
+* @param {Boolean} [recursive=false] Specifies if the property change should also be applied recursively to all children of the object.
+* @memberof module:altspaceutil
+*/
+altspaceutil.setCursorCollider = function(object3d, isCursorCollider, recursive) {
+	if(!object3d) return;
+
+	if(recursive) {
+		object3d.traverse(child => {
+			if(!child.userData.altspace) child.userData.altspace = {};
+			if(!child.userData.altspace.collider) child.userData.altspace.collider = {};
+			child.userData.altspace.collider.enabled = isCursorCollider;
+		});
+	} else {
+		if(!object3d.userData.altspace) object3d.userData.altspace = {};
+		if(!object3d.userData.altspace.collider) object3d.userData.altspace.collider = {};
+		object3d.userData.altspace.collider.enabled = isCursorCollider;
+	}
+}
+
+/**
+* Gets the Altspace cursor collider property for the specified object.
+* @function isCursorCollider
+* @param {THREE.Object3D} [object3d] An object to retrieve the cursor collider property from.
+* @returns {Boolean} Whether the object is a cursor collider.
+* @memberof module:altspaceutil
+*/
+altspaceutil.isCursorCollider = function(object3d) {
+	if(!object3d) return false;
+	return (!object3d.userData.altspace || !object3d.userData.altspace.collider || object3d.userData.altspace.enabled === undefined || object3d.userData.altspace.enabled);
 }
 
 /**
