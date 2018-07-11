@@ -4,7 +4,7 @@ Provides helper functions, behaviors and A-Frame components for common functiona
 # Usage
 Include the utility library in your project:
 ```html
-<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v1.0.0/js/altspaceutil.min.js"></script>
+<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v1.0.1/js/altspaceutil.min.js"></script>
 ```
 
 # API Reference
@@ -16,6 +16,9 @@ Include the utility library in your project:
 * [altspaceutil.isMobileApp](#isMobileApp)
 * [altspaceutil.expandSerializationBuffer](#expandSerializationBuffer)
 * [altspaceutil.profileSerializationBuffer](#profileSerializationBuffer)
+* [altspaceutil.setCursorCollider](#setCursorCollider)
+* [altspaceutil.isCursorCollider](#isCursorCollider)
+* [altspaceutil.loadTexture](#loadTexture)
 
 ## Behaviors
 * [altspaceutil.behaviors.NativeComponent](#NativeComponent)
@@ -101,6 +104,43 @@ Enables or disables the profiler for the Altspace client's serialization buffer 
 | Name      | Type    | Description |
 | --------- | ------- | ----------- |
 | `enabled` | Boolean | Specifies whether the serialization buffer is to be enabled. |
+
+## <a name="setCursorCollider">altspaceutil.setCursorCollider</a>
+Sets the Altspace cursor collider property for the specified object.
+
+### Parameters
+| Name                | Type                                                          | Default | Description |
+| ------------------- | ------------------------------------------------------------- | ------- | ----------- |
+| `object3d`          | [THREE.Object3D](https://threejs.org/docs/#api/core/Object3D) |         | An object to set the cursor collider property for. |
+| `isCursorCollider`  | Boolean                                                       |         | Specifies if the object is a cursor collider. |
+| `recursive`         | Boolean                                                       | false   | Specifies if the property change should also be applied recursively to all children of the object. |
+
+## <a name="isCursorCollider">altspaceutil.isCursorCollider</a>
+Gets the Altspace cursor collider property for the specified object.
+
+### Parameters
+| Name       | Type                                                          | Description |
+| ---------- | ------------------------------------------------------------- | ----------- |
+| `object3d` | [THREE.Object3D](https://threejs.org/docs/#api/core/Object3D) | An object to retrieve the cursor collider property from. |
+
+### Returns
+| Type    | Description |
+| ------- | ----------- |
+| Boolean | Whether the object is a cursor collider. |
+
+## <a name="loadTexture">altspaceutil.loadTexture</a>
+Loads a three.js texture from the specified texture file URL, optimizing for faster loading times in the Altspace client where appropriate.
+
+### Parameters
+| Name     | Type   | Description |
+| -------- | ------ | ----------- |
+| `url`    | String | A URL to a texture file. |
+| `config` | Object | Optional parameters to be passed to the texture loader (e.g. crossOrigin, withCredentials, path). |
+
+### Returns
+| Type                                                            | Description |
+| --------------------------------------------------------------- | ----------- |
+| [THREE.Texture](https://threejs.org/docs/#api/textures/Texture) | The loaded texture. |
 
 # Behaviors
 
