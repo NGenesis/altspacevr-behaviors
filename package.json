@@ -1,5 +1,5 @@
 {
-  "name": "altspaceutil",
+  "name": "altspacevr-behaviors",
   "version": "1.0.0",
   "main": "js/altspaceutil.js",
   "dependencies": {
