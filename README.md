@@ -70,7 +70,7 @@ Gets an initialized fullspace app instance.  The app will be initialized on the 
 ### Returns
 | Type    | Description |
 | ------- | ----------- |
-| Promise | A promise that resolves to a [fullspace app](#FullspaceApp). |
+| Promise | A promise that resolves to a [FullspaceApp](#FullspaceApp). |
 
 ## <a name="getFullspaceEnclosure">altspaceutil.getFullspaceEnclosure</a>
 Gets the fullspace enclosure for the app.
@@ -675,15 +675,49 @@ Provides a convenience wrapper for [tween.js](https://github.com/tweenjs/tween.j
 ## <a name="FullspaceApp">FullspaceApp</a>
 Manages the render and update loop and creation of anchor points for a three.js app. This class is not intended to be created directly, but should be retrieved using [altspaceutil.getFullspaceApp](#getFullspaceApp).
 
+### Anchor Points
+#### Overview
+Anchor points (also referred to as Anchors) are nodes in a scene which can be positioned, rotated and scaled externally by end users using URL parameters passed in when the app is loaded into an enclosure, allowing an app to be customized for any environment layout.
+
+By default, all apps using [altspaceutil.getFullspaceApp](#getFullspaceApp) are provided with a root anchor point which encompasses all objects in the scene.  Additional user-defined anchor points which are transformed relative to the root anchor may also be used to split a scene into seperately customizable parts.
+Scene objects should be attached to either the root `anchor` point, or a user-defined anchor point obtained from `anchors` to ensure that apps can be customized by end users as appropriate.
+
+#### Example Usage
+Imagine a concert environment app containing a skybox, a stage for performers and a seating area for an audience, where each part of the scene can be arranged independently of each other.
+
+`https://example.com/concertapp/index.html`
+```javascript
+app.anchor.add(new SkyboxModel());
+app.anchors('performerstage').add(concertStageModel);
+app.anchors('audiencestand').add(audienceStandModel);
+```
+
+`https://path/to/manifest.json`
+```javascript
+{
+	"enclosure": {
+		"position": { "x": 0, "y": 0, "z": 0 }, "rotation": { "x": 0, "y": 0, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 }
+	},
+	"anchors": [
+		{ "name": "performerstage", "position": { "x": 5, "y": 0, "z": -3 }, "rotation": { "x": 0, "y": 0, "z": 0 }, "scale": { "x": 2, "y": 0.5, "z": 3 } },
+		{ "name": "audiencestand", "position": { "x": 1, "y": 0, "z": 0 }, "rotation": { "x": 0, "y": 0, "z": 0 }, "scale": { "x": 1, "y": 1, "z": 1 } }
+	]
+}
+```
+
+Manifest file example: https://example.com/concertapp/index.html?altvr.manifest=https://path/to/manifest.json
+Anchors can be customized without a manifest file with URL parameters: https://example.com/concertapp/index.html?altvr.enclosure.position=0,0,0&altvr.enclosure.rotation=0,0,0&altvr.anchors.performerstage.position=5,0,-3&altvr.anchors.performerstage.scale=2,0.5,3&altvr.anchors.audiencestand.position=1,0,0
+URL parameters can also be used to override a manifest file: https://example.com/concertapp/index.html?altvr.manifest=https://path/to/manifest.json&altvr.enclosure.position=0,0,0&altvr.anchors.performerstage.position=5,0,-3&altvr.anchors.performerstage.scale=2,0.5,3&altvr.anchors.audiencestand.position=1,0,0
+
 ### Members
-| Name    | Type   | Description |
-| ------- | ------ | ----------- |
-| `scene` | THREE.Scene | The scene associated with the app. |
-| `renderer` | [AltRenderer](https://altspacevr.github.io/AltspaceSDK/doc/js/module-altspace-AltRenderer.html) | The renderer associated with the app. |
-| `camera` | THREE.Camera | The camera associated with the app. |
-| `anchor` | Object | The root anchor associated with the app.  The root anchor can have its transform specified using the `altvr.enclosure.position`, `altvr.enclosure.rotation` and `altvr.enclosure.scale` URL parameters, or a manifest file referenced using the `altvr.manifest` URL parameter. |
-| `enclosure` | [Enclosure](https://altspacevr.github.io/AltspaceSDK/doc/js/module-altspace-Enclosure.html) | The enclosure associated with the app. |
-| `space` | [Space](https://altspacevr.github.io/AltspaceSDK/doc/js/module-altspace.html#~Space) | The space associated with the app. |
+| Name        | Type                                                                                            | Description |
+| ----------- | ----------------------------------------------------------------------------------------------- | ----------- |
+| `scene`     | [THREE.Scene](https://threejs.org/docs/#api/scenes/Scene)                                       | The scene associated with the app. |
+| `renderer`  | [AltRenderer](https://altspacevr.github.io/AltspaceSDK/doc/js/module-altspace-AltRenderer.html) | The renderer associated with the app. |
+| `camera`    | [THREE.Camera](https://threejs.org/docs/#api/cameras/Camera)                                    | The camera associated with the app. |
+| `anchor`    | [THREE.Group](https://threejs.org/docs/#api/objects/Group)                                      | The root anchor associated with the app.  The root anchor can have its transform specified using the `altvr.enclosure.position`, `altvr.enclosure.rotation` and `altvr.enclosure.scale` URL parameters, or a manifest file referenced using the `altvr.manifest` URL parameter. |
+| `enclosure` | [Enclosure](https://altspacevr.github.io/AltspaceSDK/doc/js/module-altspace-Enclosure.html)     | The enclosure associated with the app. |
+| `space`     | [Space](https://altspacevr.github.io/AltspaceSDK/doc/js/module-altspace.html#~Space)            | The space associated with the app. |
 
 ### Methods
 ### <a name="FullspaceApp.anchors">anchors</a>
