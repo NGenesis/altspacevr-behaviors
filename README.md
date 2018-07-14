@@ -706,11 +706,11 @@ app.anchors('audiencestand').add(audienceStandModel);
 }
 ```
 
-Manifest file example: https://example.com/concertapp/index.html?altvr.manifest=https://path/to/manifest.json
+Manifest file example: `https://example.com/concertapp/index.html?altvr.manifest=https://path/to/manifest.json`
 
-Anchors can be customized without a manifest file with URL parameters: https://example.com/concertapp/index.html?altvr.enclosure.position=0,0,0&altvr.enclosure.rotation=0,0,0&altvr.anchors.performerstage.position=5,0,-3&altvr.anchors.performerstage.scale=2,0.5,3&altvr.anchors.audiencestand.position=1,0,0
+Anchors can be customized without a manifest file with URL parameters: `https://example.com/concertapp/index.html?altvr.enclosure.position=0,0,0&altvr.enclosure.rotation=0,0,0&altvr.anchors.performerstage.position=5,0,-3&altvr.anchors.performerstage.scale=2,0.5,3&altvr.anchors.audiencestand.position=1,0,0`
 
-URL parameters can also be used to override a manifest file: https://example.com/concertapp/index.html?altvr.manifest=https://path/to/manifest.json&altvr.enclosure.position=0,0,0&altvr.anchors.performerstage.position=5,0,-3&altvr.anchors.performerstage.scale=2,0.5,3&altvr.anchors.audiencestand.position=1,0,0
+URL parameters can also be used to override a manifest file: `https://example.com/concertapp/index.html?altvr.manifest=https://path/to/manifest.json&altvr.enclosure.position=0,0,0&altvr.anchors.performerstage.position=5,0,-3&altvr.anchors.performerstage.scale=2,0.5,3&altvr.anchors.audiencestand.position=1,0,0`
 
 ### Members
 | Name        | Type                                                                                            | Description |
