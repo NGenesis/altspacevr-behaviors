@@ -197,6 +197,7 @@ Loads and executes one or more scripts from the specified JavaScript file URL.
 | `scripts`    | Script[] | An array of objects containing a URL and optional config parameters for the scripts to be loaded. See below for object parameters. |
 
 Script parameters.
+
 | Name         | Type     | Default | Description |
 | ------------ | -------- | ------- | ----------- |
 | `url`        | String   |         | A URL to a JavaScript file. |
@@ -706,7 +707,9 @@ app.anchors('audiencestand').add(audienceStandModel);
 ```
 
 Manifest file example: https://example.com/concertapp/index.html?altvr.manifest=https://path/to/manifest.json
+
 Anchors can be customized without a manifest file with URL parameters: https://example.com/concertapp/index.html?altvr.enclosure.position=0,0,0&altvr.enclosure.rotation=0,0,0&altvr.anchors.performerstage.position=5,0,-3&altvr.anchors.performerstage.scale=2,0.5,3&altvr.anchors.audiencestand.position=1,0,0
+
 URL parameters can also be used to override a manifest file: https://example.com/concertapp/index.html?altvr.manifest=https://path/to/manifest.json&altvr.enclosure.position=0,0,0&altvr.anchors.performerstage.position=5,0,-3&altvr.anchors.performerstage.scale=2,0.5,3&altvr.anchors.audiencestand.position=1,0,0
 
 ### Members
