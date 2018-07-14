@@ -4,12 +4,18 @@ Provides helper functions, behaviors and A-Frame components for common functiona
 # Usage
 Include the utility library in your project:
 ```html
-<script src="https://cdn.rawgit.com/NGenesis/altspacevr-behaviors/v1.0.2/js/altspaceutil.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/altspacevr-behaviors/js/altspaceutil.min.js"></script>
+```
+
+To include a specific version of the library (recommended for production environments):
+```html
+<script src="https://cdn.jsdelivr.net/npm/altspacevr-behaviors@[version]/js/altspaceutil.min.js"></script>
 ```
 
 # API Reference
 
 ## Functions
+* [altspaceutil.getFullspaceApp](#getFullspaceApp)
 * [altspaceutil.getFullspaceEnclosure](#getFullspaceEnclosure)
 * [altspaceutil.getAbsoluteURL](#getAbsoluteURL)
 * [altspaceutil.getBasePath](#getBasePath)
@@ -19,6 +25,8 @@ Include the utility library in your project:
 * [altspaceutil.setCursorCollider](#setCursorCollider)
 * [altspaceutil.isCursorCollider](#isCursorCollider)
 * [altspaceutil.loadTexture](#loadTexture)
+* [altspaceutil.loadScript](#loadScript)
+* [altspaceutil.loadScripts](#loadScripts)
 
 ## Behaviors
 * [altspaceutil.behaviors.NativeComponent](#NativeComponent)
@@ -41,11 +49,28 @@ Include the utility library in your project:
 * [avatarstatus](#avatarstatus)
 * [n-sound-preloaded](#n-sound-preloaded)
 
+## Classes
+* [FullspaceApp](#FullspaceApp)
+
 ## A-Frame Components
 * [altspace-transform-controls](#altspace-transform-controls)
 * [n-text-material](#n-text-material)
 
 # Functions
+
+## <a name="getFullspaceApp">altspaceutil.getFullspaceApp</a>
+Gets an initialized fullspace app instance.  The app will be initialized on the first call to this function, which sets up the render loop, fullspace enclosure and anchors.
+
+### Parameters
+| Name                             | Type   | Default | Description |
+| -------------------------------- | ------ | ------- | ----------- |
+| `config`                         | Object |         | Optional parameters. |
+| `config.serializationBufferSize` | Number | 500000  | Initial size of the serialization buffer. See [altspaceutil.expandSerializationBuffer](#expandSerializationBuffer) for more information. |
+
+### Returns
+| Type    | Description |
+| ------- | ----------- |
+| Promise | A promise that resolves to a [fullspace app](#FullspaceApp). |
 
 ## <a name="getFullspaceEnclosure">altspaceutil.getFullspaceEnclosure</a>
 Gets the fullspace enclosure for the app.
@@ -141,6 +166,47 @@ Loads a three.js texture from the specified texture file URL, optimizing for fas
 | Type                                                            | Description |
 | --------------------------------------------------------------- | ----------- |
 | [THREE.Texture](https://threejs.org/docs/#api/textures/Texture) | The loaded texture. |
+
+## <a name="loadScript">altspaceutil.loadScript</a>
+Loads and executes a script from the specified JavaScript file URL.
+
+### Parameters
+| Name                | Type     | Default | Description |
+| ------------------- | -------- | ------- | ----------- |
+| `url`               | String   |         | A URL to a JavaScript file. |
+| `config`            | Object   |         | Optional parameters for specialized cases. |
+| `config.scriptTest` | Function | null    | A predicate function that tests whether the script contents has loaded.  A return value of true indicates that the loaded script content exists, false otherwise. |
+| `config.loadOnce`   | Boolean  | true    | Indicates whether the script should be loaded if it was previously loaded.  If true, the script will not be loaded again on subsequent calls if it was previously loaded. |
+
+### Returns
+| Type    | Description |
+| ------- | ----------- |
+| Promise | A promise that resolves when the javascript file has been loaded. |
+
+## <a name="loadScripts">altspaceutil.loadScripts</a>
+Loads and executes one or more scripts from the specified JavaScript file URL.
+
+### Parameters (1)
+| Name         | Type     | Description |
+| ------------ | -------- | ----------- |
+| `scripts`    | String[] | An array of JavaScript file URLs to be loaded. |
+
+### Parameters (2)
+| Name         | Type     | Description |
+| ------------ | -------- | ----------- |
+| `scripts`    | Script[] | An array of objects containing a URL and optional config parameters for the scripts to be loaded. See below for object parameters. |
+
+Script parameters.
+| Name         | Type     | Default | Description |
+| ------------ | -------- | ------- | ----------- |
+| `url`        | String   |         | A URL to a JavaScript file. |
+| `scriptTest` | Function | null    | A predicate function that tests whether the script contents has loaded.  A return value of true indicates that the loaded script content exists, false otherwise. |
+| `loadOnce`   | Boolean  | true    | Indicates whether the script should be loaded if it was previously loaded.  If true, the script will not be loaded again on subsequent calls if it was previously loaded. |
+
+### Returns
+| Type    | Description |
+| ------- | ----------- |
+| Promise | A promise that resolves when the javascript files have been loaded. |
 
 # Behaviors
 
@@ -603,6 +669,35 @@ Provides a convenience wrapper for [tween.js](https://github.com/tweenjs/tween.j
 | Name         | Type        | Default  | Description |
 | ------------ | ----------- | -------- | ----------- |
 | `tweengroup` | TWEEN.Group | TWEEN    | A tween group to be managed by the behavior.  When ommitted, the global `TWEEN` object will be managed by the behavior. |
+
+# Classes
+
+## <a name="FullspaceApp">FullspaceApp</a>
+Manages the render and update loop and creation of anchor points for a three.js app. This class is not intended to be created directly, but should be retrieved using [altspaceutil.getFullspaceApp](#getFullspaceApp).
+
+### Members
+| Name    | Type   | Description |
+| ------- | ------ | ----------- |
+| `scene` | THREE.Scene | The scene associated with the app. |
+| `renderer` | [AltRenderer](https://altspacevr.github.io/AltspaceSDK/doc/js/module-altspace-AltRenderer.html) | The renderer associated with the app. |
+| `camera` | THREE.Camera | The camera associated with the app. |
+| `anchor` | Object | The root anchor associated with the app.  The root anchor can have its transform specified using the `altvr.enclosure.position`, `altvr.enclosure.rotation` and `altvr.enclosure.scale` URL parameters, or a manifest file referenced using the `altvr.manifest` URL parameter. |
+| `enclosure` | [Enclosure](https://altspacevr.github.io/AltspaceSDK/doc/js/module-altspace-Enclosure.html) | The enclosure associated with the app. |
+| `space` | [Space](https://altspacevr.github.io/AltspaceSDK/doc/js/module-altspace.html#~Space) | The space associated with the app. |
+
+### Methods
+### <a name="FullspaceApp.anchors">anchors</a>
+Retrieves an anchor point with the specified name.  If the anchor point does not exist, it will be created automtically at app origin. The anchor can have its transform specified using the `altvr.anchors.[name].position`, `altvr.anchors.[name].rotation` and `altvr.anchors.[name].scale` URL parameters, or a manifest file referenced using the `altvr.manifest` URL parameter.
+
+#### Parameters
+| Name   | Type   | Description |
+| ------ | ------ | ----------- |
+| `name` | String | Name of the anchor. |
+
+#### Returns
+| Type                                                       | Description |
+| ---------------------------------------------------------- | ----------- |
+| [THREE.Group](https://threejs.org/docs/#api/objects/Group) | An anchor with the specified name. |
 
 # A-Frame Components
 ## <a name="altspace-transform-controls">altspace-transform-controls</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/aframe/altspace-transform-controls.html))

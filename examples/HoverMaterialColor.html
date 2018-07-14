@@ -1,37 +1,25 @@
 <!DOCTYPE html>
-<html lang=en>
-	<head>
-		<meta charset=utf-8>
-		<meta name="author" content="Genesis">
-		<title>HoverMaterialColor Example</title>
-		<script src="https://cdn.rawgit.com/mrdoob/three.js/r94/build/three.min.js"></script>
-		<script src="https://cdn.rawgit.com/AltspaceVR/AltspaceSDK/v2.9.0/dist/altspace.min.js"></script>
-		<script src="../js/altspaceutil.min.js"></script>
-	</head>
-	<body>
-		<script>
-			var sim = new altspace.utilities.Simulation();
+<title>HoverMaterialColor Example</title>
+<script src="https://cdn.jsdelivr.net/combine/npm/three/build/three.min.js,npm/altspace/dist/altspace.min.js,npm/altspacevr-behaviors/js/altspaceutil.min.js"></script>
+<script>
+	altspaceutil.getFullspaceApp().then(app => {
+		// Hovering over red cube will change cube color to blue
+		let obj = new THREE.Mesh(new THREE.BoxBufferGeometry(2, 2, 2), new THREE.MeshBasicMaterial({ color: 'red' }));
+		obj.addBehavior(new altspaceutil.behaviors.HoverMaterialColor({ beginDuration: 100, endDuration: 600, color: new THREE.Color('blue') }));
+		app.anchor.add(obj);
 
-			altspaceutil.getFullspaceEnclosure().then(function(enclosure) {
-				// Hovering over red cube will change cube color to blue
-				var obj = new THREE.Mesh(new THREE.BoxBufferGeometry(2, 2, 2), new THREE.MeshBasicMaterial({ color: 'red' }));
-				obj.addBehavior(new altspaceutil.behaviors.HoverMaterialColor({ beginDuration: 100, endDuration: 600, color: new THREE.Color('blue') }));
-				sim.scene.add(obj);
+		// Hovering over small yellow cubes will change colors of the cubes below them.
+		obj = new THREE.Mesh(new THREE.BoxBufferGeometry(2, 2, 2), new THREE.MeshBasicMaterial({ color: 'green' }));
+		obj.position.set(0, 0, 5);
+		obj.addBehavior(new altspaceutil.behaviors.HoverMaterialColor({ color: new THREE.Color('yellow'), hoverChildren: true }));
+		app.anchor.add(obj);
 
-				// Hovering over small yellow cubes will change colors of the cubes below them.
-				var obj = new THREE.Mesh(new THREE.BoxBufferGeometry(2, 2, 2), new THREE.MeshBasicMaterial({ color: 'green' }));
-				obj.position.set(0, 0, 5);
-				obj.addBehavior(new altspaceutil.behaviors.HoverMaterialColor({ color: new THREE.Color('yellow'), hoverChildren: true }));
-				sim.scene.add(obj);
-
-				for(var parent = obj, i = 0; i < 3; ++i) {
-					var child = new THREE.Mesh(new THREE.BoxBufferGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 'green' }));
-					child.position.set(0, 2, 0);
-					child.addBehavior(new altspaceutil.behaviors.HoverMaterialColor({ color: new THREE.Color('yellow'), hoverChildren: true }));
-					parent.add(child);
-					parent = child;
-				}
-			});
-		</script>
-	</body>
-</html>
+		for(let parent = obj, i = 0; i < 3; ++i) {
+			let child = new THREE.Mesh(new THREE.BoxBufferGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 'green' }));
+			child.position.set(0, 2, 0);
+			child.addBehavior(new altspaceutil.behaviors.HoverMaterialColor({ color: new THREE.Color('yellow'), hoverChildren: true }));
+			parent.add(child);
+			parent = child;
+		}
+	});
+</script>

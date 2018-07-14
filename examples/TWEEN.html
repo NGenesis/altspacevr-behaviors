@@ -1,27 +1,18 @@
 <!DOCTYPE html>
-<html lang=en>
-	<head>
-		<meta charset=utf-8>
-		<meta name="author" content="Genesis">
-		<title>TWEEN Behavior Example</title>
-		<script src="https://cdn.rawgit.com/mrdoob/three.js/r94/build/three.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/17.2.0/Tween.min.js"></script>
-		<script src="https://cdn.rawgit.com/AltspaceVR/AltspaceSDK/v2.9.0/dist/altspace.min.js"></script>
-		<script src="../js/altspaceutil.min.js"></script>
-	</head>
-	<body>
-		<script>
-			var sim = new altspace.utilities.Simulation();
-			sim.scene.addBehavior(new altspaceutil.behaviors.TWEEN());
+<title>TWEEN Behavior Example</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/17.2.0/Tween.min.js"></script>
+<script src="https://cdn.jsdelivr.net/combine/npm/three/build/three.min.js,npm/altspace/dist/altspace.min.js,npm/altspacevr-behaviors/js/altspaceutil.min.js"></script>
+<script>
+	altspaceutil.getFullspaceApp().then(app => {
+		app.anchor.addBehavior(new altspaceutil.behaviors.TWEEN());
 
-			var cube = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), new THREE.MeshBasicMaterial());
-			sim.scene.add(cube);
+		let cube = new THREE.Mesh(new THREE.BoxBufferGeometry(2, 2, 2), new THREE.MeshBasicMaterial({ color: 'red' }));
+		app.anchor.add(cube);
 
-			var forward = new TWEEN.Tween(cube.position).to({ x: 2 }, 1000).easing(TWEEN.Easing.Back.Out);
-			var reverse = new TWEEN.Tween(cube.position).to({ x: -2 }, 1000).easing(TWEEN.Easing.Back.Out);
-			forward.chain(reverse);
-			reverse.chain(forward);
-			forward.start();
-		</script>
-	</body>
-</html>
+		let forward = new TWEEN.Tween(cube.position).to({ x: 2 }, 1000).easing(TWEEN.Easing.Back.Out);
+		let reverse = new TWEEN.Tween(cube.position).to({ x: -2 }, 1000).easing(TWEEN.Easing.Back.Out);
+		forward.chain(reverse);
+		reverse.chain(forward);
+		forward.start();
+	});
+</script>

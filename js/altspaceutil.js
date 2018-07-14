@@ -65,22 +65,375 @@ altspaceutil.isMobileApp = function(url) {
 * @memberof module:altspaceutil
 */
 altspaceutil.getFullspaceEnclosure = function() {
-	return new Promise(function(resolve, reject) {
-		altspace.getEnclosure().then(function(enclosure) {
-			enclosure.requestFullspace().then(function() {
-				enclosure.addEventListener('fullspacechange', function() {
-					if(!enclosure.fullspace) enclosure.requestFullspace().catch(function() {
-						reject('enclosure.requestFullspace() after fullspacechange event failed');
-					});
-				});
-				resolve(enclosure);
-			}).catch(function() {
-				reject('enclosure.requestFullspace() failed');
+	let getEnclosure = altspace.inClient ? altspace.getEnclosure : () => {
+		// Emulate fullspace enclosure in browser
+		if(!altspaceutil._BrowserEnclosure) {
+			altspaceutil._BrowserEnclosure = new class extends THREE.EventDispatcher {
+				constructor() {
+					super();
+					this.innerWidth = 1280;
+					this.innerHeight = 720;
+					this.innerDepth = 1280;
+					this.pixelsPerMeter = 1;
+					this.hasFocus = document.hasFocus();
+					this.fullspace = true;
+
+					window.addEventListener('focus', () => this.hasFocus = document.hasFocus());
+					window.addEventListener('blur', () => this.hasFocus = document.hasFocus());
+				}
+
+				requestFullspace() {
+					if(!this.fullspace) {
+						this.fullspace = true;
+						this.dispatchEvent({ type: 'fullspacechange' });
+					}
+					return Promise.resolve();
+				}
+
+				exitFullspace() {
+					if(this.fullspace) {
+						this.fullspace = false;
+						this.dispatchEvent({ type: 'fullspacechange' });
+					}
+					return Promise.resolve();
+				}
+			};
+		}
+
+		return Promise.resolve(altspaceutil._BrowserEnclosure);
+	};
+
+	return new Promise((resolve, reject) => {
+		getEnclosure().then(enclosure => enclosure.requestFullspace().then(() => {
+			enclosure.addEventListener('fullspacechange', () => {
+				if(!enclosure.fullspace) enclosure.requestFullspace().catch(() => reject('enclosure.requestFullspace() after fullspacechange event failed'));
 			});
-		}).catch(function() {
-			reject('altspace.getEnclosure() failed');
-		});
+			resolve(enclosure);
+		})).catch(() => reject('Failed to get fullspace enclosure.'));
 	});
+}
+
+altspaceutil.getFullspaceAppManifest = function() {
+	if(altspaceutil._fullspaceAppManifest) return Promise.resolve(altspaceutil._fullspaceAppManifest);
+
+	let query = new URLSearchParams(window.location.search);
+	let applyManifestUrlParams = manifest => {
+		for(let q of query.entries()) {
+			if(/altvr\.enclosure\.(.*)/i.test(q[0])) {
+				let propertyname = q[0].match(/altvr\.enclosure\.(.*)/i)[1];
+
+				let anchormanifest = manifest.enclosure = Object.assign({}, manifest.enclosure);
+				anchormanifest.position = Object.assign({ x: 0, y: 0, z: 0 }, anchormanifest.position);
+				anchormanifest.rotation = Object.assign({ x: 0, y: 0, z: 0 }, anchormanifest.rotation);
+				anchormanifest.scale = (anchormanifest.hasOwnProperty('scale') && typeof anchormanifest.scale == 'number') ? { x: anchormanifest.scale || 1, y: anchormanifeste.scale || 1, z: anchormanifest.scale || 1 } : Object.assign({ x: 1, y: 1, z: 1 }, anchormanifest.scale);
+
+				switch(propertyname) {
+					case 'position':
+					case 'rotation': {
+						let property = q[1].split(',');
+						if(property.length >= 1) anchormanifest[propertyname].x = parseFloat(property[0]) || 0;
+						if(property.length >= 2) anchormanifest[propertyname].y = parseFloat(property[1]) || 0;
+						if(property.length >= 3) anchormanifest[propertyname].z = parseFloat(property[2]) || 0;
+						break;
+					}
+
+					case 'scale': {
+						let property = q[1].split(',');
+						if(property.length === 1) {
+							anchormanifest[propertyname].x = anchormanifest[propertyname].y = anchormanifest[propertyname].z = parseFloat(property[0]) || 1;
+						} else {
+							if(property.length >= 1) anchormanifest[propertyname].x = parseFloat(property[0]) || 1;
+							if(property.length >= 2) anchormanifest[propertyname].y = parseFloat(property[1]) || 1;
+							if(property.length >= 3) anchormanifest[propertyname].z = parseFloat(property[2]) || 1;
+						}
+						break;
+					}
+				}
+			} else if(/altvr\.anchors\.(.*)\.(.*)/i.test(q[0])) {
+				let [, anchorname, propertyname] = q[0].match(/altvr\.anchors\.(.*)\.(.*)/i);
+
+				let anchormanifestindex = manifest.anchors.findIndex(a => { return (a.name === anchorname); });
+				if(anchormanifestindex < 0) anchormanifestindex = manifest.anchors.push({ name: anchorname }) - 1;
+
+				anchormanifest = manifest.anchors[anchormanifestindex] = Object.assign({ name: anchorname }, manifest.anchors[anchormanifestindex]);
+				anchormanifest.position = Object.assign({ x: 0, y: 0, z: 0 }, anchormanifest.position);
+				anchormanifest.rotation = Object.assign({ x: 0, y: 0, z: 0 }, anchormanifest.rotation);
+				anchormanifest.scale = (anchormanifest.hasOwnProperty('scale') && typeof anchormanifest.scale == 'number') ? { x: anchormanifest.scale || 1, y: anchormanifeste.scale || 1, z: anchormanifest.scale || 1 } : Object.assign({ x: 1, y: 1, z: 1 }, anchormanifest.scale);
+
+				switch(propertyname) {
+					case 'position':
+					case 'rotation': {
+						let property = q[1].split(',');
+						if(property.length >= 1) anchormanifest[propertyname].x = parseFloat(property[0]) || 0;
+						if(property.length >= 2) anchormanifest[propertyname].y = parseFloat(property[1]) || 0;
+						if(property.length >= 3) anchormanifest[propertyname].z = parseFloat(property[2]) || 0;
+						break;
+					}
+
+					case 'scale': {
+						let property = q[1].split(',');
+						if(property.length === 1) {
+							anchormanifest[propertyname].x = anchormanifest[propertyname].y = anchormanifest[propertyname].z = parseFloat(property[0]) || 1;
+						} else {
+							if(property.length >= 1) anchormanifest[propertyname].x = parseFloat(property[0]) || 1;
+							if(property.length >= 2) anchormanifest[propertyname].y = parseFloat(property[1]) || 1;
+							if(property.length >= 3) anchormanifest[propertyname].z = parseFloat(property[2]) || 1;
+						}
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	if(query.has('altvr.manifest') && query.get('altvr.manifest').length > 0) {
+		return new Promise((resolve, reject) => {
+			fetch(altspaceutil.getAbsoluteURL(query.get('altvr.manifest'))).then(response => response.json()).then(obj => {
+				altspaceutil._fullspaceAppManifest = obj;
+				applyManifestUrlParams(altspaceutil._fullspaceAppManifest);
+				resolve(altspaceutil._fullspaceAppManifest);
+			}).catch(() => reject('Failed to download manifest from ' + query.get('altvr.manifest')));
+		});
+	} else {
+		altspaceutil._fullspaceAppManifest = { enclosure: { position: { x: 0, y: 0, z: 0 }, rotation: { x: 0, y: 0, z: 0 }, scale: { x: 1, y: 1, z: 1 } }, anchors: [] };
+		applyManifestUrlParams(altspaceutil._fullspaceAppManifest);
+		return Promise.resolve(altspaceutil._fullspaceAppManifest);
+	}
+}
+
+/**
+* FullspaceApp manages the render and update loop and creation of anchor points for a three.js app. This class is not intended to be created directly, but should be retrieved using [altspaceutil.getFullspaceApp]{@link module:altspaceutil.getFullspaceApp}.
+* @class module:altspaceutil~FullspaceApp
+* @memberof module:altspaceutil
+*/
+altspaceutil.FullspaceApp = class {
+	constructor(config) {
+		this.config = Object.assign({ serializationBufferSize: 500000 }, config);
+		if(this.config.serializationBufferSize) altspaceutil.expandSerializationBuffer(this.config.serializationBufferSize);
+	}
+
+	initialize() {
+		let waitForInitialization = () => {
+			if(!this._isInitializing && !this._isInitialized) {
+				this._isInitializing = true;
+				return Promise.resolve();
+			}
+
+			return new Promise((resolve, reject) => {
+				let waitIntervalId = setInterval(() => {
+					if(!this._isInitializing) {
+						clearInterval(waitIntervalId);
+						resolve();
+					}
+				}, 10);
+			})
+		};
+
+		let getSpace = altspace.inClient ? altspace.getSpace() : Promise.resolve({ sid: 'browser', name: 'Web Space', templateSid: 'browser' });
+
+		return new Promise((resolve, reject) => {
+			waitForInitialization().then(() => {
+				if(this._isInitialized) return resolve(this);
+				this._isInitializing = true;
+
+				return Promise.all([altspaceutil.getFullspaceEnclosure(), altspaceutil.getFullspaceAppManifest(), getSpace]).then(resolvers => {
+					let [enclosure, manifest, space] = resolvers;
+
+					this._enclosure = enclosure;
+					this._manifest = manifest;
+					this._space = space;
+
+					this._scene = new THREE.Scene();
+					this._camera = new THREE.PerspectiveCamera();
+
+					if(altspace.inClient) {
+						this._renderer = altspace.getThreeJSRenderer();
+					} else {
+						this._renderer = new THREE.WebGLRenderer({ antialias: true });
+
+						Object.assign(this._camera, { fov: 90, near: 1, far: 2000 });
+						this._camera.position.z = 20;
+
+						let addRendererToDOM = () => {
+							this._renderer.setClearColor('#99AACC');
+							document.body.style.margin = '0px';
+							document.body.style.overflow = 'hidden';
+							document.body.appendChild(this._renderer.domElement);
+						}
+						document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", addRendererToDOM) : addRendererToDOM();
+
+						let resizeRender = () => {
+							this._camera.aspect = window.innerWidth / window.innerHeight;
+							this._camera.updateProjectionMatrix();
+							this._renderer.setSize(window.innerWidth, window.innerHeight);
+						}
+						window.addEventListener('resize', resizeRender);
+						resizeRender();
+
+						this._scene.add(this._camera);
+						this._scene.add(new THREE.AmbientLight('white'));
+
+						altspace.utilities.shims.cursor.init(this._scene, this._camera, { renderer: this._renderer } );
+					}
+
+					this._anchors = {};
+
+					this._anchor = Object.assign(new THREE.Group(), { name: 'altvr.enclosure' });
+					this._scene.add(this._anchor);
+
+					let anchormanifest = this._manifest ? this._manifest.enclosure : null;
+					if(anchormanifest) {
+						this._anchor.position.copy(anchormanifest.position);
+						this._anchor.rotation.set(THREE.Math.degToRad(anchormanifest.rotation.x), THREE.Math.degToRad(anchormanifest.rotation.y), THREE.Math.degToRad(anchormanifest.rotation.z));
+						this._anchor.scale.copy(anchormanifest.scale);
+					}
+
+					this._anchorsGroup = Object.assign(new THREE.Group(), { name: 'altvr.anchors' });
+					this._anchorsGroup.addBehavior(new class _ApplyAppAnchorTransform {
+						get type() {
+							return '_ApplyAppAnchorTransform';
+						}
+
+						constructor(anchor) {
+							this.anchor = anchor;
+						}
+
+						awake(o) {
+							this.object3d = o;
+							this.object3d.position.copy(this.anchor.position);
+							this.object3d.quaternion.copy(this.anchor.quaternion);
+							this.object3d.scale.copy(this.anchor.scale);
+						}
+
+						update() {
+							this.object3d.position.copy(this.anchor.position);
+							this.object3d.quaternion.copy(this.anchor.quaternion);
+							this.object3d.scale.copy(this.anchor.scale);
+						}
+					}(this._anchor));
+					this._scene.add(this._anchorsGroup);
+
+					this._isInitialized = true;
+
+					let loop = () => {
+						window.requestAnimationFrame(loop);
+						this._scene.updateAllBehaviors();
+						this._renderer.render(this._scene, this._camera);
+					}
+					loop();
+
+					this._isInitializing = false;
+					resolve(this);
+				});
+			}).catch(() => {
+				this._isInitializing = false;
+				reject('Failed to initialize fullspace app.');
+			});
+		});
+	}
+
+
+	/**
+	* Retrieves an anchor point with the specified name.  If the anchor point does not exist, it will be created automtically at app origin. The anchor can have its transform specified using the altvr.anchors.<name>.position, altvr.anchors.<name>.rotation and altvr.anchors.<name>.scale URL parameters, or a manifest file referenced using the altvr.manifest URL parameter.
+	* @method anchors
+	* @param {String} [name] Name of the anchor.
+	* @returns {THREE.Group}
+	* @memberof module:altspaceutil~FullspaceApp
+	*/
+	anchors(name) {
+		if(this._anchors[name]) return this._anchors[name];
+
+		let anchor = this._anchors[name] = Object.assign(new THREE.Group(), { name: name });
+		this._anchorsGroup.add(anchor);
+
+		let anchormanifest = this._manifest.anchors.find(a => { return a.name === name; });
+		if(anchormanifest) {
+			anchor.position.copy(anchormanifest.position);
+			anchor.rotation.set(THREE.Math.degToRad(anchormanifest.rotation.x), THREE.Math.degToRad(anchormanifest.rotation.y), THREE.Math.degToRad(anchormanifest.rotation.z));
+			anchor.scale.copy(anchormanifest.scale);
+		}
+
+		return anchor;
+	}
+
+	/**
+	* The scene associated with the app.
+	* @readonly
+	* @instance
+	* @member {THREE.Scene} scene
+	* @memberof module:altspaceutil~FullspaceApp
+	*/
+	get scene() {
+		return this._scene;
+	}
+
+	/**
+	* The renderer associated with the app.
+	* @readonly
+	* @instance
+	* @member {module:altspace~AltRenderer} renderer
+	* @memberof module:altspaceutil~FullspaceApp
+	*/
+	get renderer() {
+		return this._renderer;
+	}
+
+	/**
+	* The camera associated with the app.
+	* @readonly
+	* @instance
+	* @member {THREE.Camera} camera
+	* @memberof module:altspaceutil~FullspaceApp
+	*/
+	get camera() {
+		return this._camera;
+	}
+
+	/**
+	* The root anchor associated with the app.  The root anchor can have its transform specified using the altvr.enclosure.position, altvr.enclosure.rotation and altvr.enclosure.scale URL parameters, or a manifest file referenced using the altvr.manifest URL parameter.
+	* @readonly
+	* @instance
+	* @member {THREE.Group} anchor
+	* @memberof module:altspaceutil~FullspaceApp
+	*/
+	get anchor() {
+		return this._anchor;
+	}
+
+	/**
+	* The enclosure associated with the app.
+	* @readonly
+	* @instance
+	* @member {module:altspace~Enclosure} enclosure
+	* @memberof module:altspaceutil~FullspaceApp
+	*/
+	get enclosure() {
+		return this._enclosure;
+	}
+
+	/**
+	* The space associated with the app.
+	* @readonly
+	* @instance
+	* @member {module:altspace~Space} space
+	* @memberof module:altspaceutil~FullspaceApp
+	*/
+	get space() {
+		return this._space;
+	}
+}
+
+/**
+* Gets an initialized fullspace app instance.  The app will be initialized on the first call to this function, which sets up the render loop, fullspace enclosure and anchors.
+* @function getFullspaceApp
+* @param {Object} [config] Optional parameters.
+* @param {Number} [config.serializationBufferSize=500000] Initial size of the serialization buffer. See {@link expandSerializationBuffer} for more information.
+* @returns {Promise} A promise that resolves to a FullspaceApp.
+* @memberof module:altspaceutil
+*/
+altspaceutil.getFullspaceApp = function(config) {
+	if(!altspaceutil._fullspaceApp) altspaceutil._fullspaceApp = new altspaceutil.FullspaceApp(config);
+	return altspaceutil._fullspaceApp.initialize();
 }
 
 /**
@@ -262,6 +615,92 @@ altspaceutil.cloneWithBehaviors = function(obj, recursive) {
 	}
 
 	return other;
+}
+
+/**
+* Loads and executes a script from the specified JavaScript file URL.
+* @function loadScript
+* @param {String} [url] A URL to a JavaScript file.
+* @param {Object} [config] Optional parameters for specialized cases.
+* @param {Function} [config.scriptTest=null] A predicate function that tests whether the script contents has loaded.  A return value of true indicates that the loaded script content exists, false otherwise.
+* @param {Boolean} [config.loadOnce=true] Indicates whether the script should be loaded if it was previously loaded.  If true, the script will not be loaded again on subsequent calls if it was previously loaded.
+* @returns {Promise}
+* @memberof module:altspaceutil
+*/
+altspaceutil.loadScript = (url, config) => {
+	config = Object.assign({ loadOnce: true }, config);
+	altspaceutil._loadedScripts = altspaceutil._loadedScripts || {};
+
+	if(config.scriptTest && config.scriptTest(url)) return Promise.resolve();
+
+	if(config.loadOnce) {
+		if(altspaceutil._loadedScripts[url] && altspaceutil._loadedScripts[url].loaded) return Promise.resolve();
+		if(altspaceutil._loadedScripts[url] && altspaceutil._loadedScripts[url].waiting) return altspaceutil._loadedScripts[url].waiting;
+	}
+
+	let script = document.createElement('script');
+	script.src = new URL(url, window.location).toString();
+	script.async = false; // When explicitly set to false, download the script asynchronously but execute in order it was added to DOM
+
+	let firstTimeLoad = (altspaceutil._loadedScripts[url] === undefined);
+	let waitForScriptEvents = new Promise((resolve, reject) => {
+		script.onload = () => {
+			if(!config.scriptTest || config.scriptTest(url)) {
+				resolve();
+			} else {
+				console.warn('Script test failed for script at ' + script.src);
+				reject('Script test failed for script at ' + script.src);
+			}
+
+			if(firstTimeLoad) {
+				altspaceutil._loadedScripts[url].loaded = true;
+				altspaceutil._loadedScripts[url].waiting = null;
+			}
+		};
+		script.onerror = () => {
+			if(firstTimeLoad) {
+				altspaceutil._loadedScripts[url].waiting = null;
+				delete altspaceutil._loadedScripts[url];
+			}
+
+			console.warn('Failed to load script at ' + script.src);
+			reject('Failed to load script at ' + script.src);
+		};
+	});
+
+	if(firstTimeLoad) altspaceutil._loadedScripts[url] = { waiting: waitForScriptEvents };
+
+	if(!altspaceutil._lastLoadScript) {
+		// Insert first dynamically loaded script before the first script in the DOM
+		let firstScript = document.getElementsByTagName('script')[0];
+		firstScript.parentNode.insertBefore(script, firstScript);
+	} else {
+		// Every subsequently loaded script should be inserted after the previously loaded script
+		altspaceutil._lastLoadScript.parentNode.insertBefore(script, altspaceutil._lastLoadScript.nextSibling);
+	}
+
+	altspaceutil._lastLoadScript = script;
+
+	return waitForScriptEvents;
+}
+
+/**
+* Loads and executes one or more scripts from the specified JavaScript file URL.
+* @function loadScripts
+* @param {String[]} [scripts] An array of JavaScript file URLs to be loaded.
+* @returns {Promise}
+* @memberof module:altspaceutil
+*/
+/**
+* Loads and executes one or more scripts from the specified JavaScript file URL.
+* @function loadScripts
+* @param {Object[]} [scripts] An array of objects containing a URL and optional config parameters for the scripts to be loaded. See below for object parameters.
+* @returns {Promise}
+* @memberof module:altspaceutil
+*/
+altspaceutil.loadScripts = scripts => {
+	if(!scripts || scripts.length <= 0) return Promise.resolve();
+	return Promise.all(scripts.map(script => (typeof script === 'string' || script instanceof String) ? altspaceutil.loadScript(script) : altspaceutil.loadScript(script.url, script)));
 }
 /**
  * The TWEEN behavior provides a convenience wrapper for [tween.js](https://github.com/tweenjs/tween.js/) to manage and update TWEEN and TWEEN.Group objects.

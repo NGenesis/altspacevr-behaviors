@@ -1,43 +1,33 @@
 <!DOCTYPE html>
-<html lang=en>
-	<head>
-		<meta charset=utf-8>
-		<meta name="author" content="Genesis">
-		<title>PreloadNativeSounds Behavior Example</title>
-		<script src="https://cdn.rawgit.com/mrdoob/three.js/r94/build/three.min.js"></script>
-		<script src="https://cdn.rawgit.com/AltspaceVR/AltspaceSDK/v2.9.0/dist/altspace.min.js"></script>
-		<script src="../js/altspaceutil.min.js"></script>
-	</head>
-	<body>
-		<script>
-			var sim = new altspace.utilities.Simulation();
-
-			// Preload sounds for caching purposes only, underlying sound objects will be deleted after being cached.
-			var cube = new THREE.Mesh(new THREE.BoxGeometry(100, 100, 100), new THREE.MeshBasicMaterial());
-			sim.scene.add(cube);
-			sim.scene.addBehavior(new altspaceutil.behaviors.PreloadNativeSounds(['test.mp3', 'test.ogg']));
-			sim.scene.addEventListener('n-sound-preloaded', function(event) {
-				cube.addEventListener('cursordown', function(event) {
-					var soundcomponent = cube.getBehaviorByType('n-sound');
-					if(soundcomponent) cube.removeBehavior(soundcomponent);
-					cube.addBehavior(new altspaceutil.behaviors.NativeComponent('n-sound', { src: /Mobile/i.test(navigator.userAgent) ? 'test.mp3' : 'test.ogg', oneshot: true, autoplay: true }, { useCollider: true }));
-				});
+<title>PreloadNativeSounds Behavior Example</title>
+<script src="https://cdn.jsdelivr.net/combine/npm/three/build/three.min.js,npm/altspace/dist/altspace.min.js,npm/altspacevr-behaviors/js/altspaceutil.min.js"></script>
+<script>
+	altspaceutil.getFullspaceApp().then(app => {
+		// Preload sounds for caching purposes only, underlying sound objects will be deleted after being cached.
+		let cube = new THREE.Mesh(new THREE.BoxGeometry(100, 100, 100), new THREE.MeshBasicMaterial());
+		app.anchor.add(cube);
+		app.anchor.addBehavior(new altspaceutil.behaviors.PreloadNativeSounds(['test.mp3', 'test.ogg']));
+		app.anchor.addEventListener('n-sound-preloaded', event => {
+			cube.addEventListener('cursordown', event => {
+				let soundcomponent = cube.getBehaviorByType('n-sound');
+				if(soundcomponent) cube.removeBehavior(soundcomponent);
+				cube.addBehavior(new altspaceutil.behaviors.NativeComponent('n-sound', { src: /Mobile/i.test(navigator.userAgent) ? 'test.mp3' : 'test.ogg', oneshot: true, autoplay: true }, { useCollider: true }));
 			});
+		});
 
-			// Preload sounds and save sound objects for later use.
-			var soundlibrary = new THREE.Group();
-			sim.scene.add(soundlibrary);
-			var nsounddata = [
-				{ src: 'soundtest1.wav', oneshot: true, autoplay: false, volume: 0.5 },
-				{ src: 'soundtest2.wav', oneshot: true, autoplay: false, volume: 0.8 }
-			];
-			soundlibrary.addBehavior(new altspaceutil.behaviors.PreloadNativeSounds(nsounddata, { dispose: false, timeout: 15000 }));
-			soundlibrary.addEventListener('n-sound-preloaded', function(event) {
-				for(var sound of event.sounds) {
-					var soundcomponent = sound.getBehaviorByType('n-sound');
-					if(!event.timeout || soundcomponent.getAttribute('loaded')) soundcomponent.callComponentAction('play');
-				}
-			});
-		</script>
-	</body>
-</html>
+		// Preload sounds and save sound objects for later use.
+		let soundlibrary = new THREE.Group();
+		app.anchor.add(soundlibrary);
+		let nsounddata = [
+			{ src: 'soundtest1.wav', oneshot: true, autoplay: false, volume: 0.5 },
+			{ src: 'soundtest2.wav', oneshot: true, autoplay: false, volume: 0.8 }
+		];
+		soundlibrary.addBehavior(new altspaceutil.behaviors.PreloadNativeSounds(nsounddata, { dispose: false, timeout: 15000 }));
+		soundlibrary.addEventListener('n-sound-preloaded', event => {
+			for(let sound of event.sounds) {
+				let soundcomponent = sound.getBehaviorByType('n-sound');
+				if(!event.timeout || soundcomponent.getAttribute('loaded')) soundcomponent.callComponentAction('play');
+			}
+		});
+	});
+</script>
