@@ -688,9 +688,11 @@ Imagine a concert environment app containing a skybox, a stage for performers an
 
 `https://example.com/concertapp/index.html`
 ```javascript
-app.anchor.add(new SkyboxModel());
-app.anchors('performerstage').add(concertStageModel);
-app.anchors('audiencestand').add(audienceStandModel);
+altspaceutil.getFullspaceApp(app => {
+	app.anchor.add(skyboxModel);
+	app.anchors('performerstage').add(concertStageModel);
+	app.anchors('audiencestand').add(audienceStandModel);
+});
 ```
 
 `https://path/to/manifest.json`
