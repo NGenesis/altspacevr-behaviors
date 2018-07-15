@@ -721,7 +721,7 @@ URL parameters can also be used to override a manifest file: `https://example.co
 
 ### Methods
 ### <a name="FullspaceApp.anchors">anchors</a>
-Retrieves an anchor point with the specified name.  If the anchor point does not exist, it will be created automtically at app origin. The anchor can have its transform specified using the `altvr.anchors.[name].position`, `altvr.anchors.[name].rotation` and `altvr.anchors.[name].scale` URL parameters, or a manifest file referenced using the `altvr.manifest` URL parameter.
+Retrieves an anchor point with the specified name.  If the anchor point does not exist, it will be created automatically. The anchor can have its transform specified using the `altvr.anchors.[name].position`, `altvr.anchors.[name].rotation` and `altvr.anchors.[name].scale` URL parameters, or a manifest file referenced using the `altvr.manifest` URL parameter.
 
 #### Parameters
 | Name   | Type   | Description |
