@@ -2084,12 +2084,10 @@ altspaceutil.behaviors.UserEvents = function(config) {
 		if(typeof(color) === 'string') {
 			var rgb = color.match(/^rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i);
 			if(rgb) return getColorFromRGB(rgb[1], rgb[2], rgb[3]);
-
 			return getColorFromName(color);
-		} else if(typeof(color[0]) === 'string') {
+		} else if(color.constructor === Array && color.length === 1 && typeof(color[0]) === 'string') {
 			var rgb = color[0].match(/^rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i);
 			if(rgb) return getColorFromRGB(rgb[1], rgb[2], rgb[3]);
-
 			return getColorFromName(color[0]);
 		}
 
