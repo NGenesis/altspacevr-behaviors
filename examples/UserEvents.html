@@ -3,20 +3,20 @@
 <script src="https://cdn.jsdelivr.net/combine/npm/three@0.94.0/build/three.min.js,npm/altspace@2.9.0/dist/altspace.min.js,npm/altspacevr-behaviors@1.0.4/js/altspaceutil.min.js"></script>
 <script>
 	altspaceutil.getFullspaceApp().then(app => {
-		let avatarPrimaryColor, avatarHighlightColor, avatarColorGeometry = new THREE.BoxGeometry(100, 100, 100);
+		let avatarPrimaryColor, avatarHighlightColor, avatarColorGeometry = new THREE.BoxGeometry(2, 2, 2);
 
 		let avatarDetails = new THREE.Group();
 		avatarDetails.addBehaviors(
 			new altspaceutil.behaviors.NativeComponent('n-billboard'),
 			new altspaceutil.behaviors.NativeComponent('n-text', {
-				fontSize: 150,
+				fontSize: 2,
 				width: 500,
 				height: 1,
 				horizontalAlign: 'middle',
 				verticalAlign: 'middle'
 			})
 		);
-		avatarDetails.position.y = -100;
+		avatarDetails.position.y = 2.5;
 		app.anchor.add(avatarDetails);
 
 		app.anchor.addEventListener('avatarchange', event => {
@@ -36,7 +36,7 @@
 
 			if(event.detail.colors['primary']) {
 				avatarPrimaryColor = new THREE.Mesh(avatarColorGeometry, Object.assign(new THREE.MeshBasicMaterial(), { color: event.detail.colors['primary'] }));
-				avatarPrimaryColor.position.x = -100;
+				avatarPrimaryColor.position.x = -2;
 				app.anchor.add(avatarPrimaryColor);
 			}
 
@@ -47,7 +47,7 @@
 
 			if(event.detail.colors['highlight']) {
 				avatarHighlightColor = new THREE.Mesh(avatarColorGeometry, Object.assign(new THREE.MeshBasicMaterial(), { color: event.detail.colors['highlight'] }));
-				avatarHighlightColor.position.x = 100;
+				avatarHighlightColor.position.x = 2;
 				app.anchor.add(avatarHighlightColor);
 			}
 		});
