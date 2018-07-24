@@ -816,7 +816,7 @@ if(!altspaceutil._assetLoaders) altspaceutil._assetLoaders = new class {
 
 		this.add(/\.bom$/i, (url, config) => {
 			return new Promise((resolve, reject) => {
-				altspaceutil.loadScript('https://cdn.jsdelivr.net/gh/NGenesis/bom-three.js@v0.6.1/examples/js/loaders/BOMLoader.min.js', { scriptTest: () => THREE.BOMLoader }).then(() => {
+				altspaceutil.loadScript('https://cdn.jsdelivr.net/gh/NGenesis/bom-three.js@v0.6.3/examples/js/loaders/BOMLoader.min.js', { scriptTest: () => THREE.BOMLoader }).then(() => {
 					let loader = new THREE.BOMLoader();
 					loader.load(url, obj => resolve(obj), null, () => reject('Could not retrieve asset from ' + url));
 				}).catch(() => reject('Could not load scripts for BOMLoader'));
