@@ -890,7 +890,7 @@ altspaceutil.removeAssetLoader = (regex, handler) => {
 */
 altspaceutil.loadAsset = (url, config) => {
 	url = altspaceutil.getAbsoluteURL(url);
-	config = Object.assign({ applyTransform: true, cursorCollider: false }, config);
+	config = Object.assign({ applyTransform: true, cursorCollider: false, crossOrigin: 'anonymous' }, config);
 
 	let fireOnLoadedEvent = asset => {
 		altspaceutil.setCursorCollider(asset, config.cursorCollider ? true : false, true);
