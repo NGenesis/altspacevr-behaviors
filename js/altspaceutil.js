@@ -757,6 +757,7 @@ if(!altspaceutil._assetLoaders) altspaceutil._assetLoaders = new class {
 						if(mtlFileUrl) {
 							mtlFileUrl = new URL(mtlFileUrl[1], url).toString();
 							let loader = new THREE.MTLLoader();
+							loader.setCrossOrigin(config.crossOrigin);
 							loader.setTexturePath(altspaceutil.getBasePath(mtlFileUrl));
 							loader.load(mtlFileUrl, materials => {
 								materials.preload();
@@ -780,6 +781,7 @@ if(!altspaceutil._assetLoaders) altspaceutil._assetLoaders = new class {
 			return new Promise((resolve, reject) => {
 				altspaceutil.loadScript('https://cdn.jsdelivr.net/npm/three@0.' + THREE.REVISION + '.0/examples/js/loaders/GLTFLoader.min.js', { scriptTest: () => THREE.GLTFLoader }).then(() => {
 					let loader = new THREE.GLTFLoader();
+					loader.setCrossOrigin(config.crossOrigin);
 					loader.load(url, obj => resolve(obj.scene), null, () => reject('Could not retrieve asset from ' + url));
 				}).catch(() => reject('Could not load scripts for GLTFLoader'));
 			});
@@ -793,12 +795,16 @@ if(!altspaceutil._assetLoaders) altspaceutil._assetLoaders = new class {
 						loader.load(url, response => {
 							let originalLoader = THREE.TextureLoader.prototype.load;
 							THREE.TextureLoader.prototype.load = textureUrl => { return new THREE.Texture({ src: new URL(textureUrl, url).toString() }); };
-							let obj = new THREE.ColladaLoader().parse(response, altspaceutil.getBasePath(url));
+
+							let loader = new THREE.ColladaLoader();
+							loader.setCrossOrigin(config.crossOrigin);
+							let obj = loader.parse(response, altspaceutil.getBasePath(url));
 							THREE.TextureLoader.prototype.load = originalLoader;
 							resolve(obj.scene);
 						}, null, () => reject('Could not retrieve asset from ' + url));
 					} else {
 						let loader = new THREE.ColladaLoader();
+						loader.setCrossOrigin(config.crossOrigin);
 						loader.load(url, obj => resolve(obj.scene), null, () => reject('Could not retrieve asset from ' + url));
 					}
 				}).catch(() => reject('Could not load scripts for ColladaLoader'));
@@ -809,6 +815,7 @@ if(!altspaceutil._assetLoaders) altspaceutil._assetLoaders = new class {
 			return new Promise((resolve, reject) => {
 				altspaceutil.loadScript('https://cdn.jsdelivr.net/npm/three@0.' + THREE.REVISION + '.0/examples/js/loaders/FBXLoader.min.js', { scriptTest: () => THREE.FBXLoader }).then(() => {
 					let loader = new THREE.FBXLoader();
+					loader.setCrossOrigin(config.crossOrigin);
 					loader.load(url, obj => resolve(obj.scene), null, () => reject('Could not retrieve asset from ' + url));
 				}).catch(() => reject('Could not load scripts for FBXLoader'));
 			});
@@ -818,6 +825,7 @@ if(!altspaceutil._assetLoaders) altspaceutil._assetLoaders = new class {
 			return new Promise((resolve, reject) => {
 				altspaceutil.loadScript('https://cdn.jsdelivr.net/gh/NGenesis/bom-three.js@v0.6.3/examples/js/loaders/BOMLoader.min.js', { scriptTest: () => THREE.BOMLoader }).then(() => {
 					let loader = new THREE.BOMLoader();
+					loader.setCrossOrigin(config.crossOrigin);
 					loader.load(url, obj => resolve(obj), null, () => reject('Could not retrieve asset from ' + url));
 				}).catch(() => reject('Could not load scripts for BOMLoader'));
 			});
@@ -871,6 +879,7 @@ altspaceutil.removeAssetLoader = (regex, handler) => {
 * @param {Boolean} [config.applyTransform=true] When true, the position/rotation/quaternion/scale properties will be applied to the loaded asset.
 * @param {Boolean} [config.native=true] When true, assets loaded in the Altspace client will be loaded as native objects where appropriate (e.g. n-gltf for glTF assets), otherwise standard browser behavior will be followed.
 * @param {Boolean} [config.cursorCollider=false] Specified whether cursor collision is enabled on the loaded asset.
+* @param {Boolean} [config.crossOrigin='anonymous'] Specifies the cross-origin state for loading textures.
 * @param {THREE.Vector3} [config.position] Position to be applied to the loaded asset.
 * @param {THREE.Euler} [config.rotation] Rotation to be applied to the loaded asset, in radians.
 * @param {THREE.Quaternion} [config.quaternion] Quaternion to be applied to the loaded asset.  Specifying quaternion will override the rotation property.

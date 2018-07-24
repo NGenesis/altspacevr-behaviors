@@ -4,7 +4,7 @@ Provides helper functions, behaviors and A-Frame components for common functiona
 # Usage
 Include the utility library in your project:
 ```html
-<script src="https://cdn.jsdelivr.net/npm/altspacevr-behaviors@1.0.6/js/altspaceutil.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/altspacevr-behaviors@1.0.7/js/altspaceutil.min.js"></script>
 ```
 
 # API Reference
@@ -225,6 +225,7 @@ Loads an asset from the specified URL.
 | `config.quaternion`     | [THREE.Quaternion](https://threejs.org/docs/#api/math/Quaternion) | { x: 0, y: 0, z: 0, w: 1 } | Quaternion to be applied to the loaded asset.  Specifying quaternion will override the rotation property. |
 | `config.scale`          | [THREE.Vector3](https://threejs.org/docs/#api/math/Vector3)       | { x: 1, y: 1, z: 1 }       | Scale to be applied to the loaded asset.  Alternatively, uniform scaling is applied when a number is specified. |
 | `config.onLoaded`       | Function                                                          | null                       | A callback function to execute when the asset has been loaded.  A reference to the loaded asset will be passed into this function. |
+| `config.crossOrigin`    | String                                                            | anonymous                  | Specifies the cross-origin state for loading textures. |
 
 ### Returns
 | Type    | Description |
@@ -246,9 +247,9 @@ Loads one or more assets from the specified URLs.
 
 Asset parameters.
 
-| Name             | Type                                                              | Default | Description |
-| ---------------- | ----------------------------------------------------------------- | ------- | ----------- |
-| `url`            | String                                                            |         | A URL to a JavaScript file. |
+| Name             | Type                                                              | Default                    | Description |
+| ---------------- | ----------------------------------------------------------------- | -------------------------- | ----------- |
+| `url`            | String                                                            |                            | A URL to a JavaScript file. |
 | `applyTransform` | Boolean                                                           | true                       | When true, the `position`/`rotation`/`quaternion`/`scale` properties will be applied to the loaded asset. |
 | `cursorCollider` | Boolean                                                           | false                      | Specified whether cursor collision is enabled on the loaded asset. |
 | `native`         | Boolean                                                           | true                       | When true, assets loaded in the Altspace client will be loaded as native objects where appropriate (e.g. n-gltf for glTF assets), otherwise standard browser behavior will be followed. |
@@ -257,6 +258,7 @@ Asset parameters.
 | `quaternion`     | [THREE.Quaternion](https://threejs.org/docs/#api/math/Quaternion) | { x: 0, y: 0, z: 0, w: 1 } | Quaternion to be applied to the loaded asset.  Specifying quaternion will override the rotation property. |
 | `scale`          | [THREE.Vector3](https://threejs.org/docs/#api/math/Vector3)       | { x: 1, y: 1, z: 1 }       | Scale to be applied to the loaded asset.  Alternatively, uniform scaling is applied when a number is specified. |
 | `onLoaded`       | Function                                                          | null                       | A callback function to execute when the asset has been loaded.  A reference to the loaded asset will be passed into this function. |
+| `crossOrigin`    | String                                                            | anonymous                  | Specifies the cross-origin state for loading textures. |
 
 ### Returns
 | Type    | Description |
