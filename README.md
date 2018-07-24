@@ -209,7 +209,7 @@ Script parameters.
 | ------- | ----------- |
 | Promise | A promise that resolves when the javascript files have been loaded. |
 
-## <a name="loadAsset">altspaceutil.loadAsset</a>
+## <a name="loadAsset">altspaceutil.loadAsset</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/loadassets.html))
 Loads an asset from the specified URL.
 
 ### Parameters
@@ -231,7 +231,7 @@ Loads an asset from the specified URL.
 | ------- | ----------- |
 | Promise | A promise that resolves to the loaded asset. |
 
-## <a name="loadAssets">altspaceutil.loadAssets</a>
+## <a name="loadAssets">altspaceutil.loadAssets</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/loadassets.html))
 Loads one or more assets from the specified URLs.
 
 ### Parameters (1)
@@ -263,7 +263,7 @@ Asset parameters.
 | ------- | ----------- |
 | Promise | A promise that resolves to the loaded assets, either as an array or object of named assets depending on the supplied parameters. |
 
-## <a name="addAssetLoader">altspaceutil.addAssetLoader</a>
+## <a name="addAssetLoader">altspaceutil.addAssetLoader</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/loadassets.html))
 Registers a handler that will load and construct the specified asset type when [loadAsset](#loadAsset) or [loadAssets](#loadAssets) is called.
 
 ### Parameters
