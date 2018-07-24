@@ -264,7 +264,7 @@ Asset parameters.
 | Promise | A promise that resolves to the loaded assets, either as an array or object of named assets depending on the supplied parameters. |
 
 ## <a name="addAssetLoader">altspaceutil.addAssetLoader</a>
-Registers a handler that will load and construct the specified asset type when [altspaceutil.loadAsset](#loadAsset) or [altspaceutil.loadAssets](#loadAssets) is called.
+Registers a handler that will load and construct the specified asset type when [loadAsset](#loadAsset) or [loadAssets](#loadAssets) is called.
 
 ### Parameters
 | Name      | Type                                                                                              | Description |
@@ -280,7 +280,7 @@ Registers a handler that will load and construct the specified asset type when [
 | `config` | Object | Optional parameters. |
 
 ## <a name="removeAssetLoader">altspaceutil.removeAssetLoader</a>
-Unregisters a handler for the specified asset type that is used when [altspaceutil.loadAsset](#loadAsset) or [altspaceutil.loadAssets](#loadAssets) is called.
+Unregisters a handler for the specified asset type that is used when [loadAsset](#loadAsset) or [loadAssets](#loadAssets) is called.
 
 ### Parameters
 | Name      | Type                                                                                              | Default | Description |
