@@ -125,7 +125,7 @@ altspaceutil.getFullspaceAppManifest = function() {
 				let anchormanifest = manifest.enclosure = Object.assign({}, manifest.enclosure);
 				anchormanifest.position = Object.assign({ x: 0, y: 0, z: 0 }, anchormanifest.position);
 				anchormanifest.rotation = Object.assign({ x: 0, y: 0, z: 0 }, anchormanifest.rotation);
-				anchormanifest.scale = (anchormanifest.hasOwnProperty('scale') && typeof anchormanifest.scale == 'number') ? { x: anchormanifest.scale || 1, y: anchormanifeste.scale || 1, z: anchormanifest.scale || 1 } : Object.assign({ x: 1, y: 1, z: 1 }, anchormanifest.scale);
+				anchormanifest.scale = (anchormanifest.hasOwnProperty('scale') && typeof anchormanifest.scale == 'number') ? { x: anchormanifest.scale || 1, y: anchormanifest.scale || 1, z: anchormanifest.scale || 1 } : Object.assign({ x: 1, y: 1, z: 1 }, anchormanifest.scale);
 
 				switch(propertyname) {
 					case 'position':
@@ -158,7 +158,7 @@ altspaceutil.getFullspaceAppManifest = function() {
 				anchormanifest = manifest.anchors[anchormanifestindex] = Object.assign({ name: anchorname }, manifest.anchors[anchormanifestindex]);
 				anchormanifest.position = Object.assign({ x: 0, y: 0, z: 0 }, anchormanifest.position);
 				anchormanifest.rotation = Object.assign({ x: 0, y: 0, z: 0 }, anchormanifest.rotation);
-				anchormanifest.scale = (anchormanifest.hasOwnProperty('scale') && typeof anchormanifest.scale == 'number') ? { x: anchormanifest.scale || 1, y: anchormanifeste.scale || 1, z: anchormanifest.scale || 1 } : Object.assign({ x: 1, y: 1, z: 1 }, anchormanifest.scale);
+				anchormanifest.scale = (anchormanifest.hasOwnProperty('scale') && typeof anchormanifest.scale == 'number') ? { x: anchormanifest.scale || 1, y: anchormanifest.scale || 1, z: anchormanifest.scale || 1 } : Object.assign({ x: 1, y: 1, z: 1 }, anchormanifest.scale);
 
 				switch(propertyname) {
 					case 'position':
@@ -467,7 +467,25 @@ altspaceutil.getBasePath = function(url) {
 * @memberof module:altspaceutil
 */
 altspaceutil.loadTexture = function(url, config) {
-	if(altspace.inClient) return new THREE.Texture({ src: altspaceutil.getAbsoluteURL(url) });
+	if(altspace.inClient) {
+		if(url.startsWith('blob:')) {
+			// Convert Blob URL to Data URL, then shim canvas to avoid redrawing texture in Coherent
+			let texture = new THREE.Texture();
+			fetch(url).then(response => response.blob()).then(blob => {
+				let reader = new FileReader();
+				reader.onerror = () => console.warn('Failed to load blob texture at ' + url);
+				reader.onload = () => Object.assign(texture, { image: { nodeName: 'CANVAS', toDataURL: () => reader.result }, needsUpdate: true })
+				reader.readAsDataURL(blob);
+			});
+			return texture;
+		} else if(url.startsWith('data:')) {
+			// Shim canvas to avoid redrawing texture in Coherent
+			return Object.assign(new THREE.Texture({ nodeName: 'CANVAS', toDataURL: () => url }), { needsUpdate: true });
+		}
+
+		// Shim image to avoid texture being loaded in Coherent
+		return new THREE.Texture({ src: altspaceutil.getAbsoluteURL(url) });
+	}
 
 	config = Object.assign({ crossOrigin: 'anonymous' }, config);
 
@@ -701,6 +719,233 @@ altspaceutil.loadScript = (url, config) => {
 altspaceutil.loadScripts = scripts => {
 	if(!scripts || scripts.length <= 0) return Promise.resolve();
 	return Promise.all(scripts.map(script => (typeof script === 'string' || script instanceof String) ? altspaceutil.loadScript(script) : altspaceutil.loadScript(script.url, script)));
+}
+
+/**
+* Enables or disables texture loading optimizations in the Altspace client.  Enabling texture loader optimizations can drastically improve texture loading times, reduce resource usage and correct compability issues with embedded textures in the Altspace client.  These optimizations are enabled by default, and can be disabled when compatibility issues with other libraries arise.
+* @function overrideTextureLoader
+* @param {Boolean} [override] Specifies whether texture loader optimizations are enabled.
+* @memberof module:altspaceutil
+*/
+altspaceutil.overrideTextureLoader = override => {
+	if(altspace.inClient) altspaceutil._isTextureLoaderOverridden = override;
+}
+
+if(altspace.inClient) {
+	if(!altspaceutil._originalTextureLoaderFunc) altspaceutil._originalTextureLoaderFunc = THREE.TextureLoader.prototype.load;
+	altspaceutil._isTextureLoaderOverridden = true; // Enable texture loader optimizations by default, but can be disabled later by user if it conflicts with other libraries.
+
+	THREE.TextureLoader.prototype.load = function(url, resolve) {
+		if(!altspaceutil._isTextureLoaderOverridden) return altspaceutil._originalTextureLoaderFunc.apply(this, arguments);
+		let texture = altspaceutil.loadTexture(url);
+		if(resolve) resolve(texture); // Signal GLTFLoader resource resolution
+		return texture;
+	}
+}
+
+if(!altspaceutil._assetLoaders) altspaceutil._assetLoaders = new class {
+	constructor() {
+		this.handlers = [];
+
+		this.add(/\.obj$/i, (url, config) => {
+			return new Promise((resolve, reject) => {
+				altspaceutil.loadScript('https://cdn.jsdelivr.net/combine/npm/three@0.' + THREE.REVISION + '.0/examples/js/loaders/MTLLoader.min.js,npm/three@0.' + THREE.REVISION + '.0/examples/js/loaders/OBJLoader.min.js', { scriptTest: () => THREE.MTLLoader && THREE.OBJLoader }).then(() => {
+					// Retrieve MTL file path from OBJ
+					let loader = new THREE.FileLoader();
+					loader.load(url, response => {
+						let mtlFileUrl = /^[\s]*mtllib[\s]+(.*\.mtl)[\s]*$/m.exec(response);
+						if(mtlFileUrl) {
+							mtlFileUrl = new URL(mtlFileUrl[1], url).toString();
+							let loader = new THREE.MTLLoader();
+							loader.setTexturePath(altspaceutil.getBasePath(mtlFileUrl));
+							loader.load(mtlFileUrl, materials => {
+								materials.preload();
+								resolve(new THREE.OBJLoader().setMaterials(materials).parse(response));
+							}, null, () => reject('Could not retrieve materials from ' + mtlFileUrl));
+						} else {
+							resolve(new THREE.OBJLoader().parse(response));
+						}
+					}, null, () => reject('Could not retrieve asset from ' + url));
+				}).catch(() => reject('Could not load scripts for MTLLoader/OBJLoader'));
+			});
+		});
+
+		this.add(/\.gltf|\.glb$/i, (url, config) => {
+			if(altspace.inClient && (config.native === undefined || config.native)) {
+				let obj = new THREE.Object3D();
+				obj.addBehavior(new altspaceutil.behaviors.NativeComponent('n-gltf', { url: url }, { useCollider: config.cursorCollider }));
+				return Promise.resolve(obj);
+			}
+
+			return new Promise((resolve, reject) => {
+				altspaceutil.loadScript('https://cdn.jsdelivr.net/npm/three@0.' + THREE.REVISION + '.0/examples/js/loaders/GLTFLoader.min.js', { scriptTest: () => THREE.GLTFLoader }).then(() => {
+					let loader = new THREE.GLTFLoader();
+					loader.load(url, obj => resolve(obj.scene), null, () => reject('Could not retrieve asset from ' + url));
+				}).catch(() => reject('Could not load scripts for GLTFLoader'));
+			});
+		});
+
+		this.add(/\.dae$/i, (url, config) => {
+			return new Promise((resolve, reject) => {
+				altspaceutil.loadScript('https://cdn.jsdelivr.net/npm/three@0.' + THREE.REVISION + '.0/examples/js/loaders/ColladaLoader.min.js', { scriptTest: () => THREE.ColladaLoader }).then(() => {
+					if(altspace.inClient) {
+						let loader = new THREE.FileLoader();
+						loader.load(url, response => {
+							let originalLoader = THREE.TextureLoader.prototype.load;
+							THREE.TextureLoader.prototype.load = textureUrl => { return new THREE.Texture({ src: new URL(textureUrl, url).toString() }); };
+							let obj = new THREE.ColladaLoader().parse(response, altspaceutil.getBasePath(url));
+							THREE.TextureLoader.prototype.load = originalLoader;
+							resolve(obj.scene);
+						}, null, () => reject('Could not retrieve asset from ' + url));
+					} else {
+						let loader = new THREE.ColladaLoader();
+						loader.load(url, obj => resolve(obj.scene), null, () => reject('Could not retrieve asset from ' + url));
+					}
+				}).catch(() => reject('Could not load scripts for ColladaLoader'));
+			});
+		});
+
+		this.add(/\.fbx$/i, (url, config) => {
+			return new Promise((resolve, reject) => {
+				altspaceutil.loadScript('https://cdn.jsdelivr.net/npm/three@0.' + THREE.REVISION + '.0/examples/js/loaders/FBXLoader.min.js', { scriptTest: () => THREE.FBXLoader }).then(() => {
+					let loader = new THREE.FBXLoader();
+					loader.load(url, obj => resolve(obj.scene), null, () => reject('Could not retrieve asset from ' + url));
+				}).catch(() => reject('Could not load scripts for FBXLoader'));
+			});
+		});
+
+		this.add(/\.bom$/i, (url, config) => {
+			return new Promise((resolve, reject) => {
+				altspaceutil.loadScript('https://cdn.jsdelivr.net/gh/NGenesis/bom-three.js@v0.6.1/examples/js/loaders/BOMLoader.min.js', { scriptTest: () => THREE.BOMLoader }).then(() => {
+					let loader = new THREE.BOMLoader();
+					loader.load(url, obj => resolve(obj), null, () => reject('Could not retrieve asset from ' + url));
+				}).catch(() => reject('Could not load scripts for BOMLoader'));
+			});
+		});
+	}
+
+	add(regex, handler) {
+		this.handlers.push({ regex: regex, handler: handler });
+	}
+
+	remove(regex, handler) {
+		this.handlers = this.handlers.filter(handler => (handler.regex !== regex && (!handler || handler !== handler)));
+	}
+
+	get(url) {
+		let path = new URL(url).pathname;
+		for(let h of this.handlers) {
+			if(h.regex.test(path)) return h.handler;
+		}
+		return null;
+	}
+}
+
+/**
+* Registers a handler that will load and construct the specified asset type.
+* @function addAssetLoader
+* @param {RegExp} [regex] The regular expression that will be used to identify an asset from its URL (e.g. `/\.dae$/i` to match the file extension for Collada assets.)
+* @param {AssetLoaderHandler} [handler] A handler function that accepts a URL and configuration parameters that will load and construct the asset.  The function must return a promise that resolves that resolves to the loaded asset, or a rejected promise on failure.
+* @memberof module:altspaceutil
+*/
+altspaceutil.addAssetLoader = (regex, handler) => {
+	altspaceutil._assetLoaders.add(regex, handler);
+}
+
+/**
+* Unregisters a handler for the specified asset type.
+* @function removeAssetLoader
+* @param {RegExp} [regex] The regular expression associated with an asset handler.
+* @param {AssetLoaderHandler} [handler=null] An asset handler function that is associated with the specified regular expression.  If omitted, all handlers for the specified regular expression will be removed.
+* @memberof module:altspaceutil
+*/
+altspaceutil.removeAssetLoader = (regex, handler) => {
+	altspaceutil._assetLoaders.remove(regex, handler);
+}
+
+/**
+* Loads an asset from the specified URL.
+* @function loadAsset
+* @param {String} [url] A URL to the asset to be loaded.
+* @param {Object} [config] Optional parameters.
+* @param {Boolean} [config.applyTransform=true] When true, the position/rotation/quaternion/scale properties will be applied to the loaded asset.
+* @param {Boolean} [config.native=true] When true, assets loaded in the Altspace client will be loaded as native objects where appropriate (e.g. n-gltf for glTF assets), otherwise standard browser behavior will be followed.
+* @param {Boolean} [config.cursorCollider=false] Specified whether cursor collision is enabled on the loaded asset.
+* @param {THREE.Vector3} [config.position] Position to be applied to the loaded asset.
+* @param {THREE.Euler} [config.rotation] Rotation to be applied to the loaded asset, in radians.
+* @param {THREE.Quaternion} [config.quaternion] Quaternion to be applied to the loaded asset.  Specifying quaternion will override the rotation property.
+* @param {THREE.Vector3|Number} [config.scale=1] Scale to be applied to the loaded asset.  Uniform scaling is applied when a single value is specified.
+* @param {Function} [config.onLoaded=null] A callback function to execute when the asset has been loaded.  A reference to the loaded asset will be passed into this function.
+* @returns {Promise}
+* @memberof module:altspaceutil
+*/
+altspaceutil.loadAsset = (url, config) => {
+	url = altspaceutil.getAbsoluteURL(url);
+	config = Object.assign({ applyTransform: true, cursorCollider: false }, config);
+
+	let fireOnLoadedEvent = asset => {
+		altspaceutil.setCursorCollider(asset, config.cursorCollider ? true : false, true);
+
+		if(config.applyTransform) {
+			if(config.position) {
+				config.position = Object.assign({ x: 0, y: 0, z: 0 }, config.position);
+				asset.position.copy(config.position);
+			}
+
+			if(config.quaternion) {
+				config.quaternion = Object.assign({ x: 0, y: 0, z: 0, w: 1 }, config.quaternion);
+				asset.quaternion.copy(config.quaternion);
+			} else if(config.rotation) {
+				config.rotation = Object.assign({ x: 0, y: 0, z: 0 }, config.rotation);
+				asset.rotation.set(config.rotation.x, config.rotation.y, config.rotation.z);
+			}
+
+			if(config.scale) {
+				config.scale = (config.hasOwnProperty('scale') && typeof config.scale == 'number') ? { x: config.scale || 1, y: config.scale || 1, z: config.scale || 1 } : Object.assign({ x: 1, y: 1, z: 1 }, config.scale);
+				asset.scale.copy(config.scale);
+			}
+		}
+
+		return new Promise((resolve, reject) => {
+			let result = config.onLoaded ? config.onLoaded(asset) : null;
+			if(result instanceof Promise) result.then(() => resolve(asset)).catch(e => reject('Error occurred while processing onLoaded asset handler', e));
+			else resolve(asset);
+		});
+	}
+
+	let handler = altspaceutil._assetLoaders.get(url, config);
+	return handler ? handler(url, config).then(fireOnLoadedEvent) : Promise.reject('Could not get asset handler for ' + url);
+}
+
+/**
+* Loads one or more assets from the specified URLs.
+* @function loadAssets
+* @param {Object[]} [assets] An array of objects containing a URL and optional config parameters for the assets to be loaded.
+* @returns {Promise}
+* @memberof module:altspaceutil
+*/
+/**
+* Loads one or more assets from the specified URLs.
+* @function loadAssets
+* @param {Object} [assets] An object of named objects containing a URL and optional config parameters for the assets to be loaded.
+* @returns {Promise}
+* @memberof module:altspaceutil
+*/
+altspaceutil.loadAssets = assets => {
+	if(!assets) return Promise.resolve(assets);
+	
+	return new Promise((resolve, reject) => {
+		let promisedAssets = Array.isArray(assets) ? assets : Object.values(assets);
+		Promise.all(promisedAssets.map(asset => (typeof asset === 'string' || asset instanceof String) ? altspaceutil.loadAsset(asset) : altspaceutil.loadAsset(asset.url, asset))).then(resolvers => {
+			if(Array.isArray(assets)) {
+				resolve(resolvers);
+			} else {
+				let loadedAssets = {};
+				Object.keys(assets).forEach((key, index) => { loadedAssets[key] = resolvers[index]; });
+				resolve(loadedAssets);
+			}
+		}).catch(e => reject('Could not load assets', e));
+	});
 }
 /**
  * The TWEEN behavior provides a convenience wrapper for [tween.js](https://github.com/tweenjs/tween.js/) to manage and update TWEEN and TWEEN.Group objects.

@@ -4,7 +4,7 @@ Provides helper functions, behaviors and A-Frame components for common functiona
 # Usage
 Include the utility library in your project:
 ```html
-<script src="https://cdn.jsdelivr.net/npm/altspacevr-behaviors@1.0.5/js/altspaceutil.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/altspacevr-behaviors@1.0.6/js/altspaceutil.min.js"></script>
 ```
 
 # API Reference
@@ -22,6 +22,11 @@ Include the utility library in your project:
 * [altspaceutil.loadTexture](#loadTexture)
 * [altspaceutil.loadScript](#loadScript)
 * [altspaceutil.loadScripts](#loadScripts)
+* [altspaceutil.loadAsset](#loadAsset)
+* [altspaceutil.loadAssets](#loadAssets)
+* [altspaceutil.addAssetLoader](#addAssetLoader)
+* [altspaceutil.removeAssetLoader](#removeAssetLoader)
+* [altspaceutil.overrideTextureLoader](#overrideTextureLoader)
 
 ## Behaviors
 * [altspaceutil.behaviors.NativeComponent](#NativeComponent)
@@ -203,6 +208,93 @@ Script parameters.
 | Type    | Description |
 | ------- | ----------- |
 | Promise | A promise that resolves when the javascript files have been loaded. |
+
+## <a name="loadAsset">altspaceutil.loadAsset</a>
+Loads an asset from the specified URL.
+
+### Parameters
+| Name                    | Type                                                              | Default                    | Description |
+| ----------------------- | ----------------------------------------------------------------- | -------------------------- | ----------- |
+| `url`                   | String                                                            |                            | A URL to the asset to be loaded. |
+| `config`                | Object                                                            |                            | Optional parameters. |
+| `config.applyTransform` | Boolean                                                           | true                       | When true, the `position`/`rotation`/`quaternion`/`scale` properties will be applied to the loaded asset. |
+| `config.cursorCollider` | Boolean                                                           | false                      | Specified whether cursor collision is enabled on the loaded asset. |
+| `config.native`         | Boolean                                                           | true                       | When true, assets loaded in the Altspace client will be loaded as native objects where appropriate (e.g. n-gltf for glTF assets), otherwise standard browser behavior will be followed. |
+| `config.position`       | [THREE.Vector3](https://threejs.org/docs/#api/math/Vector3)       | { x: 0, y: 0, z: 0 }       | Position to be applied to the loaded asset. |
+| `config.rotation`       | [THREE.Euler](https://threejs.org/docs/#api/math/Euler)           | { x: 0, y: 0, z: 0 }       | Rotation to be applied to the loaded asset, in radians. |
+| `config.quaternion`     | [THREE.Quaternion](https://threejs.org/docs/#api/math/Quaternion) | { x: 0, y: 0, z: 0, w: 1 } | Quaternion to be applied to the loaded asset.  Specifying quaternion will override the rotation property. |
+| `config.scale`          | [THREE.Vector3](https://threejs.org/docs/#api/math/Vector3)       | { x: 1, y: 1, z: 1 }       | Scale to be applied to the loaded asset.  Alternatively, uniform scaling is applied when a number is specified. |
+| `config.onLoaded`       | Function                                                          | null                       | A callback function to execute when the asset has been loaded.  A reference to the loaded asset will be passed into this function. |
+
+### Returns
+| Type    | Description |
+| ------- | ----------- |
+| Promise | A promise that resolves to the loaded asset. |
+
+## <a name="loadAssets">altspaceutil.loadAssets</a>
+Loads one or more assets from the specified URLs.
+
+### Parameters (1)
+| Name         | Type     | Description |
+| ------------ | -------- | ----------- |
+| `assets`     | Asset[]  | An array of assets to be loaded. |
+
+### Parameters (2)
+| Name         | Type     | Description |
+| ------------ | -------- | ----------- |
+| `assets`     | Object   | An object of unordered, named assets to be loaded. |
+
+Asset parameters.
+
+| Name             | Type                                                              | Default | Description |
+| ---------------- | ----------------------------------------------------------------- | ------- | ----------- |
+| `url`            | String                                                            |         | A URL to a JavaScript file. |
+| `applyTransform` | Boolean                                                           | true                       | When true, the `position`/`rotation`/`quaternion`/`scale` properties will be applied to the loaded asset. |
+| `cursorCollider` | Boolean                                                           | false                      | Specified whether cursor collision is enabled on the loaded asset. |
+| `native`         | Boolean                                                           | true                       | When true, assets loaded in the Altspace client will be loaded as native objects where appropriate (e.g. n-gltf for glTF assets), otherwise standard browser behavior will be followed. |
+| `position`       | [THREE.Vector3](https://threejs.org/docs/#api/math/Vector3)       | { x: 0, y: 0, z: 0 }       | Position to be applied to the loaded asset. |
+| `rotation`       | [THREE.Euler](https://threejs.org/docs/#api/math/Euler)           | { x: 0, y: 0, z: 0 }       | Rotation to be applied to the loaded asset, in radians. |
+| `quaternion`     | [THREE.Quaternion](https://threejs.org/docs/#api/math/Quaternion) | { x: 0, y: 0, z: 0, w: 1 } | Quaternion to be applied to the loaded asset.  Specifying quaternion will override the rotation property. |
+| `scale`          | [THREE.Vector3](https://threejs.org/docs/#api/math/Vector3)       | { x: 1, y: 1, z: 1 }       | Scale to be applied to the loaded asset.  Alternatively, uniform scaling is applied when a number is specified. |
+| `onLoaded`       | Function                                                          | null                       | A callback function to execute when the asset has been loaded.  A reference to the loaded asset will be passed into this function. |
+
+### Returns
+| Type    | Description |
+| ------- | ----------- |
+| Promise | A promise that resolves to the loaded assets, either as an array or object of named assets depending on the supplied parameters. |
+
+## <a name="addAssetLoader">altspaceutil.addAssetLoader</a>
+Registers a handler that will load and construct the specified asset type.
+
+### Parameters
+| Name      | Type                                                                                              | Description |
+| --------- | ------------------------------------------------------------------------------------------------- | ----------- |
+| `regex`   | [RegExp](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp) | The regular expression that will be used to identify an asset from its URL (e.g. `/\.dae$/i` to match the file extension for Collada assets.) |
+| `handler` | AssetLoaderHandler                                                                                | A handler function that accepts a URL and configuration parameters that will load and construct the asset.  The function must return a promise that resolves that resolves to the loaded asset, or a rejected promise on failure. |
+
+`AssetLoaderHandler` parameters.
+
+| Name     | Type   | Description |
+| -------- | ------ | ----------- |
+| `url`    | String | A URL to the asset to be loaded. |
+| `config` | Object | Optional parameters. |
+
+## <a name="removeAssetLoader">altspaceutil.removeAssetLoader</a>
+Unregisters a handler for the specified asset type.
+
+### Parameters
+| Name      | Type                                                                                              | Default | Description |
+| --------- | ------------------------------------------------------------------------------------------------- | ------- | ----------- |
+| `regex`   | [RegExp](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp) |         | The regular expression associated with an asset handler. |
+| `handler` | AssetLoaderHandler                                                                                | null    | An asset handler function that is associated with the specified regular expression.  If omitted, all handlers for the specified regular expression will be removed. |
+
+## <a name="overrideTextureLoader">altspaceutil.overrideTextureLoader</a>
+Enables or disables texture loading optimizations in the Altspace client.  Enabling texture loader optimizations can drastically improve texture loading times, reduce resource usage and correct compability issues with embedded textures in the Altspace client.  These optimizations are enabled by default, and can be disabled when compatibility issues with other libraries arise.
+
+### Parameters
+| Name       | Type    | Description |
+| ---------- | ------- | ----------- |
+| `override` | Boolean | Specifies whether texture loader optimizations are enabled. |
 
 # Behaviors
 
