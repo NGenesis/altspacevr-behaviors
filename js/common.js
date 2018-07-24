@@ -467,7 +467,25 @@ altspaceutil.getBasePath = function(url) {
 * @memberof module:altspaceutil
 */
 altspaceutil.loadTexture = function(url, config) {
-	if(altspace.inClient) return new THREE.Texture({ src: altspaceutil.getAbsoluteURL(url) });
+	if(altspace.inClient) {
+		if(url.startsWith('blob:')) {
+			// Convert Blob URL to Data URL, then shim canvas to avoid redrawing texture in Coherent
+			let texture = new THREE.Texture();
+			fetch(url).then(response => response.blob()).then(blob => {
+				let reader = new FileReader();
+				reader.onerror = () => console.warn('Failed to load blob texture at ' + url);
+				reader.onload = () => Object.assign(texture, { image: { nodeName: 'CANVAS', toDataURL: () => reader.result }, needsUpdate: true })
+				reader.readAsDataURL(blob);
+			});
+			return texture;
+		} else if(url.startsWith('data:')) {
+			// Shim canvas to avoid redrawing texture in Coherent
+			return Object.assign(new THREE.Texture({ nodeName: 'CANVAS', toDataURL: () => url }), { needsUpdate: true });
+		}
+
+		// Shim image to avoid texture being loaded in Coherent
+		return new THREE.Texture({ src: altspaceutil.getAbsoluteURL(url) });
+	}
 
 	config = Object.assign({ crossOrigin: 'anonymous' }, config);
 
