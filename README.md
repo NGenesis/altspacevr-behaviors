@@ -264,7 +264,7 @@ Asset parameters.
 | Promise | A promise that resolves to the loaded assets, either as an array or object of named assets depending on the supplied parameters. |
 
 ## <a name="addAssetLoader">altspaceutil.addAssetLoader</a>
-Registers a handler that will load and construct the specified asset type.
+Registers a handler that will load and construct the specified asset type when [altspaceutil.loadAsset](#loadAsset) or [altspaceutil.loadAssets](#loadAssets) is called.
 
 ### Parameters
 | Name      | Type                                                                                              | Description |
@@ -280,7 +280,7 @@ Registers a handler that will load and construct the specified asset type.
 | `config` | Object | Optional parameters. |
 
 ## <a name="removeAssetLoader">altspaceutil.removeAssetLoader</a>
-Unregisters a handler for the specified asset type.
+Unregisters a handler for the specified asset type that is used when [altspaceutil.loadAsset](#loadAsset) or [altspaceutil.loadAssets](#loadAssets) is called.
 
 ### Parameters
 | Name      | Type                                                                                              | Default | Description |
@@ -289,7 +289,9 @@ Unregisters a handler for the specified asset type.
 | `handler` | AssetLoaderHandler                                                                                | null    | An asset handler function that is associated with the specified regular expression.  If omitted, all handlers for the specified regular expression will be removed. |
 
 ## <a name="overrideTextureLoader">altspaceutil.overrideTextureLoader</a>
-Enables or disables texture loading optimizations in the Altspace client.  Enabling texture loader optimizations can drastically improve texture loading times, reduce resource usage and correct compability issues with embedded textures in the Altspace client.  These optimizations are enabled by default, and can be disabled when compatibility issues with other libraries arise.
+Enables or disables texture loading optimizations in the Altspace client.  Enabling texture loader optimizations can drastically improve texture loading times, reduce resource usage and correct compability issues with embedded textures in the Altspace client.
+
+Please note that these optimizations are enabled by default, and can be disabled when compatibility issues with other libraries arise.
 
 ### Parameters
 | Name       | Type    | Description |
