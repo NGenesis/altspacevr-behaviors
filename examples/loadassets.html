@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<title>Asset Loader Example</title>
+<script src="https://cdn.jsdelivr.net/combine/npm/three@0.94.0/build/three.min.js,npm/altspace@2.9.0/dist/altspace.min.js,npm/altspacevr-behaviors@1.0.6/js/altspaceutil.min.js"></script>
+<script>
+	altspaceutil.getFullspaceApp().then(app => {
+		// Load a single asset
+		altspaceutil.loadAsset('https://rawgit.com/KhronosGroup/glTF-Sample-Models/master/2.0/Lantern/glTF/Lantern.gltf', { native: false, scale: 0.2, position: { x: 0, y: 3, z: 0 } }).then(asset => {
+			app.anchor.add(asset);
+		});
+
+		// Load multiple assets at once using arrays
+		let assets = [
+			{ url: 'https://rawgit.com/NGenesis/bom-three.js/master/examples/altspace/lightmap/assets/pillar.obj', scale: 0.001, rotation: { x: -Math.PI / 2, y: 0, z: 0 } },
+			{ url: 'https://rawgit.com/KhronosGroup/glTF-Sample-Models/master/2.0/Monster/glTF-Binary/Monster.glb', scale: 0.1 },
+			'https://rawgit.com/stevenvergenz/altspace-diorama/master/examples/models/globe.dae'
+		];
+		altspaceutil.loadAssets(assets).then(loadedAssets => {
+			loadedAssets.forEach((asset, index) => {
+				console.log('Loaded array asset from ' + (assets[index].url || assets[index]));
+				asset.position.x = 9 + (3 * index);
+				app.anchor.add(asset);
+			});
+		});
+
+		// Load multiple assets at once using named objects
+		let moreAssets = {
+			'pillar': { url: 'https://rawgit.com/NGenesis/bom-three.js/master/examples/altspace/lightmap/assets/pillar_diffuse.bom', scale: 0.001, rotation: { x: -Math.PI / 2, y: 0, z: 0 } },
+			'monster': { url: 'https://rawgit.com/KhronosGroup/glTF-Sample-Models/master/2.0/Monster/glTF-Binary/Monster.glb', native: false, scale: 0.1 },
+			'native_monster': { url: 'https://rawgit.com/KhronosGroup/glTF-Sample-Models/master/2.0/Monster/glTF-Binary/Monster.glb', scale: 0.1 },
+			'globe': 'https://rawgit.com/stevenvergenz/altspace-diorama/master/examples/models/globe.dae'
+		};
+		altspaceutil.loadAssets(moreAssets).then(loadedAssets => {
+			Object.entries(loadedAssets).forEach(([assetname,  asset], index) => {
+				console.log('Loaded keyed asset ' + assetname + ' from ' + (moreAssets[assetname].url || moreAssets[assetname]));
+				asset.position.x = (9 + (6 * index)) * -1;
+				app.anchor.add(asset);
+			});
+		});
+
+		// Create custom asset handler to create posters from images
+		altspaceutil.addAssetLoader(/\.png|\.jpe?g$/i, (url, config) => {
+			return Promise.resolve(new THREE.Mesh(new THREE.PlaneBufferGeometry(config.width, config.height, 1, 1), new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, map: altspaceutil.loadTexture(url) })));
+		});
+
+		// Load an asset using the newly added asset handler
+		altspaceutil.loadAsset('https://rawgit.com/NGenesis/bom-three.js/master/examples/altspace/lightmap/assets/pillar.png', { width: 3, height: 3 }).then(asset => {
+			app.anchor.add(asset);
+		});
+	});
+</script>
