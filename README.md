@@ -4,7 +4,7 @@ Provides helper functions, behaviors and A-Frame components for common functiona
 # Usage
 Include the utility library in your project:
 ```html
-<script src="https://cdn.jsdelivr.net/npm/altspacevr-behaviors@1.0.8/js/altspaceutil.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/altspacevr-behaviors@1.0.9/js/altspaceutil.min.js"></script>
 ```
 
 # API Reference
@@ -211,6 +211,20 @@ Script parameters.
 
 ## <a name="loadAsset">altspaceutil.loadAsset</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/loadassets.html))
 Loads an asset from the specified URL.
+
+Default formats supported:
+
+- [Wavefront OBJ (.obj)](https://en.wikipedia.org/wiki/Wavefront_.obj_file)
+  - Material is applied automatically based on MTL file linked to OBJ.
+- [COLLADA (.dae)](https://en.wikipedia.org/wiki/COLLADA)
+- [glTF (.gltf/.glb)](https://en.wikipedia.org/wiki/GlTF)
+  - Altspace client loads glTF assets using n-gltf by default, which can be overridden with the `native` config parameter.
+- [STL (.stl)](<https://en.wikipedia.org/wiki/STL_(file_format)>)
+- [AutoDesk FBX (.fbx)](https://en.wikipedia.org/wiki/FBX)
+- [Open Asset Import Library (.assimp)](https://en.wikipedia.org/wiki/Open_Asset_Import_Library)
+- [Binary Object/Material (.bom)](https://github.com/NGenesis/bom-obj2bom#features)
+
+Additional formats can be loaded by registering a custom file handler using [addAssetLoader](#addAssetLoader).
 
 ### Parameters
 | Name                    | Type                                                              | Default                    | Description |

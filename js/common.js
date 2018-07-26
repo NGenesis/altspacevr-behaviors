@@ -794,7 +794,7 @@ if(!altspaceutil._assetLoaders) altspaceutil._assetLoaders = new class {
 						let loader = new THREE.FileLoader();
 						loader.load(url, response => {
 							let originalLoader = THREE.TextureLoader.prototype.load;
-							THREE.TextureLoader.prototype.load = textureUrl => { return new THREE.Texture({ src: new URL(textureUrl, url).toString() }); };
+							THREE.TextureLoader.prototype.load = (textureUrl, ...args) => originalLoader.call(this, new URL(textureUrl, url).toString(), ...args);
 
 							let loader = new THREE.ColladaLoader();
 							loader.setCrossOrigin(config.crossOrigin);
@@ -813,11 +813,46 @@ if(!altspaceutil._assetLoaders) altspaceutil._assetLoaders = new class {
 
 		this.add(/\.fbx$/i, (url, config) => {
 			return new Promise((resolve, reject) => {
-				altspaceutil.loadScript('https://cdn.jsdelivr.net/npm/three@0.' + THREE.REVISION + '.0/examples/js/loaders/FBXLoader.min.js', { scriptTest: () => THREE.FBXLoader }).then(() => {
+				altspaceutil.loadScript('https://cdn.jsdelivr.net/combine/npm/three@0.' + THREE.REVISION + '.0/examples/js/libs/inflate.min.js,npm/three@0.' + THREE.REVISION + '.0/examples/js/loaders/FBXLoader.min.js', { scriptTest: () => THREE.FBXLoader }).then(() => {
 					let loader = new THREE.FBXLoader();
 					loader.setCrossOrigin(config.crossOrigin);
-					loader.load(url, obj => resolve(obj.scene), null, () => reject('Could not retrieve asset from ' + url));
+					loader.load(url, obj => resolve(obj), null, () => reject('Could not retrieve asset from ' + url));
 				}).catch(() => reject('Could not load scripts for FBXLoader'));
+			});
+		});
+
+		this.add(/\.stl$/i, (url, config) => {
+			return new Promise((resolve, reject) => {
+				altspaceutil.loadScript('https://cdn.jsdelivr.net/npm/three@0.' + THREE.REVISION + '.0/examples/js/loaders/STLLoader.min.js', { scriptTest: () => THREE.STLLoader }).then(() => {
+					let loader = new THREE.STLLoader();
+					if(loader.setCrossOrigin) loader.setCrossOrigin(config.crossOrigin);
+					loader.load(url, geometry => resolve(new THREE.Mesh(geometry, geometry.hasColors ? new THREE.MeshBasicMaterial({ opacity: geometry.alpha, transparent: (geometry.alpha < 1), vertexColors: THREE.VertexColors }) : undefined)), null, () => reject('Could not retrieve asset from ' + url));
+				}).catch(() => reject('Could not load scripts for STLLoader'));
+			});
+		});
+
+		this.add(/\.assimp$/i, (url, config) => {
+			return new Promise((resolve, reject) => {
+				altspaceutil.loadScript('https://cdn.jsdelivr.net/npm/three@0.' + THREE.REVISION + '.0/examples/js/loaders/AssimpLoader.min.js', { scriptTest: () => THREE.AssimpLoader }).then(() => {
+					if(altspace.inClient) {
+						let loader = new THREE.FileLoader();
+						loader.setResponseType('arraybuffer');
+						loader.load(url, response => {
+							let originalLoader = THREE.TextureLoader.prototype.load;
+							THREE.TextureLoader.prototype.load = (textureUrl, ...args) => originalLoader.call(this, new URL(textureUrl, url).toString(), ...args);
+
+							let loader = new THREE.AssimpLoader();
+							loader.setCrossOrigin(config.crossOrigin);
+							let obj = loader.parse(response, altspaceutil.getBasePath(url));
+							THREE.TextureLoader.prototype.load = originalLoader;
+							resolve(obj.object);
+						}, null, () => reject('Could not retrieve asset from ' + url));
+					} else {
+						let loader = new THREE.AssimpLoader();
+						loader.setCrossOrigin(config.crossOrigin);
+						loader.load(url, obj => resolve(obj.object), null, () => reject('Could not retrieve asset from ' + url));
+					}
+				}).catch(() => reject('Could not load scripts for AssimpLoader'));
 			});
 		});
 
@@ -837,7 +872,7 @@ if(!altspaceutil._assetLoaders) altspaceutil._assetLoaders = new class {
 	}
 
 	remove(regex, handler) {
-		this.handlers = this.handlers.filter(handler => (handler.regex !== regex && (!handler || handler !== handler)));
+		this.handlers = this.handlers.filter(h => h.regex.toString() !== regex.toString() && (!handler || h.handler !== handler));
 	}
 
 	get(url) {
