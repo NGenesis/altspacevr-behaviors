@@ -215,7 +215,7 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 						altspace._internal.forwardEventToChildIFrames('NativeSoundLoadedEvent', arguments);
 
 						var object3D = altspace._internal.getObject3DById(meshId);
-						if(object3D && object3D.el) targetEl.emit('n-sound-loaded', null, true);
+						if(object3D && object3D.el) object3D.el.emit('n-sound-loaded', null, true);
 					});
 				}
 
@@ -386,7 +386,7 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 						altspace._internal.forwardEventToChildIFrames('NativeGLTFLoadedEvent', arguments);
 
 						var object3D = altspace._internal.getObject3DById(meshId);
-						if(object3D && object3D.el) targetEl.emit('n-gltf-loaded', null, true);
+						if(object3D && object3D.el) object3D.el.emit('n-gltf-loaded', null, true);
 					});
 				}
 
