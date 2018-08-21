@@ -5,23 +5,32 @@ altspaceutil.behaviors = altspaceutil.behaviors || {};
 
 // Native Event Helpers
 altspaceutil.addNativeEventListener = function(name, callback) {
-	return (altspace.inClient && altspace._internal && altspace._internal.couiEngine) ? altspace._internal.couiEngine.on(name, callback) : null;
+	return (altspace._internal && altspace._internal.couiEngine) ? altspace._internal.couiEngine.on(name, callback) : null;
 }
 
 altspaceutil.removeNativeEventListener = function(name, callback) {
-	if(altspace.inClient && altspace._internal && altspace._internal.couiEngine) altspace._internal.couiEngine.off(name, callback);
+	if(altspace._internal && altspace._internal.couiEngine) altspace._internal.couiEngine.off(name, callback);
 }
 
 altspaceutil.removeAllNativeEventListeners = function(name) {
-	if(altspace.inClient && altspace._internal && altspace._internal.couiEngine && altspace._internal.couiEngine.events[name]) delete altspace._internal.couiEngine.events[name];
+	if(altspace._internal && altspace._internal.couiEngine && altspace._internal.couiEngine.events[name]) delete altspace._internal.couiEngine.events[name];
 }
 
 altspaceutil.getObject3DById = function(meshId) {
-	return (altspace.inClient && altspace._internal) ? altspace._internal.getObject3DById(meshId) : null;
+	return (altspace._internal && altspace._internal.getObject3DById) ? altspace._internal.getObject3DById(meshId) : null;
 }
 
+altspaceutil._currentThreeJSScene = null;
 altspaceutil.getThreeJSScene = function() {
-	return (altspace.inClient && altspace._internal) ? altspace._internal.getThreeJSScene() : null;
+	return (altspace._internal && altspace._internal.getThreeJSScene) ? altspace._internal.getThreeJSScene() : altspaceutil._currentThreeJSScene;
+}
+
+altspaceutil.setThreeJSScene = function(scene) {
+	if(altspace._internal && altspace._internal.setThreeJSScene) {
+		altspace._internal.setThreeJSScene(scene);
+	} else {
+		altspaceutil._currentThreeJSScene = scene;
+	}
 }
 
 /**
