@@ -4,7 +4,7 @@ Provides helper functions, behaviors and A-Frame components for common functiona
 # Usage
 Include the utility library in your project:
 ```html
-<script src="https://cdn.jsdelivr.net/npm/altspacevr-behaviors@1.1.0/js/altspaceutil.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/altspacevr-behaviors@1.1.1/js/altspaceutil.min.js"></script>
 ```
 
 # API Reference
@@ -39,6 +39,7 @@ Include the utility library in your project:
 * [altspaceutil.behaviors.HoverMaterialColor](#HoverMaterialColor)
 * [altspaceutil.behaviors.NativeTextMaterial](#NativeTextMaterial)
 * [altspaceutil.behaviors.TWEEN](#TWEEN)
+* [altspaceutil.behaviors.Billboard](#Billboard)
 
 ## Events
 * [transform-controls-dragmove](#transform-controls-dragmove)
@@ -775,6 +776,19 @@ Provides a convenience wrapper for [tween.js](https://github.com/tweenjs/tween.j
 | Name         | Type        | Default  | Description |
 | ------------ | ----------- | -------- | ----------- |
 | `tweengroup` | TWEEN.Group | TWEEN    | A tween group to be managed by the behavior.  When ommitted, the global `TWEEN` object will be managed by the behavior. |
+
+## <a name="Billboard">altspaceutil.behaviors.Billboard</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/Billboard.html))
+The Billboard behavior updates the orientation of an object to face the camera.
+
+### Parameters
+| Name            | Type                                                          | Default  | Description |
+| --------------- | ------------------------------------------------------------- | -------- | ----------- |
+| `config`        | Object                                                        |          | Optional parameters. |
+| `config.target` | [THREE.Object3D](https://threejs.org/docs/#api/core/Object3D) | null     | A target that the object should face.  If omitted, the scene camera will be used. |
+| `config.x`      | Boolean                                                       | true     | Specifies whether the X-axis of the object should be reoriented to face the camera. |
+| `config.y`      | Boolean                                                       | true     | Specifies whether the Y-axis of the object should be reoriented to face the camera. |
+| `config.z`      | Boolean                                                       | true     | Specifies whether the Z-axis of the object should be reoriented to face the camera. |
+| `config.native` | Boolean                                                       | true     | Specifies whether a native billboard (n-billboard) component will be used when running the app in the Altspace client. |
 
 # Classes
 

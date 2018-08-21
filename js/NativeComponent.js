@@ -313,6 +313,50 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 		config: {
 			sendUpdates: false,
 			meshComponent: true
+		},
+		initComponent: function() {
+			if(!altspace.inClient) {
+				this.followTarget = null;
+				this.worldPosition = new THREE.Vector3();
+				this.worldPositionTarget = new THREE.Vector3();
+				this.lookAtRotation = new THREE.Matrix4();
+				this.worldQuaternion = new THREE.Quaternion();
+				this.worldUp = new THREE.Vector3();
+			}
+		},
+		shimUpdate: function() {
+			if(!altspace.inClient && this.initialized) {
+				if(!this.followTarget) {
+					this.scene.traverseVisible(child => {
+						if(!this.followTarget && child.isCamera) {
+							this.followTarget = child;
+							return;
+						}
+					});
+				}
+
+				if(this.followTarget) {
+					// Transform from observer space to world space
+					let parent = this.component.parent;
+					parent.updateMatrixWorld(true);
+					this.component.applyMatrix(parent.matrixWorld);
+					this.scene.add(this.component);
+
+					// Limit Axis Rotation
+					this.followTarget.getWorldPosition(this.worldPositionTarget);
+					this.component.getWorldPosition(this.worldPosition);
+					if(!this.config.y) this.worldPositionTarget.y = this.worldPosition.y = 0;
+
+					// Rotate observer to look at target
+					this.lookAtRotation.lookAt(this.worldPositionTarget, this.worldPosition, this.worldUp.copy(this.component.up).applyQuaternion(parent.getWorldQuaternion(this.worldQuaternion)).normalize());
+					this.component.quaternion.setFromRotationMatrix(this.lookAtRotation);
+					this.component.updateMatrix();
+
+					// Transform from world space to target space
+					this.component.applyMatrix(this.lookAtRotation.getInverse(parent.matrixWorld));
+					parent.add(this.component);
+				}
+			}
 		}
 	},
 
@@ -690,6 +734,22 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 					}
 				}
 			}
+		} else {
+			if(!this.initialized) {
+				if(!this.config.meshComponent || this.object3d instanceof THREE.Mesh) {
+					this.initialized = true;
+				} else if(this.config.sharedComponent && this.sharedData) {
+					// Initialize Shared Components That Previously Offered No Functional Benefit
+					for(var behavior of this.sharedData.behaviors) {
+						if(behavior.initialized) {
+							this.initialized = true;
+							break;
+						}
+					}
+				}
+			}
+
+			if(this.defaults && this.defaults.shimUpdate) this.defaults.shimUpdate.bind(this)();
 		}
 	}
 
@@ -749,7 +809,10 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 			if(this.nativeEvents.hasOwnProperty(nativeEvent)) this.nativeEvents[nativeEvent].clear();
 		}
 
-		if(this.initialized) altspace.removeNativeComponent(this.component, this.type);
+		if(this.initialized) {
+			if(this.defaults && this.defaults.dispose) this.defaults.dispose.bind(this)();
+			altspace.removeNativeComponent(this.component, this.type);
+		}
 
 		if(this.config.sharedComponent && this.sharedData) {
 			// Decrease Reference Count
