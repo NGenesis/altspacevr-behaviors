@@ -322,6 +322,7 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 				this.lookAtRotation = new THREE.Matrix4();
 				this.worldQuaternion = new THREE.Quaternion();
 				this.worldUp = new THREE.Vector3();
+				this.config.meshComponent = false;
 			}
 		},
 		shimUpdate: function() {
@@ -337,24 +338,24 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 
 				if(this.followTarget) {
 					// Transform from observer space to world space
-					let parent = this.component.parent;
+					let parent = this.object3d.parent;
 					parent.updateMatrixWorld(true);
-					this.component.applyMatrix(parent.matrixWorld);
-					this.scene.add(this.component);
+					this.object3d.applyMatrix(parent.matrixWorld);
+					this.scene.add(this.object3d);
 
 					// Limit Axis Rotation
 					this.followTarget.getWorldPosition(this.worldPositionTarget);
-					this.component.getWorldPosition(this.worldPosition);
+					this.object3d.getWorldPosition(this.worldPosition);
 					if(!this.config.y) this.worldPositionTarget.y = this.worldPosition.y = 0;
 
 					// Rotate observer to look at target
-					this.lookAtRotation.lookAt(this.worldPositionTarget, this.worldPosition, this.worldUp.copy(this.component.up).applyQuaternion(parent.getWorldQuaternion(this.worldQuaternion)).normalize());
-					this.component.quaternion.setFromRotationMatrix(this.lookAtRotation);
-					this.component.updateMatrix();
+					this.lookAtRotation.lookAt(this.worldPositionTarget, this.worldPosition, this.worldUp.copy(this.object3d.up).applyQuaternion(parent.getWorldQuaternion(this.worldQuaternion)).normalize());
+					this.object3d.quaternion.setFromRotationMatrix(this.lookAtRotation);
+					this.object3d.updateMatrix();
 
 					// Transform from world space to target space
-					this.component.applyMatrix(this.lookAtRotation.getInverse(parent.matrixWorld));
-					parent.add(this.component);
+					this.object3d.applyMatrix(this.lookAtRotation.getInverse(parent.matrixWorld));
+					parent.add(this.object3d);
 				}
 			}
 		}
