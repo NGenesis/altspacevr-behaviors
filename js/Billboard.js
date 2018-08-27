@@ -57,7 +57,12 @@ altspaceutil.behaviors.Billboard = class {
 			let parent = this.object3d.parent;
 			parent.updateMatrixWorld(true);
 			this.object3d.applyMatrix(parent.matrixWorld);
-			this.scene.add(this.object3d);
+
+			// Move observer to scene temporarily, without firing scene tree events
+			//this.scene.add(this.object3d);
+			this.object3d.parent.children.splice(this.object3d.parent.children.indexOf(this.object3d), 1);
+			this.object3d.parent = this.scene;
+			this.object3d.parent.children.push(this.object3d);
 
 			// Limit Axis Rotation
 			this.followTarget.getWorldPosition(this.worldPositionTarget);
@@ -73,7 +78,12 @@ altspaceutil.behaviors.Billboard = class {
 
 			// Transform from world space to target space
 			this.object3d.applyMatrix(this.lookAtRotation.getInverse(parent.matrixWorld));
-			parent.add(this.object3d);
+
+			// Move observer back to original parent, without firing scene tree events
+			//parent.add(this.object3d);
+			this.object3d.parent.children.splice(this.object3d.parent.children.indexOf(this.object3d), 1);
+			this.object3d.parent = parent;
+			this.object3d.parent.children.push(this.object3d);
 		}
 	}
 
