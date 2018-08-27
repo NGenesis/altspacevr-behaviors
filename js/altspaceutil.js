@@ -1323,7 +1323,7 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 		initComponent: function() {
 			if(!altspace.inClient) {
 				this.config.meshComponent = false;
-				this.shimbehavior = new altspaceutil.behaviors.Text({ text: this.data.text, fontSize: this.data.fontSize, width: this.data.width, height: this.data.height, horizontalAlign: this.data.horizontalAlign, verticalAlign: this.data.verticalAlign });
+				this.shimbehavior = new altspaceutil.behaviors.Text({ text: this.data.text, fontSize: this.data.fontSize, width: this.data.width, height: this.data.height, horizontalAlign: this.data.horizontalAlign, verticalAlign: this.data.verticalAlign, native: false });
 				this.object3d.addBehavior(this.shimbehavior);
 			}
 		},
@@ -1631,47 +1631,9 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 		},
 		initComponent: function() {
 			if(!altspace.inClient) {
-				this.followTarget = null;
-				this.worldPosition = new THREE.Vector3();
-				this.worldPositionTarget = new THREE.Vector3();
-				this.lookAtRotation = new THREE.Matrix4();
-				this.worldQuaternion = new THREE.Quaternion();
-				this.worldUp = new THREE.Vector3();
 				this.config.meshComponent = false;
-			}
-		},
-		shimUpdate: function() {
-			if(!altspace.inClient && this.initialized) {
-				if(!this.followTarget) {
-					this.scene.traverseVisible(child => {
-						if(!this.followTarget && child.isCamera) {
-							this.followTarget = child;
-							return;
-						}
-					});
-				}
-
-				if(this.followTarget) {
-					// Transform from observer space to world space
-					let parent = this.object3d.parent;
-					parent.updateMatrixWorld(true);
-					this.object3d.applyMatrix(parent.matrixWorld);
-					this.scene.add(this.object3d);
-
-					// Limit Axis Rotation
-					this.followTarget.getWorldPosition(this.worldPositionTarget);
-					this.object3d.getWorldPosition(this.worldPosition);
-					if(!this.config.y) this.worldPositionTarget.y = this.worldPosition.y = 0;
-
-					// Rotate observer to look at target
-					this.lookAtRotation.lookAt(this.worldPositionTarget, this.worldPosition, this.worldUp.copy(this.object3d.up).applyQuaternion(parent.getWorldQuaternion(this.worldQuaternion)).normalize());
-					this.object3d.quaternion.setFromRotationMatrix(this.lookAtRotation);
-					this.object3d.updateMatrix();
-
-					// Transform from world space to target space
-					this.object3d.applyMatrix(this.lookAtRotation.getInverse(parent.matrixWorld));
-					parent.add(this.object3d);
-				}
+				this.shimbehavior = new altspaceutil.behaviors.Billboard({ y: false, native: false });
+				this.object3d.addBehavior(this.shimbehavior);
 			}
 		}
 	},
@@ -2112,6 +2074,8 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 	}
 
 	this.dispose = function() {
+		if(this.shimbehavior && this.object3d) this.object3d.removeBehavior(this.shimbehavior);
+
 		if(this.config.recursive || this.config.recursiveMesh && !this.parent) {
 			this.object3d.traverse((function(child) {
 				if(child !== this.object3d && child !== this.placeholder && (this.config.recursive || (this.config.recursiveMesh && child instanceof THREE.Mesh))) {
@@ -2154,6 +2118,7 @@ altspaceutil.behaviors.NativeComponent = function(_type, _data, _config) {
 		this.sharedData = null;
 		this.oldData = null;
 		this.parent = null;
+		this.shimbehavior = null;
 	}
 
 	/**
