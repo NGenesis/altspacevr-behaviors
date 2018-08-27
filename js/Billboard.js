@@ -35,7 +35,8 @@ altspaceutil.behaviors.Billboard = class {
 
 		if(this.config.native && altspace.inClient) {
 			this.config.y = false;
-			this.object3d.addBehavior(new altspaceutil.behaviors.NativeComponent('n-billboard'));
+			this.nativeComponent = new altspaceutil.behaviors.NativeComponent('n-billboard');
+			this.object3d.addBehavior(this.nativeComponent);
 		}
 	}
 
@@ -78,8 +79,7 @@ altspaceutil.behaviors.Billboard = class {
 
 	dispose() {
 		if(this.object3d && this.config.native && altspace.inClient) {
-			let behavior = this.object3d.getBehaviorByType('n-billboard');
-			if(behavior) this.object3d.removeBehavior(behavior);
+			if(this.nativeComponent) this.object3d.removeBehavior(this.nativeComponent);
 		}
 	}
 

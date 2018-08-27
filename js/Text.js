@@ -99,7 +99,8 @@ altspaceutil.behaviors.Text = class {
 		altspaceutil.manageBehavior(this, this.object3d);
 
 		if(this.config.native && altspace.inClient) {
-			this.object3d.addBehavior(new altspaceutil.behaviors.NativeComponent('n-text', { text: this.config.text, fontSize: this.config.fontSize, width: this.config.width, height: this.config.height, horizontalAlign: this.config.horizontalAlign, verticalAlign: this.config.verticalAlign }));
+			this.nativeComponent = new altspaceutil.behaviors.NativeComponent('n-text', { text: this.config.text, fontSize: this.config.fontSize, width: this.config.width, height: this.config.height, horizontalAlign: this.config.horizontalAlign, verticalAlign: this.config.verticalAlign });
+			this.object3d.addBehavior(this.nativeComponent);
 		} else {
 			Promise.all([altspaceutil._FontGlobals.loadFont(), altspaceutil.loadScript('https://rawgit.com/NGenesis/altspacevr-behaviors/master/lib/three-bmfont-text/three-bmfont-text.min.js', { scriptTest: () => window.createGeometry })]).then(() => {
 				if(this.loading) {
@@ -111,21 +112,31 @@ altspaceutil.behaviors.Text = class {
 	}
 
 	update() {
-		if(this.config.native && altspace.inClient) return;
-
-		if(this.mesh && (this.text !== this.config.text || this.fontSize !== this.config.fontSize || this.width !== this.config.width || this.height !== this.config.height || this.horizontalAlign !== this.config.horizontalAlign || this.verticalAlign !== this.config.verticalAlign)) {
-			this._updateText();
+		if(this.config.native && altspace.inClient && this.nativeComponent) {
+			this.nativeComponent.data.text = this.config.text;
+			this.nativeComponent.data.fontSize = this.config.fontSize;
+			this.nativeComponent.data.width = this.config.width;
+			this.nativeComponent.data.height = this.config.height;
+			this.nativeComponent.data.horizontalAlign = this.config.horizontalAlign;
+			this.nativeComponent.data.verticalAlign = this.config.verticalAlign;
+		} else {
+			if(this.mesh && (this.text !== this.config.text || this.fontSize !== this.config.fontSize || this.width !== this.config.width || this.height !== this.config.height || this.horizontalAlign !== this.config.horizontalAlign || this.verticalAlign !== this.config.verticalAlign)) {
+				this._updateText();
+			}
 		}
 	}
 
 	dispose() {
 		if(this.object3d && this.config.native && altspace.inClient) {
-			let behavior = this.object3d.getBehaviorByType('n-text');
-			if(behavior) this.object3d.removeBehavior(behavior);
+			if(this.nativeComponent) this.object3d.removeBehavior(this.nativeComponent);
 		} else {
 			if(this.loading) this.loading = false; // Prevent race conditions when font is being loaded
 			if(this.mesh && this.mesh.parent) this.mesh.parent.remove(this.mesh);
 		}
+	}
+
+	clone() {
+		return new altspaceutil.behaviors.Text(this.config);
 	}
 
 	_updateText(init) {
