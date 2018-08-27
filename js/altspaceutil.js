@@ -2314,8 +2314,8 @@ altspaceutil.behaviors.Billboard = class {
 }
 // Font Loader Helper
 altspaceutil._FontGlobals = {
-	fontUrl: 'https://rawgit.com/NGenesis/altspacevr-behaviors/master/fonts/Varela_Round/Varela_Round.json',
-	textureUrl: 'https://rawgit.com/NGenesis/altspacevr-behaviors/master/fonts/Varela_Round/Varela_Round.png',
+	fontUrl: 'https://cdn.jsdelivr.net/npm/altspacevr-behaviors@' + altspaceutil.VERSION + '/fonts/Varela_Round/Varela_Round.json',
+	textureUrl: 'https://cdn.jsdelivr.net/npm/altspacevr-behaviors@' + altspaceutil.VERSION + '/fonts/Varela_Round/Varela_Round.png',
 	width: 510,
 	height: 250,
 	scale: 0.001945,
@@ -2416,7 +2416,7 @@ altspaceutil.behaviors.Text = class {
 			this.nativeComponent = new altspaceutil.behaviors.NativeComponent('n-text', { text: this.config.text, fontSize: this.config.fontSize, width: this.config.width, height: this.config.height, horizontalAlign: this.config.horizontalAlign, verticalAlign: this.config.verticalAlign });
 			this.object3d.addBehavior(this.nativeComponent);
 		} else {
-			Promise.all([altspaceutil._FontGlobals.loadFont(), altspaceutil.loadScript('https://rawgit.com/NGenesis/altspacevr-behaviors/master/lib/three-bmfont-text/three-bmfont-text.min.js', { scriptTest: () => window.createGeometry })]).then(() => {
+			Promise.all([altspaceutil._FontGlobals.loadFont(), altspaceutil.loadScript('https://cdn.jsdelivr.net/npm/altspacevr-behaviors@' + altspaceutil.VERSION + '/lib/three-bmfont-text/three-bmfont-text.min.js', { scriptTest: () => window.createGeometry })]).then(() => {
 				if(this.loading) {
 					this.loading = false;
 					this._updateText(true);
