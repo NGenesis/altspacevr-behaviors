@@ -268,6 +268,7 @@ altspaceutil.FullspaceApp = class {
 							document.body.style.margin = '0px';
 							document.body.style.overflow = 'hidden';
 							document.body.appendChild(this._renderer.domElement);
+							this._renderer.domElement.oncontextmenu = () => false;
 						}
 						document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", addRendererToDOM) : addRendererToDOM();
 
