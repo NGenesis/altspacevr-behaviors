@@ -1,0 +1,37 @@
+﻿<!DOCTYPE html>
+<title>Text Behavior Example</title>
+<script src="https://cdn.jsdelivr.net/combine/npm/three@0.95.0/build/three.js,npm/altspace@2.9.0/dist/altspace.min.js,npm/altspacevr-behaviors@1.1.2/js/altspaceutil.min.js"></script>
+<script>
+	altspaceutil.getFullspaceApp().then(app => {
+		let text = new THREE.Object3D();
+		text.addBehavior(new altspaceutil.behaviors.Text({ text: 'The quick brown fox jumps over the lazy dog!\n<color=#FFFFFF>The</color> <color="red">quick <#FFFF00>brown <alpha=#33>fox <color=#FF00F0FF> jumps over the <noparse><alpha=#DD>lazy</noparse> dog.', fontSize: 2, width: 5, height: 2, horizontalAlign: 'left', verticalAlign: 'bottom' }));
+		app.anchor.add(text);
+
+		let timetext = new THREE.Object3D();
+		timetext.addBehaviors(
+			new altspaceutil.behaviors.Text({ fontSize: 3, width: 10, height: 5, horizontalAlign: 'middle', verticalAlign: 'middle' }),
+			new class {
+				awake(o) {
+					this.nTextComponent = o.getBehaviorByType('Text');
+					this.elapsedTime = 0;
+					this.color = '<#' + this.getRandomColor() + this.getRandomColor() + this.getRandomColor() + this.getRandomColor() + '>';
+				}
+
+				update(deltaTime) {
+					this.elapsedTime += deltaTime;
+					while(this.elapsedTime >= 1000) {
+						this.elapsedTime -= 1000;
+						this.color = '<#' + this.getRandomColor() + this.getRandomColor() + this.getRandomColor() + this.getRandomColor() + '>';
+					}
+					if(this.nTextComponent) this.nTextComponent.config.text = this.color + new Date().toLocaleString();
+				}
+
+				getRandomColor() {
+					let color = Math.floor(Math.random() * 254).toString(16);
+					return color.length >= 2 ? color : ('0' + color);
+				}
+			}
+		);
+		app.anchor.add(timetext);
+	});
+</script>

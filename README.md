@@ -793,6 +793,7 @@ The Billboard behavior updates the orientation of an object to face the camera.
 
 ## <a name="Text">altspaceutil.behaviors.Text</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/Text.html))
 The Text behavior displays a text string using an SDF font, supporting line breaks, text alignment and inline formatting tags.
+
 e.g. `<color=#FFFFFF>The</color> <color="red">quick <#FFFF00>brown <alpha=#33>fox <color=#FFFFFFFF> jumps over the <noparse><alpha=#DD>lazy</noparse> dog.`
 
 ### Supported Tags
