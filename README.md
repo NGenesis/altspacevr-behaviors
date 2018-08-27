@@ -4,7 +4,7 @@ Provides helper functions, behaviors and A-Frame components for common functiona
 # Usage
 Include the utility library in your project:
 ```html
-<script src="https://cdn.jsdelivr.net/npm/altspacevr-behaviors@1.1.1/js/altspaceutil.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/altspacevr-behaviors@1.1.2/js/altspaceutil.min.js"></script>
 ```
 
 # API Reference
@@ -40,6 +40,7 @@ Include the utility library in your project:
 * [altspaceutil.behaviors.NativeTextMaterial](#NativeTextMaterial)
 * [altspaceutil.behaviors.TWEEN](#TWEEN)
 * [altspaceutil.behaviors.Billboard](#Billboard)
+* [altspaceutil.behaviors.Text](#Text)
 
 ## Events
 * [transform-controls-dragmove](#transform-controls-dragmove)
@@ -789,6 +790,29 @@ The Billboard behavior updates the orientation of an object to face the camera.
 | `config.y`      | Boolean                                                       | true     | Specifies whether the Y-axis of the object should be reoriented to face the camera. |
 | `config.z`      | Boolean                                                       | true     | Specifies whether the Z-axis of the object should be reoriented to face the camera. |
 | `config.native` | Boolean                                                       | true     | Specifies whether a native billboard (n-billboard) component will be used when running the app in the Altspace client. |
+
+## <a name="Text">altspaceutil.behaviors.Text</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/Text.html))
+The Text behavior displays a text string using an SDF font, supporting line breaks, text alignment and inline formatting tags.
+e.g. `<color=#FFFFFF>The</color> <color="red">quick <#FFFF00>brown <alpha=#33>fox <color=#FFFFFFFF> jumps over the <noparse><alpha=#DD>lazy</noparse> dog.`
+
+### Supported Tags
+* `<color=...>Text</color>`
+* `<color="name">` - Changes the color of the text using the specified color name. Supported color names are `black`, `blue`, `green`, `orange`, `purple`, `red`, `yellow` or `white`.
+* `<color=#RRGGBB>` `<color=#RGB>` `<color=#RRGGBBAA>` `<color=#RGBA>` `<#RRGGBB>` `<#RGB>` `<#RRGGBBAA>` `<#RGBA>` - Changes the color and opacity of text using the specified hexidecimal code.
+* `<alpha=#AA>` - Changes the opacity of any text that follows.
+* `<noparse>Text</noparse>` - Prevents formatting tags from being parsed.
+
+### Parameters
+| Name                     | Type    | Default  | Description |
+| ------------------------ | ------- | -------- | ----------- |
+| `config`                 | Object  |          | Optional parameters. |
+| `config.text`            | String  |          | The text to be displayed. |
+| `config.fontSize`        | Number  | 10       | The size of the text. |
+| `config.width`           | Number  | 10       | The width of the text block to display before text wrapping occurs. |
+| `config.height`          | Number  | 1        | The height offset of the text block. |
+| `config.horizontalAlign` | String  | middle   | The horizontal alignment of the text block. |
+| `config.verticalAlign`   | String  | middle   | The vertical alignment of the text block. |
+| `config.native`          | Boolean | true     | Specifies whether a native text (n-text) component will be used when running the app in the Altspace client. |
 
 # Classes
 

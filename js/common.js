@@ -3,6 +3,8 @@
 window.altspaceutil = window.altspaceutil || {};
 altspaceutil.behaviors = altspaceutil.behaviors || {};
 
+altspaceutil.VERSION = altspaceutil.VERSION || '1.1.2';
+
 // Native Event Helpers
 altspaceutil.addNativeEventListener = function(name, callback) {
 	return (altspace._internal && altspace._internal.couiEngine) ? altspace._internal.couiEngine.on(name, callback) : null;

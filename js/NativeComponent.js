@@ -21,6 +21,23 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			height: 1,
 			horizontalAlign: 'middle',
 			verticalAlign: 'middle'
+		},
+		initComponent: function() {
+			if(!altspace.inClient) {
+				this.config.meshComponent = false;
+				this.shimbehavior = new altspaceutil.behaviors.Text({ text: this.data.text, fontSize: this.data.fontSize, width: this.data.width, height: this.data.height, horizontalAlign: this.data.horizontalAlign, verticalAlign: this.data.verticalAlign });
+				this.object3d.addBehavior(this.shimbehavior);
+			}
+		},
+		shimUpdate: function() {
+			if(!altspace.inClient && this.shimbehavior) {
+				this.shimbehavior.config.text = this.data.text;
+				this.shimbehavior.config.fontSize = this.data.fontSize;
+				this.shimbehavior.config.width = this.data.width;
+				this.shimbehavior.config.height = this.data.height;
+				this.shimbehavior.config.horizontalAlign = this.data.horizontalAlign;
+				this.shimbehavior.config.verticalAlign = this.data.verticalAlign;
+			}
 		}
 	},
 
