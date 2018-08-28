@@ -4,7 +4,7 @@ Provides helper functions, behaviors and A-Frame components for common functiona
 # Usage
 Include the utility library in your project:
 ```html
-<script src="https://cdn.jsdelivr.net/npm/altspacevr-behaviors@1.1.2/js/altspaceutil.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/altspacevr-behaviors@1.1.3/js/altspaceutil.min.js"></script>
 ```
 
 # API Reference
@@ -801,6 +801,8 @@ e.g. `<color=#FFFFFF>The</color> <color="red">quick <#FFFF00>brown <alpha=#33>fo
 * `<color="name">` - Changes the color of the text using the specified color name. Supported color names are `black`, `blue`, `green`, `orange`, `purple`, `red`, `yellow` or `white`.
 * `<color=#RRGGBB>` `<color=#RGB>` `<color=#RRGGBBAA>` `<color=#RGBA>` `<#RRGGBB>` `<#RGB>` `<#RRGGBBAA>` `<#RGBA>` - Changes the color and opacity of text using the specified hexidecimal code.
 * `<alpha=#AA>` - Changes the opacity of any text that follows.
+* `<b>Text</b>` - Applies a bold effect to the text.
+* `<i>Text</i>` - Applies an italic effect to the text.
 * `<noparse>Text</noparse>` - Prevents formatting tags from being parsed.
 
 ### Parameters

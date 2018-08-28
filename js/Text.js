@@ -10,8 +10,9 @@ altspaceutil._FontGlobals = {
 	tabSize: 9,
 	anisotropy: 16,
 	alphaTest: 0.0001,
-	smoothing: 0.02,
-	threshold: 0.5,
+	italicOffset: 8,
+	fontStrength: 1,
+	boldStrength: 0.75,
 	uniforms: {
 		map: { type: 't', value: null }
 	},
@@ -23,19 +24,32 @@ altspaceutil._FontGlobals = {
 		return `varying vec2 vUv;
 		varying vec4 vColor;
 		attribute vec4 color;
+		varying float vBold;
+		attribute float bold;
 		void main() {
 			vUv = uv;
 			vColor = color;
+			vBold = bold;
 			gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 		}`;
 	},
 	createFragmentShader: () => {
 		return `varying vec2 vUv;
 		varying vec4 vColor;
+		varying float vBold;
 		uniform sampler2D map;
+		#ifdef GL_OES_standard_derivatives
+			#extension GL_OES_standard_derivatives : enable
+		#endif
+		precision highp float;
 		void main() {
 			float distance = texture2D(map, vUv).a;
-			float alpha = smoothstep(` + altspaceutil._FontGlobals.threshold + ` - ` + altspaceutil._FontGlobals.smoothing + `, ` + altspaceutil._FontGlobals.threshold + ` + ` + altspaceutil._FontGlobals.smoothing + `, distance) * vColor.w;
+			#ifdef GL_OES_standard_derivatives
+				float afwidth = length(vec2(dFdx(distance), dFdy(distance))) * 0.70710678118654757;
+			#else
+				float afwidth = (1.0 / 32.0) * (1.4142135623730951 / (2.0 * gl_FragCoord.w));
+			#endif
+			float alpha = smoothstep(0.5 * vBold - afwidth, 0.5 * vBold + afwidth, distance) * vColor.w;
 			gl_FragColor = vec4(vColor.xyz, alpha);`
 			+ (altspaceutil._FontGlobals.alphaTest ? (`if(gl_FragColor.a < ` + altspaceutil._FontGlobals.alphaTest + `) discard;`) : '') + 
 		`}`;
@@ -73,6 +87,8 @@ altspaceutil._FontGlobals = {
  * `<color=#RRGGBB>` `<color=#RGB>` `<color=#RRGGBBAA>` `<color=#RGBA>` `<#RRGGBB>` `<#RGB>` `<#RRGGBBAA>` `<#RGBA>` `<color="name">` (Supported color names are 'black', 'blue', 'green', 'orange', 'purple', 'red', 'yellow', 'white')
  * `<alpha=#AA>` - Changes the opacity of any text that follows.
  * `<noparse>Text</noparse>` - Prevents formatting tags from being parsed.
+ * `<b>Text</b>` - Applies a bold effect to the text.
+ * `<i>Text</i>` - Applies an italic effect to the text.
  *
  * @class Text
  * @param {Object} [config] Optional parameters.
@@ -174,11 +190,18 @@ altspaceutil.behaviors.Text = class {
 		let statestack = [];
 		let states = [];
 		let currentstate = { color: { r: 1, g: 1, b: 1, a: 1 }, tag: 'color' };
+		let currentlink = null, isBoldStyle = false, isItalicStyle = false, isStrikethroughStyle = false, isUnderlineStyle = false;
 		statestack.push(JSON.parse(JSON.stringify(currentstate))); // Default state should not be removed from stack
 
 		let addState = str => {
 			parsedText += str;
-			let state = JSON.parse(JSON.stringify(currentstate));
+			let state = { color: { r: currentstate.color.r, g: currentstate.color.g, b: currentstate.color.b, a: currentstate.color.a } };
+			if(isBoldStyle) state.bold = true;
+			if(isItalicStyle) state.italic = true;
+			if(isStrikethroughStyle) state.strikethrough = true;
+			if(isUnderlineStyle) state.underline = true;
+			if(currentlink) state.link = currentlink;
+			delete state.tag;
 			for(let i = 0; i < str.length; ++i) {
 				if(!/\s/.test(str.charAt(i))) states.push(state);
 			}
@@ -191,10 +214,10 @@ altspaceutil.behaviors.Text = class {
 			return state;
 		}
 
-		let popColorState = () => {
+		let popColorState = tag => {
 			let count = 0;
 			while(statestack.length > 1) {
-				if(statestack[statestack.length - 1].tag === 'color') {
+				if(statestack[statestack.length - 1].tag === tag) {
 					if(count++ > 0) break;
 				}
 				statestack.pop();
@@ -310,6 +333,14 @@ altspaceutil.behaviors.Text = class {
 						} else if(skipTag) {
 							// Add unparsed/unsupported tag to parsed text
 							addState(parsedTag);
+						} else if(tagType === 'b') {
+							isBoldStyle = !isEndTag;
+						} else if(tagType === 'i') {
+							isItalicStyle = !isEndTag;
+						} else if(tagType === 's') {
+							isStrikethroughStyle = !isEndTag;
+						} else if(tagType === 'u') {
+							isUnderlineStyle = !isEndTag;
 						} else if(tagType.charAt(0) === '#' && !tagProperty && !isEndTag) {
 							// Hex color code tag
 							if(parseColorHex(tagType)) {
@@ -321,7 +352,7 @@ altspaceutil.behaviors.Text = class {
 						} else if(tagType === 'color') {
 							if(isEndTag) {
 								// Revert to previous color/alpha state
-								popColorState();
+								popColorState('color');
 							} else {
 								// Hex code/Named color tag
 								if(tagProperty && ((tagProperty.length > 1 && tagProperty.charAt(0) === '#' && parseColorHex(tagProperty)) || (tagProperty.length > 2 && tagProperty.charAt(0) === '"' && tagProperty.charAt(tagProperty.length - 1) === '"' && parseColorName(tagProperty)))) {
@@ -338,6 +369,19 @@ altspaceutil.behaviors.Text = class {
 							} else {
 								// Invalid alpha tag, add to parsed text
 								addState(parsedTag);
+							}
+						} else if(tagType === 'link' || tagType.substring(0, tagType.indexOf(' ')).trimEnd() === 'link') {
+							if(isEndTag) {
+								// Revert to previous link state
+								currentlink = null;
+							} else {
+								// link tag
+								if(tagProperty && tagProperty.length > 2 && tagProperty.charAt(0) === '"' && tagProperty.charAt(tagProperty.length - 1) === '"') {
+									currentlink = tagProperty.substring(1, tagProperty.length - 1);
+								} else {
+									// Invalid link, add to parsed text
+									addState(parsedTag);
+								}
 							}
 						} else {
 							// Invalid tag type, add to parsed text
@@ -378,6 +422,24 @@ altspaceutil.behaviors.Text = class {
 			}
 		}
 		this.mesh.geometry.addAttribute('color', new THREE.BufferAttribute(color, 4));
+
+		let bold = new Float32Array(this.mesh.geometry.attributes.position.count);
+		for(let i = 0; i < bold.length;) {
+			let value = styles[Math.floor(i / 4)].bold ? altspaceutil._FontGlobals.boldStrength : altspaceutil._FontGlobals.fontStrength;
+			for(let j = 0; j < 4; ++j) bold[i++] = value;
+		}
+		this.mesh.geometry.addAttribute('bold', new THREE.BufferAttribute(bold, 1));
+
+		let positions = this.mesh.geometry.attributes.position.array;
+		for(let i = 0; i < positions.length; i += 8) {
+			if(styles[Math.floor(i / 8)].italic) {
+				positions[i] += altspaceutil._FontGlobals.italicOffset; // Bottom Left
+				positions[i + 2] -= altspaceutil._FontGlobals.italicOffset; // Top Left
+				positions[i + 4] -= altspaceutil._FontGlobals.italicOffset; // Right Right
+				positions[i + 6] += altspaceutil._FontGlobals.italicOffset; // Bottom Right
+			}
+		}
+		this.mesh.geometry.attributes.position.needsUpdate = true;
 	}
 
 	_updateTextLayout() {

@@ -1,10 +1,10 @@
 ﻿<!DOCTYPE html>
 <title>Text Behavior Example</title>
-<script src="https://cdn.jsdelivr.net/combine/npm/three@0.95.0/build/three.js,npm/altspace@2.9.0/dist/altspace.min.js,npm/altspacevr-behaviors@1.1.2/js/altspaceutil.min.js"></script>
+<script src="https://cdn.jsdelivr.net/combine/npm/three@0.95.0/build/three.js,npm/altspace@2.9.0/dist/altspace.min.js,npm/altspacevr-behaviors@1.1.3/js/altspaceutil.min.js"></script>
 <script>
 	altspaceutil.getFullspaceApp().then(app => {
 		let text = new THREE.Object3D();
-		text.addBehavior(new altspaceutil.behaviors.Text({ text: 'The quick brown fox jumps over the lazy dog!\n<color=#FFFFFF>The</color> <color="red">quick <#FFFF00>brown <alpha=#33>fox <color=#FF00F0FF> jumps over the <noparse><alpha=#DD>lazy</noparse> dog.', fontSize: 2, width: 5, height: 2, horizontalAlign: 'left', verticalAlign: 'bottom' }));
+		text.addBehavior(new altspaceutil.behaviors.Text({ text: 'The <i>quick</i> <b>brown fox</b> jumps over the lazy dog!\n<color=#FFFFFF>The</color> <color="red">quick <#FFFF00>brown <alpha=#33>fox <color=#FF00F0FF> jumps over the <noparse><alpha=#DD>lazy</noparse> dog.', fontSize: 2, width: 5, height: 2, horizontalAlign: 'left', verticalAlign: 'bottom' }));
 		app.anchor.add(text);
 
 		let timetext = new THREE.Object3D();
