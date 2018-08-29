@@ -3,7 +3,7 @@
 window.altspaceutil = window.altspaceutil || {};
 altspaceutil.behaviors = altspaceutil.behaviors || {};
 
-altspaceutil.VERSION = altspaceutil.VERSION || '1.1.3';
+altspaceutil.VERSION = altspaceutil.VERSION || '1.1.4';
 
 // Native Event Helpers
 altspaceutil.addNativeEventListener = function(name, callback) {
@@ -260,13 +260,14 @@ altspaceutil.FullspaceApp = class {
 					if(altspace.inClient) {
 						this._renderer = altspace.getThreeJSRenderer();
 					} else {
-						this._renderer = new THREE.WebGLRenderer({ antialias: true });
+						this._renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 
 						Object.assign(this._camera, { fov: 90, near: 1, far: 2000 });
 						this._camera.position.z = 20;
 
 						let addRendererToDOM = () => {
-							this._renderer.setClearColor('#99AACC');
+							this._renderer.setClearColor(0xFFFFFF, 0);
+							document.body.style.backgroundColor = '#000000';
 							document.body.style.margin = '0px';
 							document.body.style.overflow = 'hidden';
 							document.body.appendChild(this._renderer.domElement);
@@ -786,7 +787,7 @@ if(!altspaceutil._assetLoaders) altspaceutil._assetLoaders = new class {
 		this.add(/\.gltf|\.glb$/i, (url, config) => {
 			if(altspace.inClient && (config.native === undefined || config.native)) {
 				let obj = new THREE.Object3D();
-				obj.addBehavior(new altspaceutil.behaviors.NativeComponent('n-gltf', { url: url }, { useCollider: config.cursorCollider }));
+				obj.addBehavior(new altspaceutil.behaviors.NativeComponent('n-gltf', { url: url, sceneIndex: config.sceneIndex || 0 }, { useCollider: config.cursorCollider }));
 				return Promise.resolve(obj);
 			}
 
@@ -794,7 +795,7 @@ if(!altspaceutil._assetLoaders) altspaceutil._assetLoaders = new class {
 				altspaceutil.loadScript('https://cdn.jsdelivr.net/npm/three@0.' + THREE.REVISION + '.0/examples/js/loaders/GLTFLoader.min.js', { scriptTest: () => THREE.GLTFLoader }).then(() => {
 					let loader = new THREE.GLTFLoader();
 					loader.setCrossOrigin(config.crossOrigin);
-					loader.load(url, obj => resolve(obj.scene), null, () => reject('Could not retrieve asset from ' + url));
+					loader.load(url, obj => resolve((config.sceneIndex > 0 && obj.scenes && config.sceneIndex < obj.scenes.length) ? obj.scenes[config.sceneIndex] : obj.scene), null, () => reject('Could not retrieve asset from ' + url));
 				}).catch(() => reject('Could not load scripts for GLTFLoader'));
 			});
 		});
@@ -1731,14 +1732,25 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 						});
 					}
 				}).bind(this));
-			}
 
-			// Forward Events From Placeholder To Behavior Owner
-			if(this.placeholder) {
-				var forwardPlaceholderEvent = (function(event) {
-					this.object3d.dispatchEvent(event);
-				}).bind(this);
-				this.placeholder.addEventListener('n-gltf-loaded', forwardPlaceholderEvent);
+				// Forward Events From Placeholder To Behavior Owner
+				if(this.placeholder) {
+					var forwardPlaceholderEvent = (function(event) {
+						this.object3d.dispatchEvent(event);
+					}).bind(this);
+					this.placeholder.addEventListener('n-gltf-loaded', forwardPlaceholderEvent);
+				}
+			} else {
+				this.shimbehavior = new altspaceutil.behaviors.GLTF({ url: this.data.url, sceneIndex: this.data.sceneIndex, native: false });
+				this.object3d.addEventListener('gltf-loaded', () => {
+					this.attributes.loaded = true;
+					this.object3d.dispatchEvent({
+						type: 'n-gltf-loaded',
+						bubbles: true,
+						target: this.object3d
+					});
+				});
+				this.object3d.addBehavior(this.shimbehavior);
 			}
 		},
 		update: function() {
@@ -1747,10 +1759,26 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			if(this.initialized) altspace.updateNativeComponent(this.component, this.type, this.data);
 		},
 		callComponentFunc: function(functionName, functionArgs) {
-			return altspace.callNativeComponentFunc(this.component, this.type, functionName, functionArgs).then(function(data) {
-				if(functionName === 'GetBoundingBox') return new THREE.Box3(new THREE.Vector3().subVectors(data.center, data.extents), new THREE.Vector3().addVectors(data.center, data.extents));
-				return data;
-			});
+			if(altspace.inClient) {
+				return altspace.callNativeComponentFunc(this.component, this.type, functionName, functionArgs).then(function(data) {
+					if(functionName === 'GetBoundingBox') return new THREE.Box3(new THREE.Vector3().subVectors(data.center, data.extents), new THREE.Vector3().addVectors(data.center, data.extents));
+					return data;
+				});
+			} else {
+				if(this.shimbehavior && functionName === 'GetBoundingBox') return this.shimbehavior.getBoundingBox();
+			}
+
+			return Promise.resolve();
+		},
+		shimUpdate: function() {
+			if(!altspace.inClient && this.shimbehavior) {
+				this.data.url = altspaceutil.getAbsoluteURL(this.data.url);
+				if(this.shimbehavior.config.url !== this.data.url || this.shimbehavior.config.sceneIndex !== this.data.sceneIndex) {
+					this.attributes.loaded = false;
+					this.shimbehavior.config.url = this.data.url;
+					this.shimbehavior.config.sceneIndex = this.data.sceneIndex;
+				}
+			}
 		}
 	},
 
@@ -2783,6 +2811,117 @@ altspaceutil.behaviors.Text = class {
 
 	_createFontConfig() {
 		return { text: this.config.text, width: altspaceutil._FontGlobals.width * this.config.width * (1 / this.config.fontSize), height: altspaceutil._FontGlobals.height * this.config.height * (1 / this.config.fontSize), align: this.config.horizontalAlign !== 'middle' ? this.config.horizontalAlign : 'center', font: altspaceutil._FontGlobals.font, lineHeight: altspaceutil._FontGlobals.lineHeight, letterSpacing: altspaceutil._FontGlobals.letterSpacing, tabSize: altspaceutil._FontGlobals.tabSize, scale: altspaceutil._FontGlobals.scale * this.config.fontSize, trimWhitespace: false };
+	}
+}
+/**
+ * The GLTF behavior loads and displays a glTF model asset.
+ *
+ * @class GLTF
+ * @param {Object} [config] Optional parameters.
+ * @param {String} [config.url] A URL to the GLTF model file to be loaded.
+ * @param {Number} [config.sceneIndex=0] Specifies the scene to load when the GLTF model contains multiple scenes.
+ * @param {Boolean} [config.native=true] Specifies whether a native billboard (n-billboard) component will be used when running the app in the Altspace client.
+ * @memberof module:altspaceutil/behaviors
+ **/
+altspaceutil.behaviors.GLTF = class {
+	get type() { return 'GLTF'; }
+
+	constructor(config) {
+		this.config = Object.assign({ url: '', sceneIndex: 0, native: true }, config);
+		this.url = this.config.url;
+		this.sceneIndex = this.config.sceneIndex;
+		this.loading = false;
+		this.loaded = false;
+	}
+
+	awake(o, s) {
+		this.object3d = o;
+
+		altspaceutil.manageBehavior(this, this.object3d);
+
+		if(this.config.native && altspace.inClient) {
+			this.nativeComponent = new altspaceutil.behaviors.NativeComponent('n-gltf', { url: this.config.url, sceneIndex: this.config.sceneIndex });
+			this.object3d.addEventListener('n-gltf-loaded', () => {
+				this.loaded = this.nativeComponent.getAttribute('loaded');
+				this.object3d.dispatchEvent({
+					type: 'gltf-loaded',
+					bubbles: true,
+					target: this.object3d
+				});
+			});
+			this.object3d.addBehavior(this.nativeComponent);
+		} else {
+			this.inverseWorldTransform = new THREE.Matrix4();
+			this.localTransform = new THREE.Matrix4();
+			this._loadMesh();
+		}
+	}
+
+	update() {
+		if(this.config.native && altspace.inClient) {
+			this.loaded = this.nativeComponent.getAttribute('loaded');
+			this.nativeComponent.data.url = this.config.url;
+			this.nativeComponent.data.sceneIndex = this.config.sceneIndex;
+		} else {
+			if((this.config.url !== this.url || this.config.sceneIndex !== this.sceneIndex) && !this.loading) this._loadMesh();
+		}
+	}
+
+	getBoundingBox() {
+		if(this.config.native && altspace.inClient && this.nativeComponent) return this.nativeComponent.callComponentFunc('GetBoundingBox');
+		if(!this.mesh || !this.loaded) return Promise.reject();
+
+		this.object3d.updateMatrixWorld(true);
+		this.inverseWorldTransform.getInverse(this.object3d.matrixWorld);
+		this.mesh.applyMatrix(this.inverseWorldTransform);
+
+		let bbox = new THREE.Box3().setFromObject(this.mesh);
+
+		this.inverseWorldTransform.getInverse(this.inverseWorldTransform);
+		this.mesh.applyMatrix(this.inverseWorldTransform);
+
+		return Promise.resolve(bbox);
+	}
+
+	_loadMesh() {
+		this.loaded = false;
+		if(this.mesh) {
+			this.object3d.remove(this.mesh);
+			this.mesh = null;
+		}
+		this.loading = true;
+		this.url = this.config.url;
+		this.sceneIndex = this.config.sceneIndex;
+		altspaceutil.loadAsset(this.url, { native: false, sceneIndex: this.sceneIndex || 0 }).then(asset => {
+			if(this.loading && !this.mesh) {
+				console.log(asset);
+				this.mesh = asset;
+				this.object3d.add(this.mesh);
+				this.loaded = true;
+				this.loading = false;
+				this.object3d.dispatchEvent({
+					type: 'gltf-loaded',
+					bubbles: true,
+					target: this.object3d
+				});
+			}
+		});
+	}
+
+	dispose() {
+		if(this.object3d && this.config.native && altspace.inClient) {
+			if(this.nativeComponent) this.object3d.removeBehavior(this.nativeComponent);
+		} else {
+			this.mesh = null;
+			this.loaded = false;
+			this.loading = false;
+			this.url = null;
+			this.sceneIndex = null;
+		}
+	}
+
+	clone() {
+		return new altspaceutil.behaviors.GLTF(this.config);
 	}
 }
 /**

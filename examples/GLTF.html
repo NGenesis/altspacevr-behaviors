@@ -1,0 +1,19 @@
+﻿<!DOCTYPE html>
+<title>GLTF Behavior Example</title>
+<script src="https://cdn.jsdelivr.net/combine/npm/three@0.95.0/build/three.min.js,npm/altspace@2.9.0/dist/altspace.min.js,npm/altspacevr-behaviors@1.1.4/js/altspaceutil.min.js"></script>
+<script>
+	altspaceutil.getFullspaceApp().then(app => {
+		let gltf = new THREE.Object3D();
+		gltf.addBehavior(new altspaceutil.behaviors.GLTF({ url: 'https://rawgit.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb' }));
+		gltf.addEventListener('gltf-loaded', event => {
+			let ngltfcomponent = gltf.getBehaviorByType('GLTF');
+			ngltfcomponent.getBoundingBox().then(boundingbox => {
+				let size = boundingbox.getSize(new THREE.Vector3());
+				let box = new THREE.Mesh(new THREE.BoxBufferGeometry(size.x, size.y, size.z), new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.3 }));
+				boundingbox.getCenter(box.position);
+				gltf.add(box);
+			});
+		});
+		app.anchor.add(gltf);
+	});
+</script>

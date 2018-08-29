@@ -3,7 +3,7 @@
 window.altspaceutil = window.altspaceutil || {};
 altspaceutil.behaviors = altspaceutil.behaviors || {};
 
-altspaceutil.VERSION = altspaceutil.VERSION || '1.1.3';
+altspaceutil.VERSION = altspaceutil.VERSION || '1.1.4';
 
 // Native Event Helpers
 altspaceutil.addNativeEventListener = function(name, callback) {
@@ -787,7 +787,7 @@ if(!altspaceutil._assetLoaders) altspaceutil._assetLoaders = new class {
 		this.add(/\.gltf|\.glb$/i, (url, config) => {
 			if(altspace.inClient && (config.native === undefined || config.native)) {
 				let obj = new THREE.Object3D();
-				obj.addBehavior(new altspaceutil.behaviors.NativeComponent('n-gltf', { url: url }, { useCollider: config.cursorCollider }));
+				obj.addBehavior(new altspaceutil.behaviors.NativeComponent('n-gltf', { url: url, sceneIndex: config.sceneIndex || 0 }, { useCollider: config.cursorCollider }));
 				return Promise.resolve(obj);
 			}
 
@@ -795,7 +795,7 @@ if(!altspaceutil._assetLoaders) altspaceutil._assetLoaders = new class {
 				altspaceutil.loadScript('https://cdn.jsdelivr.net/npm/three@0.' + THREE.REVISION + '.0/examples/js/loaders/GLTFLoader.min.js', { scriptTest: () => THREE.GLTFLoader }).then(() => {
 					let loader = new THREE.GLTFLoader();
 					loader.setCrossOrigin(config.crossOrigin);
-					loader.load(url, obj => resolve(obj.scene), null, () => reject('Could not retrieve asset from ' + url));
+					loader.load(url, obj => resolve((config.sceneIndex > 0 && obj.scenes && config.sceneIndex < obj.scenes.length) ? obj.scenes[config.sceneIndex] : obj.scene), null, () => reject('Could not retrieve asset from ' + url));
 				}).catch(() => reject('Could not load scripts for GLTFLoader'));
 			});
 		});

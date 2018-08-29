@@ -4,7 +4,7 @@ Provides helper functions, behaviors and A-Frame components for common functiona
 # Usage
 Include the utility library in your project:
 ```html
-<script src="https://cdn.jsdelivr.net/npm/altspacevr-behaviors@1.1.3/js/altspaceutil.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/altspacevr-behaviors@1.1.4/js/altspaceutil.min.js"></script>
 ```
 
 # API Reference
@@ -41,6 +41,7 @@ Include the utility library in your project:
 * [altspaceutil.behaviors.TWEEN](#TWEEN)
 * [altspaceutil.behaviors.Billboard](#Billboard)
 * [altspaceutil.behaviors.Text](#Text)
+* [altspaceutil.behaviors.GLTF](#GLTF)
 
 ## Events
 * [transform-controls-dragmove](#transform-controls-dragmove)
@@ -50,6 +51,7 @@ Include the utility library in your project:
 * [userchange](#userchange)
 * [avatarstatus](#avatarstatus)
 * [n-sound-preloaded](#n-sound-preloaded)
+* [gltf-loaded](#gltf-loaded)
 
 ## Classes
 * [FullspaceApp](#FullspaceApp)
@@ -816,6 +818,30 @@ e.g. `<color=#FFFFFF>The</color> <color="red">quick <#FFFF00>brown <alpha=#33>fo
 | `config.horizontalAlign` | String  | middle   | The horizontal alignment of the text block. |
 | `config.verticalAlign`   | String  | middle   | The vertical alignment of the text block. |
 | `config.native`          | Boolean | true     | Specifies whether a native text (n-text) component will be used when running the app in the Altspace client. |
+
+## <a name="GLTF">altspaceutil.behaviors.GLTF</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/GLTF.html))
+The GLTF behavior loads and displays a glTF model asset.
+
+### Parameters
+| Name                | Type    | Default | Description |
+| ------------------- | ------- | ------- | ----------- |
+| `config`            | Object  |         | Optional parameters. |
+| `config.url`        | String  |         | A URL to the GLTF model file to be loaded. |
+| `config.sceneIndex` | Number  | 0       | Specifies the scene to load when the GLTF model contains multiple scenes. |
+| `config.native`     | Boolean | true    | Specifies whether a native glTF (n-gltf) component will be used when running the app in the Altspace client. |
+
+### Methods
+### <a name="getBoundingBox">getBoundingBox</a>
+Retreives the axis aligned bounding box of the loaded glTF model.
+
+#### Returns
+| Type    | Description |
+| --------| ----------- |
+| Promise | Resolves to a [THREE.Box3](https://threejs.org/docs/#api/math/Box3) representing an axis aligned bounding box of the loaded glTF model. |
+
+### Events
+#### <a name="gltf-loaded">gltf-loaded</a>
+Fires an event once the glTF model has been loaded.
 
 # Classes
 

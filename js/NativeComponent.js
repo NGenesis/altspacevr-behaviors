@@ -433,14 +433,25 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 						});
 					}
 				}).bind(this));
-			}
 
-			// Forward Events From Placeholder To Behavior Owner
-			if(this.placeholder) {
-				var forwardPlaceholderEvent = (function(event) {
-					this.object3d.dispatchEvent(event);
-				}).bind(this);
-				this.placeholder.addEventListener('n-gltf-loaded', forwardPlaceholderEvent);
+				// Forward Events From Placeholder To Behavior Owner
+				if(this.placeholder) {
+					var forwardPlaceholderEvent = (function(event) {
+						this.object3d.dispatchEvent(event);
+					}).bind(this);
+					this.placeholder.addEventListener('n-gltf-loaded', forwardPlaceholderEvent);
+				}
+			} else {
+				this.shimbehavior = new altspaceutil.behaviors.GLTF({ url: this.data.url, sceneIndex: this.data.sceneIndex, native: false });
+				this.object3d.addEventListener('gltf-loaded', () => {
+					this.attributes.loaded = true;
+					this.object3d.dispatchEvent({
+						type: 'n-gltf-loaded',
+						bubbles: true,
+						target: this.object3d
+					});
+				});
+				this.object3d.addBehavior(this.shimbehavior);
 			}
 		},
 		update: function() {
@@ -449,10 +460,26 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			if(this.initialized) altspace.updateNativeComponent(this.component, this.type, this.data);
 		},
 		callComponentFunc: function(functionName, functionArgs) {
-			return altspace.callNativeComponentFunc(this.component, this.type, functionName, functionArgs).then(function(data) {
-				if(functionName === 'GetBoundingBox') return new THREE.Box3(new THREE.Vector3().subVectors(data.center, data.extents), new THREE.Vector3().addVectors(data.center, data.extents));
-				return data;
-			});
+			if(altspace.inClient) {
+				return altspace.callNativeComponentFunc(this.component, this.type, functionName, functionArgs).then(function(data) {
+					if(functionName === 'GetBoundingBox') return new THREE.Box3(new THREE.Vector3().subVectors(data.center, data.extents), new THREE.Vector3().addVectors(data.center, data.extents));
+					return data;
+				});
+			} else {
+				if(this.shimbehavior && functionName === 'GetBoundingBox') return this.shimbehavior.getBoundingBox();
+			}
+
+			return Promise.resolve();
+		},
+		shimUpdate: function() {
+			if(!altspace.inClient && this.shimbehavior) {
+				this.data.url = altspaceutil.getAbsoluteURL(this.data.url);
+				if(this.shimbehavior.config.url !== this.data.url || this.shimbehavior.config.sceneIndex !== this.data.sceneIndex) {
+					this.attributes.loaded = false;
+					this.shimbehavior.config.url = this.data.url;
+					this.shimbehavior.config.sceneIndex = this.data.sceneIndex;
+				}
+			}
 		}
 	},
 
