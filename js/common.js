@@ -260,13 +260,14 @@ altspaceutil.FullspaceApp = class {
 					if(altspace.inClient) {
 						this._renderer = altspace.getThreeJSRenderer();
 					} else {
-						this._renderer = new THREE.WebGLRenderer({ antialias: true });
+						this._renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 
 						Object.assign(this._camera, { fov: 90, near: 1, far: 2000 });
 						this._camera.position.z = 20;
 
 						let addRendererToDOM = () => {
-							this._renderer.setClearColor('#99AACC');
+							this._renderer.setClearColor(0xFFFFFF, 0);
+							document.body.style.backgroundColor = '#000000';
 							document.body.style.margin = '0px';
 							document.body.style.overflow = 'hidden';
 							document.body.appendChild(this._renderer.domElement);
