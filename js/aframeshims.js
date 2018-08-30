@@ -14,7 +14,7 @@ let makeComponent = (name,schema,callback)=>{
 };
 let forwardEvent = (el,name)=>{
     el.object3d.addEventListener(name, e=>{
-        el.emit(name,e);
+        el.emit(name,e.detail);
     });
 };
 makeComponent('n-object',{
