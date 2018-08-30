@@ -1,9 +1,20 @@
-let makeComponent = (name,schema)=>{
+let makeComponent = (name,schema,callback)=>{
     AFRAME.registerComponent(name,{
         schema:schema,
         init(){
-            return new altspaceutil.behaviors.NativeComponent(this.attrName,this.data);
+            let defaultPrevented;
+            if(callback && typeof callback === "function"){
+                defaultPrevented = !!callback(this);
+            }
+            if(!defaultPrevented){
+                this.el.object3d.addBehavior(new altspaceutil.behaviors.NativeComponent(this.attrName,this.data));
+            }
         }
+    });
+};
+let forwardEvent = (el,name)=>{
+    el.object3d.addEventListener(name, e=>{
+        el.emit(name,e);
     });
 };
 makeComponent('n-object',{
@@ -47,6 +58,12 @@ makeComponent('n-mesh-collider',{
 });
 makeComponent('n-container',{
     capacity: {type:'int',default:4}
+},(context)=>{
+    forwardEvent(context.el,'container-count-changed');
+    forwardEvent(context.el,'container-empty');
+    forwardEvent(context.el,'container-full');
+    forwardEvent(context.el,'triggerenter');
+    forwardEvent(context.el,'triggerexit');
 });
 makeComponent('n-sound',{
     on: {default:''},
@@ -60,6 +77,12 @@ makeComponent('n-sound',{
     pitch: {type:'number',default:1},
     minDistance: {type:'number',default:1},
     maxDistance: {type:'number',default:12}
+},(context)=>{
+    this.el.play = ()=>Promise.resolve();
+    this.el.pause = ()=>Promise.resolve();
+    forwardEvent(context.el,'n-sound-loaded');
+    forwardEvent(context.el,'sound-paused');
+    forwardEvent(context.el,'sound-played');
 });
 
 makeComponent('n-skeleton-parent',{
@@ -67,6 +90,9 @@ makeComponent('n-skeleton-parent',{
     side: {default:'center'},
     index: {type:'int',default:0},
     userId: {default:null}
+},(context)=>{
+    this.el.object3d.addBehavior(new altspaceutil.behaviors.NativeComponent('n-skeleton-parent',context.data,{recursiveMesh:false}));
+    return true;
 });
 
 makeComponent('n-cockpit-parent',{});
@@ -81,13 +107,22 @@ makeComponent('n-layout-browser',{
 });
 
 makeComponent('n-portal',{
+    targetEntity: {type:'selector'},
     targetPosition: {type:'vec3',default:{ 'x': 0, 'y': 0, 'z': 0 }},
     targetQuaternion: {type:'vec4',default:{ 'x': 0, 'y': 0, 'z': 0, w: 1 }},
     targetSpace: {default:null},
     targetEvent: {default:null},
+},(context)=>{
+    if(context.data.targetEl){
+        context.data.targetPosition = context.data.targetEl.object3d.position.copy();
+        context.data.targetQuaternion = context.data.targetEl.object3d.quaternion.copy();
+    }
 });
 
 makeComponent('n-gltf',{
     url:{default:''},
     sceneIndex:{type:'int',default:0}
+},(context)=>{
+    forwardEvent(context.el,'n-gltf-loaded');
+    context.el.getBoundingBox = ()=>new THREE.Box3().setFromObject(context.el.object3d);
 });
