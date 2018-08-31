@@ -78,7 +78,6 @@ altspaceutil.behaviors.GLTF = class {
 		this.sceneIndex = this.config.sceneIndex;
 		altspaceutil.loadAsset(this.url, { native: false, sceneIndex: this.sceneIndex || 0 }).then(asset => {
 			if(this.loading && !this.mesh) {
-				console.log(asset);
 				this.mesh = asset;
 				this.object3d.add(this.mesh);
 				this.loaded = true;
