@@ -239,6 +239,24 @@ altspaceutil.shims.sdk.open = function(url, target, opts) {
 	return Promise.resolve(popup);
 }
 
+altspaceutil.shims.sdk.addNativeComponent = function(mesh, componentType) {
+}
+
+altspaceutil.shims.sdk.removeNativeComponent = function(mesh, componentType) {
+}
+
+altspaceutil.shims.sdk.updateNativeComponent = function(mesh, componentType, data) {
+	//data = JSON.stringify((data instanceof Object) ? data : { singularProperty: data });
+}
+
+altspaceutil.shims.sdk.callNativeComponentAction = function(mesh, componentType, functionName, functionArgs) {
+}
+
+altspaceutil.shims.sdk.callNativeComponentFunc = function(mesh, componentType, functionName, functionArgs) {
+	if(componentType === 'n-gltf' && functionName === 'GetBoundingBox') return Promise.resolve({ center: { x: 0, y: 0, z: 0 }, extents: { x: 0, y: 0, z: 0 } });
+	return Promise.resolve({});
+}
+
 altspaceutil.initializeAltspaceShims = function(force) {
 	if(!altspace.inClient || force) {
 		altspace.inClient = altspaceutil.shims.sdk.inClient;
@@ -251,6 +269,11 @@ altspaceutil.initializeAltspaceShims = function(force) {
 		altspace.getGamepads = altspaceutil.shims.sdk.getGamepads;
 		altspace.getThreeJSRenderer = altspaceutil.shims.sdk.getThreeJSRenderer;
 		altspace.open = altspaceutil.shims.sdk.open;
+		altspace.addNativeComponent = altspaceutil.shims.sdk.addNativeComponent;
+		altspace.removeNativeComponent = altspaceutil.shims.sdk.removeNativeComponent;
+		altspace.updateNativeComponent = altspaceutil.shims.sdk.updateNativeComponent;
+		altspace.callNativeComponentAction = altspaceutil.shims.sdk.callNativeComponentAction;
+		altspace.callNativeComponentFunc = altspaceutil.shims.sdk.callNativeComponentFunc;
 	}
 
 	return Promise.resolve();
