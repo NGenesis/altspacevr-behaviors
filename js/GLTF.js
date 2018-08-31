@@ -37,7 +37,6 @@ altspaceutil.behaviors.GLTF = class {
 			this.object3d.addBehavior(this.nativeComponent);
 		} else {
 			this.inverseWorldTransform = new THREE.Matrix4();
-			this.localTransform = new THREE.Matrix4();
 			this._loadMesh();
 		}
 	}
