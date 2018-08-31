@@ -5,7 +5,7 @@
  * @param {Object} [config] Optional parameters.
  * @param {String} [config.url] A URL to the GLTF model file to be loaded.
  * @param {Number} [config.sceneIndex=0] Specifies the scene to load when the GLTF model contains multiple scenes.
- * @param {Boolean} [config.native=true] Specifies whether a native billboard (n-billboard) component will be used when running the app in the Altspace client.
+ * @param {Boolean} [config.native=true] Specifies whether a native glTF (n-gltf) component will be used when running the app in the Altspace client.
  * @memberof module:altspaceutil/behaviors
  **/
 altspaceutil.behaviors.GLTF = class {
