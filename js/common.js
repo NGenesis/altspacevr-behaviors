@@ -3,7 +3,7 @@
 window.altspaceutil = window.altspaceutil || {};
 altspaceutil.behaviors = altspaceutil.behaviors || {};
 
-altspaceutil.VERSION = altspaceutil.VERSION || '1.1.4';
+altspaceutil.VERSION = altspaceutil.VERSION || '1.1.5';
 
 // Native Event Helpers
 altspaceutil.addNativeEventListener = function(name, callback) {
