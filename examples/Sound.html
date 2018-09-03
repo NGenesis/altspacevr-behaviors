@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<title>Sound Behavior Example</title>
+<script src="https://cdn.jsdelivr.net/combine/npm/three@0.95.0/build/three.js,npm/altspace@2.9.0/dist/altspace.js,npm/altspacevr-behaviors@1.1.5/js/altspaceutil.js"></script>
+<script>
+	altspaceutil.getFullspaceApp().then(app => {
+		let sound = new THREE.Object3D();
+		app.anchor.add(sound);
+		sound.addBehavior(
+			new altspaceutil.behaviors.Sound({
+				src: altspaceutil.isMobileApp() ? 'test.mp3' : 'test.ogg', // MP3 Supported For Mobile Devices, OGG Supported For Everything Else
+				autoplay: false,
+				loop: true,
+				volume: 0.5,
+				minDistance: 1,
+				maxDistance: 12
+			})
+		);
+		sound.addEventListener('sound-loaded', event => {
+			if(sound.userData.loaded) return;
+
+			let soundcomponent = sound.getBehaviorByType('Sound');
+			sound.userData.loaded = soundcomponent.loaded;
+
+			let soundmutebutton = new THREE.Mesh(new THREE.BoxBufferGeometry(0.4, 0.4, 0.4), new THREE.MeshBasicMaterial({ color: 0x0000ff }));
+			soundmutebutton.position.set(-0.45, 0.5, 0);
+			soundmutebutton.addBehavior(new altspaceutil.behaviors.NativeComponent('n-text', { text: 'Mute', height: 0.7, fontSize: 1, verticalAlign: 'top' }, { useCollider: true }));
+			soundmutebutton.addEventListener('cursorup', event => {
+				soundcomponent.config.volume = soundcomponent.config.volume > 0 ? 0 : 0.5;
+				soundmutebutton.material.color.set(soundcomponent.config.volume > 0 ? 0x0000ff : 0xff0000);
+			});
+			sound.add(soundmutebutton);
+
+			let soundplaybutton = new THREE.Mesh(new THREE.BoxBufferGeometry(0.4, 0.4, 0.4), new THREE.MeshBasicMaterial({ color: 0x0000ff }));
+			soundplaybutton.position.set(0, 0.5, 0);
+			soundplaybutton.addBehavior(new altspaceutil.behaviors.NativeComponent('n-text', { text: 'Play', height: 0.7, fontSize: 1, verticalAlign: 'top' }, { useCollider: true }));
+			soundplaybutton.addEventListener('cursorup', event => {
+				soundcomponent.play();
+			});
+			sound.add(soundplaybutton);
+
+			let soundstopbutton = new THREE.Mesh(new THREE.BoxBufferGeometry(0.4, 0.4, 0.4), new THREE.MeshBasicMaterial({ color: 0x0000ff }));
+			soundstopbutton.position.set(0.45, 0.5, 0);
+			soundstopbutton.addBehavior(new altspaceutil.behaviors.NativeComponent('n-text', { text: 'Stop', height: 0.7, fontSize: 1, verticalAlign: 'top' }, { useCollider: true }));
+			soundstopbutton.addEventListener('cursorup', event => {
+				soundcomponent.stop();
+			});
+			sound.add(soundstopbutton);
+		});
+	});
+</script>

@@ -35,7 +35,7 @@ altspaceutil.behaviors.Billboard = class {
 
 		if(this.config.native && altspace.inClient) {
 			this.config.y = false;
-			this.nativeComponent = new altspaceutil.behaviors.NativeComponent('n-billboard');
+			this.nativeComponent = new altspaceutil.behaviors.NativeComponent('n-billboard', {}, { useCollider: true });
 			this.object3d.addBehavior(this.nativeComponent);
 		}
 	}

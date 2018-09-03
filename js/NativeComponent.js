@@ -207,7 +207,8 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 			spatialBlend: 1,
 			pitch: 1,
 			minDistance: 1,
-			maxDistance: 12
+			maxDistance: 12,
+			rolloff: 'logarithmic'
 		},
 		attributes: {
 			/**
@@ -255,34 +256,60 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 						});
 					}
 				}).bind(this));
-			}
 
-			// Forward Events From Placeholder To Behavior Owner
-			if(this.placeholder) {
-				var forwardPlaceholderEvent = (function(event) {
-					this.object3d.dispatchEvent(event);
-				}).bind(this);
-				this.placeholder.addEventListener('n-sound-loaded', forwardPlaceholderEvent);
-				this.placeholder.addEventListener('sound-paused', forwardPlaceholderEvent);
-				this.placeholder.addEventListener('sound-played', forwardPlaceholderEvent);
+				// Forward Events From Placeholder To Behavior Owner
+				if(this.placeholder) {
+					this.placeholder.addEventListener('n-sound-loaded', event => this.object3d.dispatchEvent(event));
+					this.placeholder.addEventListener('sound-paused', event => this.object3d.dispatchEvent(event));
+					this.placeholder.addEventListener('sound-played', event => this.object3d.dispatchEvent(event));
+					this.placeholder.addEventListener('sound-stopped', event => this.object3d.dispatchEvent(event));
+				}
+			} else {
+				this.shimbehavior = new altspaceutil.behaviors.Sound({ on: this.data.on, res: this.data.res, src: this.data.src, loop: this.data.loop, volume: this.data.volume, autoplay: this.data.autoplay, oneshot: this.data.oneshot, spatialBlend: this.data.spatialBlend, pitch: this.data.pitch, minDistance: this.data.minDistance, maxDistance: this.data.maxDistance, rolloff: this.data.rolloff, native: false });
+				this.object3d.addEventListener('sound-loaded', () => {
+					this.attributes.loaded = true;
+					this.object3d.dispatchEvent({
+						type: 'n-sound-loaded',
+						bubbles: true,
+						target: this.object3d
+					});
+				});
+				// sound-paused / sound-played / sound-stopped events don't need to be forwarded
+				this.object3d.addBehavior(this.shimbehavior);
 			}
 		},
 		callComponentAction: function(functionName, functionArgs) {
-			if(functionName === 'play') {
-				this.component.dispatchEvent({
-					type: 'sound-played',
-					bubbles: true,
-					target: this.component
-				});
-			} else if(functionName === 'pause') {
-				this.component.dispatchEvent({
-					type: 'sound-paused',
-					bubbles: true,
-					target: this.component
-				});
-			}
+			if(altspace.inClient) {
+				if(functionName === 'play') {
+					this.component.dispatchEvent({
+						type: 'sound-played',
+						bubbles: true,
+						target: this.component
+					});
+				} else if(functionName === 'pause') {
+					this.component.dispatchEvent({
+						type: 'sound-paused',
+						bubbles: true,
+						target: this.component
+					});
+				} else if(functionName === 'stop') {
+					this.component.dispatchEvent({
+						type: 'sound-stopped',
+						bubbles: true,
+						target: this.component
+					});
+					altspace.callNativeComponentAction(this.component, this.type, 'pause');
+					altspace.callNativeComponentAction(this.component, this.type, 'seek', { time: 0 });
+					return;
+				}
 
-			altspace.callNativeComponentAction(this.component, this.type, functionName, functionArgs);
+				altspace.callNativeComponentAction(this.component, this.type, functionName, functionArgs);
+			} else if(this.shimbehavior) {
+				if(functionName === 'play') this.shimbehavior.play();
+				else if(functionName === 'pause') this.shimbehavior.pause();
+				else if(functionName === 'seek') this.shimbehavior.seek(functionArgs.time || 0);
+				else if(functionName === 'stop') this.shimbehavior.stop();
+			}
 		},
 		update: function() {
 			this.data.src = altspaceutil.getAbsoluteURL(this.data.src);
@@ -299,6 +326,27 @@ altspaceutil.behaviors.NativeComponentDefaults = {
 				if(this.playHandler === undefined) this.playHandler = this.callComponentAction.bind(this, 'play');
 				this.playHandlerType = this.data.on;
 				this.component.addEventListener(this.playHandlerType, this.playHandler);
+			}
+		},
+		shimUpdate: function() {
+			if(!altspace.inClient && this.shimbehavior) {
+				this.data.src = altspaceutil.getAbsoluteURL(this.data.src);
+				this.shimbehavior.config.volume = this.data.volume;
+				this.shimbehavior.config.on = this.data.on;
+
+				if(this.shimbehavior.config.src !== this.data.src || this.shimbehavior.config.res !== this.data.res || this.shimbehavior.config.loop !== this.data.loop || this.shimbehavior.config.autoplay !== this.data.autoplay || this.shimbehavior.config.oneshot !== this.data.oneshot || this.shimbehavior.config.spatialBlend !== this.data.spatialBlend || this.shimbehavior.config.pitch !== this.data.pitch || this.shimbehavior.config.minDistance !== this.data.minDistance || this.shimbehavior.config.maxDistance !== this.data.maxDistance || this.shimbehavior.config.rolloff !== this.data.rolloff) {
+					this.attributes.loaded = false;
+					this.shimbehavior.config.src = this.data.src;
+					this.shimbehavior.config.res = this.data.res;
+					this.shimbehavior.config.loop = this.data.loop;
+					this.shimbehavior.config.autoplay = this.data.autoplay;
+					this.shimbehavior.config.oneshot = this.data.oneshot;
+					this.shimbehavior.config.spatialBlend = this.data.spatialBlend;
+					this.shimbehavior.config.pitch = this.data.pitch;
+					this.shimbehavior.config.minDistance = this.data.minDistance;
+					this.shimbehavior.config.maxDistance = this.data.maxDistance;
+					this.shimbehavior.config.rolloff = this.data.rolloff;
+				}
 			}
 		}
 	},

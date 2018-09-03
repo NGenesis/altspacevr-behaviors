@@ -1,6 +1,6 @@
 ﻿<!DOCTYPE html>
 <title>NativeComponent Behavior Example</title>
-<script src="https://cdn.jsdelivr.net/combine/npm/three@0.95.0/build/three.min.js,npm/altspace@2.9.0/dist/altspace.min.js,npm/altspacevr-behaviors@1.1.4/js/altspaceutil.min.js"></script>
+<script src="https://cdn.jsdelivr.net/combine/npm/three@0.95.0/build/three.min.js,npm/altspace@2.9.0/dist/altspace.min.js,npm/altspacevr-behaviors@1.1.5/js/altspaceutil.min.js"></script>
 <script>
 	altspaceutil.getFullspaceApp().then(app => {
 		// n-layout-browser (3D Enclosure)
@@ -118,7 +118,7 @@
 		app.anchor.add(nsound);
 		nsound.addBehaviors(
 			new altspaceutil.behaviors.NativeComponent('n-sound', {
-				src: /Mobile/i.test(navigator.userAgent) ? 'test.mp3' : 'test.ogg', // MP3 Supported For Mobile Devices, OGG Supported For Everything Else
+				src: altspaceutil.isMobileApp() ? 'test.mp3' : 'test.ogg', // MP3 Supported For Mobile Devices, OGG Supported For Everything Else
 				autoplay: false,
 				loop: true,
 				volume: 0.5,

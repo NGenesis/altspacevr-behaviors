@@ -21,7 +21,8 @@ altspaceutil._FontGlobals = {
 		return THREE.UniformsUtils.clone(altspaceutil._FontGlobals.uniforms);
 	},
 	createVertexShader: () => {
-		return `varying vec2 vUv;
+		return `
+		varying vec2 vUv;
 		varying vec4 vColor;
 		attribute vec4 color;
 		varying float vBold;
@@ -34,14 +35,15 @@ altspaceutil._FontGlobals = {
 		}`;
 	},
 	createFragmentShader: () => {
-		return `varying vec2 vUv;
-		varying vec4 vColor;
-		varying float vBold;
-		uniform sampler2D map;
+		return `
 		#ifdef GL_OES_standard_derivatives
 			#extension GL_OES_standard_derivatives : enable
 		#endif
 		precision highp float;
+		varying vec2 vUv;
+		varying vec4 vColor;
+		varying float vBold;
+		uniform sampler2D map;
 		void main() {
 			float distance = texture2D(map, vUv).a;
 			#ifdef GL_OES_standard_derivatives
@@ -115,7 +117,7 @@ altspaceutil.behaviors.Text = class {
 		altspaceutil.manageBehavior(this, this.object3d);
 
 		if(this.config.native && altspace.inClient) {
-			this.nativeComponent = new altspaceutil.behaviors.NativeComponent('n-text', { text: this.config.text, fontSize: this.config.fontSize, width: this.config.width, height: this.config.height, horizontalAlign: this.config.horizontalAlign, verticalAlign: this.config.verticalAlign });
+			this.nativeComponent = new altspaceutil.behaviors.NativeComponent('n-text', { text: this.config.text, fontSize: this.config.fontSize, width: this.config.width, height: this.config.height, horizontalAlign: this.config.horizontalAlign, verticalAlign: this.config.verticalAlign }, { useCollider: true });
 			this.object3d.addBehavior(this.nativeComponent);
 		} else {
 			Promise.all([altspaceutil._FontGlobals.loadFont(), altspaceutil.loadScript('https://cdn.jsdelivr.net/npm/altspacevr-behaviors@' + altspaceutil.VERSION + '/lib/three-bmfont-text/three-bmfont-text.min.js', { scriptTest: () => window.createGeometry })]).then(() => {

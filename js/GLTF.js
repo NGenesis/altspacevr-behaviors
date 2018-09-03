@@ -13,6 +13,7 @@ altspaceutil.behaviors.GLTF = class {
 
 	constructor(config) {
 		this.config = Object.assign({ url: '', sceneIndex: 0, native: true }, config);
+		this.config.url = altspaceutil.getAbsoluteURL(this.config.url);
 		this.url = this.config.url;
 		this.sceneIndex = this.config.sceneIndex;
 		this.loading = false;
@@ -25,7 +26,7 @@ altspaceutil.behaviors.GLTF = class {
 		altspaceutil.manageBehavior(this, this.object3d);
 
 		if(this.config.native && altspace.inClient) {
-			this.nativeComponent = new altspaceutil.behaviors.NativeComponent('n-gltf', { url: this.config.url, sceneIndex: this.config.sceneIndex });
+			this.nativeComponent = new altspaceutil.behaviors.NativeComponent('n-gltf', { url: this.config.url, sceneIndex: this.config.sceneIndex }, { useCollider: true });
 			this.object3d.addEventListener('n-gltf-loaded', () => {
 				this.loaded = this.nativeComponent.getAttribute('loaded');
 				this.object3d.dispatchEvent({
@@ -42,6 +43,8 @@ altspaceutil.behaviors.GLTF = class {
 	}
 
 	update() {
+		this.config.url = altspaceutil.getAbsoluteURL(this.config.url);
+
 		if(this.config.native && altspace.inClient) {
 			this.loaded = this.nativeComponent.getAttribute('loaded');
 			this.nativeComponent.data.url = this.config.url;

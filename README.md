@@ -4,7 +4,7 @@ Provides helper functions, behaviors and A-Frame components for common functiona
 # Usage
 Include the utility library in your project:
 ```html
-<script src="https://cdn.jsdelivr.net/npm/altspacevr-behaviors@1.1.4/js/altspaceutil.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/altspacevr-behaviors@1.1.5/js/altspaceutil.min.js"></script>
 ```
 
 # API Reference
@@ -42,6 +42,7 @@ Include the utility library in your project:
 * [altspaceutil.behaviors.Billboard](#Billboard)
 * [altspaceutil.behaviors.Text](#Text)
 * [altspaceutil.behaviors.GLTF](#GLTF)
+* [altspaceutil.behaviors.Sound](#Sound)
 
 ## Events
 * [transform-controls-dragmove](#transform-controls-dragmove)
@@ -52,6 +53,10 @@ Include the utility library in your project:
 * [avatarstatus](#avatarstatus)
 * [n-sound-preloaded](#n-sound-preloaded)
 * [gltf-loaded](#gltf-loaded)
+* [sound-loaded](#sound-loaded)
+* [sound-played](#sound-played)
+* [sound-paused](#sound-paused)
+* [sound-stopped](#sound-stopped)
 
 ## Classes
 * [FullspaceApp](#FullspaceApp)
@@ -485,7 +490,8 @@ data: {
 	spatialBlend: 1,
 	pitch: 1,
 	minDistance: 1,
-	maxDistance: 12
+	maxDistance: 12,
+	rolloff: 'logarithmic'
 }
 ```
 
@@ -830,6 +836,11 @@ The GLTF behavior loads and displays a glTF model asset.
 | `config.sceneIndex` | Number  | 0       | Specifies the scene to load when the GLTF model contains multiple scenes. |
 | `config.native`     | Boolean | true    | Specifies whether a native glTF (n-gltf) component will be used when running the app in the Altspace client. |
 
+### Members
+| Name        | Type    | Description |
+| ----------- | ------- | ----------- |
+| `loaded`    | Boolean | Indicates whether the sound has been loaded. |
+
 ### Methods
 ### <a name="getBoundingBox">getBoundingBox</a>
 Retreives the axis aligned bounding box of the loaded glTF model.
@@ -842,6 +853,64 @@ Retreives the axis aligned bounding box of the loaded glTF model.
 ### Events
 #### <a name="gltf-loaded">gltf-loaded</a>
 Fires an event once the glTF model has been loaded.
+
+## <a name="Sound">altspaceutil.behaviors.Sound</a> ([Example](https://github.com/NGenesis/altspacevr-behaviors/blob/master/examples/Sound.html))
+The Sound behavior loads and plays a sound asset supporting positional audio.
+
+### Parameters
+| Name                  | Type                                                          | Default     | Description |
+| --------------------- | ------------------------------------------------------------- | ----------- | ----------- |
+| `config`              | Object                                                        |             | Optional parameters. |
+| `config.target`       | [THREE.Object3D](https://threejs.org/docs/#api/core/Object3D) |             | A target that will listen for the sound being played.  If omitted, the scene camera will be used. |
+| `config.src`          | String                                                        |             | A URL to the sound file to be loaded. |
+| `config.res`          | String                                                        |             | A sound resource identifier to be loaded. |
+| `config.on`           | String                                                        |             | Name of the event that will trigger the sound to be played. |
+| `config.loop`         | Boolean                                                       | false       | Specifies whether the sound should loop back to the beginning once playback has finished. |
+| `config.autoplay`     | Boolean                                                       | false       | Specifies whether the sound will play automatically when the parent object is loaded into the scene. |
+| `config.oneshot`      | Boolean                                                       | false       | Specifies whether multiple instances of the sound can be played simultaneously.  Note that one-shot sounds cannot be paused, stopped or seeked into, and instances will clean themselves up automatically when playback has finished. |
+| `config.volume`       | Number                                                        | 1           | Volume that the sound should play at. |
+| `config.spatialBlend` | Number                                                        | 1           | Specifies how the sound will be perceived spactially, ranging from 0 (2D stereo without panning between left and right sound channels) up to 1 (localized 3D with panning between left and right sound channels). |
+| `config.pitch`        | Number                                                        | 1           | The speed and octave adjustment that the sound will play at.  0.5 for half speed at a lower octave, 2 for double speed at a higher octave. |
+| `config.minDistance`  | Number                                                        | 1           | The minimum distance that the sound will play at full volume. |
+| `config.maxDistance`  | Number                                                        | 12          | The maximum distance that the sound will play before volume reaches silent when a linear/cosine rolloff algorithm is specified, otherwise the volume will stop lowering after the specified distance when a logarithmic rolloff algorithm is specified. |
+| `config.rolloff`      | String                                                        | logarithmic | Volume can reach a silent level when a linear/cosine rolloff algorithm is specified, otherwise the volume will stop lowering after the specified distance when a logarithmic rolloff algorithm is specified. |
+| `config.native`       | Boolean                                                       | true        | Specifies whether a native sound (n-sound) component will be used when running the app in the Altspace client. |
+
+### Members
+| Name        | Type    | Description |
+| ----------- | ------- | ----------- |
+| `loaded`    | Boolean | Indicates whether the sound has been loaded. |
+
+### Methods
+### <a name="play">play</a>
+Begins playback of the sound, and emits a [sound-played](#sound-played) event.
+
+### <a name="pause">pause</a>
+Pauses playback of the sound at the current position, and emits a [sound-paused](#sound-paused) event.
+
+### <a name="stop">stop</a>
+Stops playback of the sound, and emits a [sound-stopped](#sound-stopped) event.
+
+### <a name="seek">seek</a>
+Skips playback to a specific time point in the sound.
+
+#### Parameters
+| Name  | Type   | Description |
+| ----- | -------| ----------- |
+| time  | Number | Number of milliseconds from the beginning of the sound to skip playback to. |
+
+### Events
+#### <a name="sound-loaded">sound-loaded</a>
+Fires an event once the sound has been loaded.
+
+#### <a name="sound-played">sound-played</a>
+Fires an event when playback of the sound begins.
+
+#### <a name="sound-paused">sound-paused</a>
+Fires an event when playback of the sound is paused.
+
+#### <a name="sound-stopped">sound-stopped</a>
+Fires an event when playback of the sound is stopped.
 
 # Classes
 
