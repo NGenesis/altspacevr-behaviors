@@ -1,7 +1,7 @@
 window.altspaceutil = window.altspaceutil || {};
 altspaceutil.shims = altspaceutil.shims || {};
 altspaceutil.shims.sdk = altspaceutil.shims.sdk || {};
-if(altspaceutil.shims.sdk.inClient === undefined) altspaceutil.shims.sdk.inClient = altspace.inClient ? true : false;
+if(altspaceutil.shims.sdk.inClient === undefined) altspaceutil.shims.sdk.inClient = !!altspace.inClient;
 
 altspaceutil.shims._currentThreeJSScene = null;
 altspaceutil.shims.sdk.getThreeJSScene = function() {
